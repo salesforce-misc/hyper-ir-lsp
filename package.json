@@ -1,55 +1,32 @@
 {
-  "name": "nrs-language-server",
-  "description": "nano rust language server",
+  "name": "hir-language-server",
+  "description": "Hyper IR language server",
   "license": "MIT",
-  "version": "1.5.0",
+  "version": "0.0.1",
   "categories": [],
   "keywords": [
-    "language-server",
-    "tower-lsp"
+    "language-server"
   ],
   "repository": {
-    "url": "https://github.com/IWANABETHATGUY/tower-lsp-boilerplate"
+    "url": "https://github.com/vogelsgesang/hir-lsp"
   },
   "engines": {
     "vscode": "^1.66.0"
   },
   "enabledApiProposals": [],
   "activationEvents": [
-    "onLanguage:nrs"
+    "onLanguage:hir"
   ],
   "main": "./dist/extension.js",
   "contributes": {
     "languages": [
       {
-        "id": "nrs",
-        "extensions": [
-          ".nrs"
-        ]
+        "id": "hir",
+        "extensions": [".hir"],
+        "aliases": ["Hyper IR"],
+        "firstLine": "^# Hyper IR"
       }
-    ],
-    "configuration": {
-      "type": "object",
-      "title": "nrs-language-server",
-      "properties": {
-        "nrs-language-server.trace.server": {
-          "type": "string",
-          "scope": "window",
-          "enum": [
-            "off",
-            "messages",
-            "verbose"
-          ],
-          "enumDescriptions": [
-            "No traces",
-            "Error only",
-            "Full log"
-          ],
-          "default": "off",
-          "description": "Traces the communication between VS Code and the language server."
-        }
-      }
-    }
+    ]
   },
   "scripts": {
     "postinstall": "cd client && pnpm i",

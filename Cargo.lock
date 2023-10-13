@@ -272,6 +272,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "hir-language-server"
+version = "0.1.0"
+dependencies = [
+ "chumsky",
+ "dashmap",
+ "env_logger",
+ "im-rc",
+ "log",
+ "ropey",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tower-lsp",
+]
+
+[[package]]
 name = "httparse"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -367,22 +383,6 @@ dependencies = [
  "log",
  "wasi",
  "windows-sys",
-]
-
-[[package]]
-name = "nrs-language-server"
-version = "0.1.0"
-dependencies = [
- "chumsky",
- "dashmap",
- "env_logger",
- "im-rc",
- "log",
- "ropey",
- "serde",
- "serde_json",
- "tokio",
- "tower-lsp",
 ]
 
 [[package]]
