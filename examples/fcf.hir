@@ -1,0 +1,3 @@
+# Hyper IR for 1_fcf
+declare exported void @_1_add_1(ptr %stringAllocator_0, ptr %threadState_1, ptr %arg1_2, ptr %null1_3, ptr %arg2_4, ptr %null2_5, ptr %res_6, ptr %resNull_7, ptr %collate_8);
+declare void @hyper::RuntimeException::throwOverflow() = 0x55f0029b8d20;
