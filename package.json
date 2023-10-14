@@ -24,7 +24,8 @@
         "id": "hir",
         "extensions": [".hir"],
         "aliases": ["Hyper IR"],
-        "firstLine": "^# Hyper IR"
+        "firstLine": "^# Hyper IR",
+        "configuration": "./client/src/hir-language-configuration.json"
       }
     ]
   },

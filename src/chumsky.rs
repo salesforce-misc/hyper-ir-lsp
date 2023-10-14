@@ -7,15 +7,18 @@ use tower_lsp::lsp_types::SemanticTokenType;
 
 use crate::semantic_token::LEGEND_TYPE;
 
-/// This is the parser and interpreter for the 'Foo' language. See `tutorial.md` in the repository's root to learn
+/// This is the parser and interpreter for the 'Hyper IR' language.
+/// See `tutorial.md` in the repository's root to learn
 /// about it.
 pub type Span = std::ops::Range<usize>;
+
 #[derive(Debug)]
 pub struct ImCompleteSemanticToken {
     pub start: usize,
     pub length: usize,
     pub token_type: usize,
 }
+
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Token {
     Null,
