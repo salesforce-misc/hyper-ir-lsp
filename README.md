@@ -17,16 +17,20 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * Code folding on function bodies
     * Code folding on basic blocks; display terminating instruction
     * Control flow graph as Mermaid charts
-* VS Code: correct word boundaries
-* packaging
-    * configure in neovim
-    * auto-build in Github CI
+* VS Code
+    * get a packaged VS Code extension
+    * correct word boundaries
+* configure in neovim
+* Github CI
+    * lint JS
+    * compile rust
+    * run rust test cases
+    * package VS Code extension
+    * automatically create release artifacts
 
 ## Development
-1. `pnpm i`
-2. `cargo build`
+
+1. `cd vscode-extension`
+2. `pnpm i`
 3. press <kbd>F5</kbd> or change to the Debug panel and click <kbd>Launch Client</kbd>
-> **Note**  
-> 
-> If encountered errors like `Cannot find module '/xxx/xxx/dist/extension.js'`
-> please try run command `tsc -b` manually, you could refer https://github.com/IWANABETHATGUY/tower-lsp-boilerplate/issues/6 for more details
+

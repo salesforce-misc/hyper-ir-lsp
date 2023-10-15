@@ -11,38 +11,16 @@
         "--extensionDevelopmentPath=${workspaceRoot}/vscode-extension"
       ],
       "outFiles": [
-        "${workspaceRoot}/client/dist/**/*.js"
+        "${workspaceRoot}/vscode-extension/dist/**/*.js"
       ],
       "preLaunchTask": {
         "type": "npm",
-        "script": "watch"
+        "script": "watch",
+        "path": "vscode-extension"
       },
       "env": {
         "SERVER_PATH": "${workspaceRoot}/target/debug/hir-language-server"
       }
-    },
-    {
-      "name": "Language Server E2E Test",
-      "type": "extensionHost",
-      "request": "launch",
-      "runtimeExecutable": "${execPath}",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceRoot}",
-        "--extensionTestsPath=${workspaceRoot}/client/out/test/index",
-        "${workspaceRoot}/client/testFixture"
-      ],
-      "outFiles": [
-        "${workspaceRoot}/client/out/test/**/*.js"
-      ]
-    }
-  ],
-  "compounds": [
-    {
-      "name": "Client + Server",
-      "configurations": [
-        "Launch Client",
-        "Attach to Server"
-      ]
     }
   ]
 }

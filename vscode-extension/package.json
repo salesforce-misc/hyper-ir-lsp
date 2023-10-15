@@ -31,21 +31,21 @@
 					"Hyper IR"
 				],
 				"firstLine": "^# Hyper IR",
-				"configuration": "./src/hir-language-configuration.json"
+				"configuration": "./hir-language-configuration.json"
 			}
 		]
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run esbuild-base -- --minify",
-		"esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
-		"esbuild": "npm run esbuild-base -- --sourcemap",
-		"esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+		"watch": "node ./build.js --watch",
 		"test-compile": "tsc -p ./",
-		"watch": "rm -rf dist && tsc -b -w",
 		"lint": "eslint src --ext ts",
-		"build": "node ./build.js",
+		"vscode:package": "node ./build.js --release",
 		"package": "vsce package --no-dependencies",
+		"vscode:prepublish": "node ./build.js --release",
 		"publish": "vsce publish --no-dependencies"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^9.0.1"
 	},
 	"devDependencies": {
 		"@types/node": "^20.8.6",
@@ -56,8 +56,5 @@
 		"esbuild": "^0.19.4",
 		"eslint": "^8.5.1",
 		"typescript": "^5.2.2"
-	},
-	"dependencies": {
-		"vscode-languageclient": "^9.0.1"
 	}
 }

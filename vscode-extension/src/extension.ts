@@ -12,7 +12,7 @@ import {
 let client: LanguageClient;
 
 export async function activate(context: ExtensionContext) {
-  const command = process.env.SERVER_PATH || "hir-language-server";
+  const command = process.env.SERVER_PATH || context.asAbsolutePath("dist/hir-language-server");
   const run: Executable = {
     command,
     options: {
