@@ -49,5 +49,5 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
             name: hir-language-server
-            path: ./target/release/hir-language-server.wasm
+            path: ./target/release/hir-language-server
             retention-days: 1
