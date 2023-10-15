@@ -1,0 +1,63 @@
+{
+	"name": "hir-language-server",
+	"description": "Code intelligence for Hyper IR",
+	"displayName": "Hyper IR language server",
+	"publisher": "vogelsgesang",
+	"license": "MIT",
+	"version": "0.0.1",
+	"categories": [
+		"Programming Languages"
+	],
+	"keywords": [
+		"language-server"
+	],
+	"repository": {
+		"url": "https://github.com/vogelsgesang/hir-lsp"
+	},
+	"engines": {
+		"vscode": "^1.83.0"
+	},
+	"enabledApiProposals": [],
+	"activationEvents": [],
+	"main": "./dist/extension.js",
+	"contributes": {
+		"languages": [
+			{
+				"id": "hir",
+				"extensions": [
+					".hir"
+				],
+				"aliases": [
+					"Hyper IR"
+				],
+				"firstLine": "^# Hyper IR",
+				"configuration": "./src/hir-language-configuration.json"
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run esbuild-base -- --minify",
+		"esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/main.js --external:vscode --format=cjs --platform=node",
+		"esbuild": "npm run esbuild-base -- --sourcemap",
+		"esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+		"test-compile": "tsc -p ./",
+		"watch": "rm -rf dist && tsc -b -w",
+		"lint": "eslint src --ext ts",
+		"build": "node ./build.js",
+		"package": "vsce package --no-dependencies",
+		"publish": "vsce publish --no-dependencies"
+	},
+	"devDependencies": {
+		"@types/node": "^20.8.6",
+		"@types/vscode": "^1.83.0",
+		"@typescript-eslint/eslint-plugin": "^6.7.5",
+		"@typescript-eslint/parser": "^6.7.5",
+		"@vscode/vsce": "^2.21.1",
+		"esbuild": "^0.19.4",
+		"eslint": "^8.5.1",
+		"typescript": "^5.2.2"
+	},
+	"dependencies": {
+		"vscode-languageclient": "^9.0.1"
+	}
+}

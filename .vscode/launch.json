@@ -8,10 +8,10 @@
       "name": "Launch Client",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "--extensionDevelopmentPath=${workspaceRoot}"
+        "--extensionDevelopmentPath=${workspaceRoot}/vscode-extension"
       ],
       "outFiles": [
-        "${workspaceRoot}/client/out/**/*.js"
+        "${workspaceRoot}/client/dist/**/*.js"
       ],
       "preLaunchTask": {
         "type": "npm",
