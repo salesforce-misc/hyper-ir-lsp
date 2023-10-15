@@ -73,17 +73,14 @@ pub fn tokenizer() -> impl Parser<char, Vec<(Token, Span)>, Error = Simple<char>
     // A parser for punctuation / control characters
     let punctuation = one_of("[]{}()<>=,;:*").map(Token::Punctuation);
 
-    // The first character of a variable name
+    // An identifier starts with an alphabetic character or an underscore
     let ident_head = filter(|c: &char| c.is_alphabetic() || c.to_char() == '_');
 
-    // Character set allowed within variable names. Also includes `:`
-    let ident_middle =
-        filter(|c: &char| c.is_alphanumeric() || c.to_char() == '_' || c.to_char() == ':');
+    // An identifier can contain an alphanumeric char or an underscore in the middle or at the end
+    let ident_char = filter(|c: &char| c.is_alphanumeric() || c.to_char() == '_');
 
-    // An identifier must not end in `:`
-    let ident_tail = (ident_middle.then_ignore(ident_middle.rewind()))
-        .repeated()
-        .then(ident_head);
+    // In addition, an identifier can also contain ':', but no trailing `:`
+    let ident_tail = (just(':').repeated().then(ident_char)).repeated();
 
     // A parser for identifiers, keywords and type names
     let ident = ident_head
@@ -215,8 +212,25 @@ fn test_tokenizer() {
     );
     // Single character identifier
     assert_eq!(
-        tokens_only("ptr234"),
-        Ok(Vec::from([Token::Ident("ptr234".to_string())]))
+        tokens_only("x"),
+        Ok(Vec::from([Token::Ident("x".to_string())]))
+    );
+    // The trailing `:` is not part of the identifier.
+    // Thereby, we can still parse basic block labels
+    assert_eq!(
+        tokens_only("my_lbl:"),
+        Ok(Vec::from([
+            Token::Ident("my_lbl".to_string()),
+            Token::Punctuation(':'),
+        ]))
+    );
+    assert_eq!(
+        tokens_only("my_lbl::"),
+        Ok(Vec::from([
+            Token::Ident("my_lbl".to_string()),
+            Token::Punctuation(':'),
+            Token::Punctuation(':'),
+        ]))
     );
 
     // Key words
