@@ -5,13 +5,22 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
 
 ## TODO:
 
-* Finish tokenizer
-* Report bugs as warnings, not errors
-* Grammar / parser
-* Go to definition / references for global variables
-* Go to definition / references for local variables
-* Go to definition / references for jump targets / basic blocks
-* Go to definition / references for debug refs
+* LSP functionality
+    * [x] Finish tokenizer
+    * Grammar / parser
+    * Go to definition / references for debug refs
+    * Go to definition / references for global variables
+    * Go to definition / declaration references for function
+    * Go to definition / references for local variables
+    * Go to definition / references for jump targets / basic blocks
+    * Somehow Hyperlink the stack trace
+    * Code folding on function bodies
+    * Code folding on basic blocks; display terminating instruction
+    * Control flow graph as Mermaid charts
+* VS Code: correct word boundaries
+* packaging
+    * configure in neovim
+    * auto-build in Github CI
 
 ## Development
 1. `pnpm i`
