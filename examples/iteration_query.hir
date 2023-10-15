@@ -1,7 +1,4 @@
 # Hyper IR for 2_query
-0x55c061c01860
-
-
 @type_18 = [0,0,0,0,0,0,4,0]
 @type_19 = [0,0,0,0,0,0,6,0]
 @attributes_25 = [int32 0,int32 1]

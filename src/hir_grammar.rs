@@ -50,14 +50,12 @@ impl fmt::Display for Token {
 
 pub fn tokenizer() -> impl Parser<char, Vec<(Token, Span)>, Error = Simple<char>> {
     // A newline parser
-    let newline = just('\n').map(|_: char| Token::Newline {});
+    let newline = just('\n').to(Token::Newline);
 
     // A comment parser
-    // XXX don't consume the line break
     let comment = just('#')
-        .chain::<char, _, _>(take_until(just('\n')))
-        .collect::<String>()
-        .map(|_: String| Token::Comment {});
+        .chain(take_until(just('\n').or(end().to('\n')).rewind()))
+        .to(Token::Comment);
 
     // A parser for hex numbers
     let hexnum = just("0x").ignore_then(text::int(16)).map(Token::HexNum);
@@ -76,19 +74,19 @@ pub fn tokenizer() -> impl Parser<char, Vec<(Token, Span)>, Error = Simple<char>
     let punctuation = one_of("[]{}()<>=,;:*").map(Token::Punctuation);
 
     // The first character of a variable name
-    let ident_first = filter(|c: &char| c.is_alphabetic() || c.to_char() == '_');
+    let ident_head = filter(|c: &char| c.is_alphabetic() || c.to_char() == '_');
 
     // Character set allowed within variable names. Also includes `:`
     let ident_middle =
         filter(|c: &char| c.is_alphanumeric() || c.to_char() == '_' || c.to_char() == ':');
 
-    // XXX don't allow trailing `:`
-    let ident_tail = ident_middle.repeated();
-    //.then(filter(|c: &char| c.is_alphanumeric() || c.to_char() == '_'));
+    // An identifier must not end in `:`
+    let ident_tail = (ident_middle.then_ignore(ident_middle.rewind()))
+        .repeated()
+        .then(ident_head);
 
     // A parser for identifiers, keywords and type names
-    // XXX also all `:` inside middle of identifiers
-    let ident = ident_first
+    let ident = ident_head
         .chain(ident_tail)
         .collect()
         .map(|ident: String| match ident.as_str() {
@@ -124,17 +122,19 @@ pub fn tokenizer() -> impl Parser<char, Vec<(Token, Span)>, Error = Simple<char>
     let debugref = just('!').ignore_then(text::digits(10)).map(Token::DebugRef);
 
     // A single token can be one of the above
-    let token = comment
-        .or(hexnum)
-        .or(num)
-        .or(str_)
-        .or(punctuation)
-        .or(ident)
-        .or(global)
-        .or(local)
-        .or(debugref)
-        .or(newline)
-        .recover_with(skip_then_retry_until([]));
+    let token = choice((
+        comment,
+        hexnum,
+        num,
+        str_,
+        punctuation,
+        ident,
+        global,
+        local,
+        debugref,
+        newline,
+    ))
+    .recover_with(skip_then_retry_until([]));
 
     token
         .padded_by(one_of(" \t").repeated())
@@ -154,7 +154,7 @@ fn test_tokenizer() {
             .map(|v| v.iter().map(|e| e.0.clone()).collect::<Vec<_>>())
     };
 
-    // Individual tokens
+    // Numbers
     assert_eq!(
         tokens_only("123"),
         Ok(Vec::from([Token::Num("123".to_string())]))
@@ -163,30 +163,42 @@ fn test_tokenizer() {
         tokens_only("0xdead0123beef"),
         Ok(Vec::from([Token::HexNum("dead0123beef".to_string())]))
     );
+
+    // Strings
     assert_eq!(
         tokens_only("\"abc\""),
         Ok(Vec::from([Token::Str("abc".to_string())]))
     );
+    // Empty string
     assert_eq!(
         tokens_only("\"\""),
         Ok(Vec::from([Token::Str("".to_string())]))
     );
-    assert_eq!(
-        tokens_only("%"),
-        Ok(Vec::from([Token::LocalName("%".to_string())]))
-    );
+
+    // Local name; including `:` and `_`
     assert_eq!(
         tokens_only("%abc::def_foo"),
         Ok(Vec::from([Token::LocalName("%abc::def_foo".to_string())]))
     );
+    // We also accept empty, unnamed local variables
+    assert_eq!(
+        tokens_only("%"),
+        Ok(Vec::from([Token::LocalName("%".to_string())]))
+    );
+
+    // Global name; including `:` and `_`
     assert_eq!(
         tokens_only("@abc::def_foo"),
         Ok(Vec::from([Token::GlobalName("@abc::def_foo".to_string())]))
     );
+
+    // Debug ref
     assert_eq!(
         tokens_only("!123"),
         Ok(Vec::from([Token::DebugRef("123".to_string())]))
     );
+
+    // Types
     assert_eq!(
         tokens_only("void"),
         Ok(Vec::from([Token::Type("void".to_string())]))
@@ -195,17 +207,35 @@ fn test_tokenizer() {
         tokens_only("ptr"),
         Ok(Vec::from([Token::Type("ptr".to_string())]))
     );
+
+    // Identifier
     assert_eq!(
         tokens_only("ptr234"),
         Ok(Vec::from([Token::Ident("ptr234".to_string())]))
     );
-    assert_eq!(tokens_only(":"), Ok(Vec::from([Token::Punctuation(':')])));
+    // Single character identifier
+    assert_eq!(
+        tokens_only("ptr234"),
+        Ok(Vec::from([Token::Ident("ptr234".to_string())]))
+    );
+
+    // Key words
     assert_eq!(tokens_only("declare"), Ok(Vec::from([Token::Declare])));
     assert_eq!(tokens_only("define"), Ok(Vec::from([Token::Define])));
 
+    assert_eq!(tokens_only(":"), Ok(Vec::from([Token::Punctuation(':')])));
+
+    // Usually, comments are terminated by a line break. The line break is a separate token
+    assert_eq!(
+        tokens_only("# comment\n"),
+        Ok(Vec::from([Token::Comment, Token::Newline]))
+    );
+    // A comment might not be terminated by a line break
+    assert_eq!(tokens_only("# comment"), Ok(Vec::from([Token::Comment])));
+
     // Multiple tokens
     assert_eq!(
-        tokens_only("declare void @foo(ptr %1) # comment\n"),
+        tokens_only("declare void @foo(ptr %1) # comment"),
         Ok(Vec::from([
             Token::Declare,
             Token::Type("void".to_string()),
