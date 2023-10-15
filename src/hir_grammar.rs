@@ -53,6 +53,7 @@ pub fn tokenizer() -> impl Parser<char, Vec<(Token, Span)>, Error = Simple<char>
     let newline = just('\n').map(|_: char| Token::Newline {});
 
     // A comment parser
+    // XXX don't consume the line break
     let comment = just('#')
         .chain::<char, _, _>(take_until(just('\n')))
         .collect::<String>()
@@ -153,9 +154,67 @@ fn test_tokenizer() {
             .map(|v| v.iter().map(|e| e.0.clone()).collect::<Vec<_>>())
     };
 
-    // Anything other than an empty string should produce an error
+    // Individual tokens
     assert_eq!(
         tokens_only("123"),
         Ok(Vec::from([Token::Num("123".to_string())]))
+    );
+    assert_eq!(
+        tokens_only("0xdead0123beef"),
+        Ok(Vec::from([Token::HexNum("dead0123beef".to_string())]))
+    );
+    assert_eq!(
+        tokens_only("\"abc\""),
+        Ok(Vec::from([Token::Str("abc".to_string())]))
+    );
+    assert_eq!(
+        tokens_only("\"\""),
+        Ok(Vec::from([Token::Str("".to_string())]))
+    );
+    assert_eq!(
+        tokens_only("%"),
+        Ok(Vec::from([Token::LocalName("%".to_string())]))
+    );
+    assert_eq!(
+        tokens_only("%abc::def_foo"),
+        Ok(Vec::from([Token::LocalName("%abc::def_foo".to_string())]))
+    );
+    assert_eq!(
+        tokens_only("@abc::def_foo"),
+        Ok(Vec::from([Token::GlobalName("@abc::def_foo".to_string())]))
+    );
+    assert_eq!(
+        tokens_only("!123"),
+        Ok(Vec::from([Token::DebugRef("123".to_string())]))
+    );
+    assert_eq!(
+        tokens_only("void"),
+        Ok(Vec::from([Token::Type("void".to_string())]))
+    );
+    assert_eq!(
+        tokens_only("ptr"),
+        Ok(Vec::from([Token::Type("ptr".to_string())]))
+    );
+    assert_eq!(
+        tokens_only("ptr234"),
+        Ok(Vec::from([Token::Ident("ptr234".to_string())]))
+    );
+    assert_eq!(tokens_only(":"), Ok(Vec::from([Token::Punctuation(':')])));
+    assert_eq!(tokens_only("declare"), Ok(Vec::from([Token::Declare])));
+    assert_eq!(tokens_only("define"), Ok(Vec::from([Token::Define])));
+
+    // Multiple tokens
+    assert_eq!(
+        tokens_only("declare void @foo(ptr %1) # comment\n"),
+        Ok(Vec::from([
+            Token::Declare,
+            Token::Type("void".to_string()),
+            Token::GlobalName("@foo".to_string()),
+            Token::Punctuation('('),
+            Token::Type("ptr".to_string()),
+            Token::LocalName("%1".to_string()),
+            Token::Punctuation(')'),
+            Token::Comment,
+        ]))
     );
 }
