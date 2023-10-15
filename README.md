@@ -3,6 +3,10 @@
 Code intelligence for Hyper IR files.
 Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
 
+## Features
+
+* syntax highlighting for Hyper IR
+
 ## TODO:
 
 * LSP functionality
@@ -18,13 +22,13 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * Code folding on basic blocks; display terminating instruction
     * Control flow graph as Mermaid charts
 * VS Code
-    * get a packaged VS Code extension
-    * correct word boundaries
+    * [x] get a packaged VS Code extension
+    * [x] correct word boundaries
 * configure in neovim
 * Github CI
     * lint JS
-    * compile rust
-    * run rust test cases
+    * [x] compile rust
+    * [x] run rust test cases
     * package VS Code extension
     * automatically create release artifacts
 
