@@ -1,7 +1,7 @@
 use ropey::Rope;
-use tower_lsp::lsp_types::{SemanticTokenType, SemanticToken};
+use tower_lsp::lsp_types::{SemanticToken, SemanticTokenType};
 
-use crate::hir_grammar::{Token, Span};
+use crate::hir_grammar::{Span, Token};
 
 pub const LEGEND_TYPE: &[SemanticTokenType] = &[
     SemanticTokenType::COMMENT,
@@ -24,10 +24,7 @@ pub fn create_semantic_token(span: &Span, ttype: &SemanticTokenType) -> HIRSeman
     HIRSemanticToken {
         start: span.start,
         length: span.len(),
-        token_type: LEGEND_TYPE
-            .iter()
-            .position(|item| item == ttype)
-            .unwrap(),
+        token_type: LEGEND_TYPE.iter().position(|item| item == ttype).unwrap(),
     }
 }
 
@@ -57,7 +54,7 @@ pub fn semantic_tokens_from_tokens(tokens: Vec<(Token, Span)>) -> Vec<HIRSemanti
 }
 
 // Converts our internal semantic tokens to the LSP representation of tokens
-pub fn convert_to_lsp_tokens(rope: &Rope, semtoks: &Vec<HIRSemanticToken>) -> Vec<SemanticToken> {
+pub fn convert_to_lsp_tokens(rope: &Rope, semtoks: &[HIRSemanticToken]) -> Vec<SemanticToken> {
     let mut pre_line = 0;
     let mut pre_start = 0;
     let lsp_tokens = semtoks

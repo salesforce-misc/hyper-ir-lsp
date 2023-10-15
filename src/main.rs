@@ -1,7 +1,9 @@
 use chumsky::Parser;
 use dashmap::DashMap;
 use hir_language_server::hir_grammar::tokenizer;
-use hir_language_server::semantic_token::{LEGEND_TYPE, HIRSemanticToken, convert_to_lsp_tokens, semantic_tokens_from_tokens};
+use hir_language_server::semantic_token::{
+    convert_to_lsp_tokens, semantic_tokens_from_tokens, HIRSemanticToken, LEGEND_TYPE,
+};
 use ropey::Rope;
 use tower_lsp::jsonrpc::Result;
 use tower_lsp::lsp_types::*;
@@ -86,63 +88,63 @@ impl LanguageServer for Backend {
         })
         .await
     }
-/*
-    async fn goto_definition(
-        &self,
-        params: GotoDefinitionParams,
-    ) -> Result<Option<GotoDefinitionResponse>> {
-        let definition = async {
-            let uri = params.text_document_position_params.text_document.uri;
-            let ast = self.ast_map.get(uri.as_str())?;
-            let rope = self.document_map.get(uri.as_str())?;
+    /*
+       async fn goto_definition(
+           &self,
+           params: GotoDefinitionParams,
+       ) -> Result<Option<GotoDefinitionResponse>> {
+           let definition = async {
+               let uri = params.text_document_position_params.text_document.uri;
+               let ast = self.ast_map.get(uri.as_str())?;
+               let rope = self.document_map.get(uri.as_str())?;
 
-            let position = params.text_document_position_params.position;
-            let char = rope.try_line_to_char(position.line as usize).ok()?;
-            let offset = char + position.character as usize;
-            // self.client.log_message(MessageType::INFO, &format!("{:#?}, {}", ast.value(), offset)).await;
-            let span = get_definition(&ast, offset);
-            self.client
-                .log_message(MessageType::INFO, &format!("{:?}, ", span))
-                .await;
-            span.and_then(|(_, range)| {
-                let start_position = offset_to_position(range.start, &rope)?;
-                let end_position = offset_to_position(range.end, &rope)?;
+               let position = params.text_document_position_params.position;
+               let char = rope.try_line_to_char(position.line as usize).ok()?;
+               let offset = char + position.character as usize;
+               // self.client.log_message(MessageType::INFO, &format!("{:#?}, {}", ast.value(), offset)).await;
+               let span = get_definition(&ast, offset);
+               self.client
+                   .log_message(MessageType::INFO, &format!("{:?}, ", span))
+                   .await;
+               span.and_then(|(_, range)| {
+                   let start_position = offset_to_position(range.start, &rope)?;
+                   let end_position = offset_to_position(range.end, &rope)?;
 
-                let range = Range::new(start_position, end_position);
+                   let range = Range::new(start_position, end_position);
 
-                Some(GotoDefinitionResponse::Scalar(Location::new(uri, range)))
-            })
-        }
-        .await;
-        Ok(definition)
-    }
+                   Some(GotoDefinitionResponse::Scalar(Location::new(uri, range)))
+               })
+           }
+           .await;
+           Ok(definition)
+       }
 
-    async fn references(&self, params: ReferenceParams) -> Result<Option<Vec<Location>>> {
-        let reference_list = || -> Option<Vec<Location>> {
-            let uri = params.text_document_position.text_document.uri;
-            let ast = self.ast_map.get(&uri.to_string())?;
-            let rope = self.document_map.get(&uri.to_string())?;
+       async fn references(&self, params: ReferenceParams) -> Result<Option<Vec<Location>>> {
+           let reference_list = || -> Option<Vec<Location>> {
+               let uri = params.text_document_position.text_document.uri;
+               let ast = self.ast_map.get(&uri.to_string())?;
+               let rope = self.document_map.get(&uri.to_string())?;
 
-            let position = params.text_document_position.position;
-            let char = rope.try_line_to_char(position.line as usize).ok()?;
-            let offset = char + position.character as usize;
-            let reference_list = get_reference(&ast, offset, false);
-            let ret = reference_list
-                .into_iter()
-                .filter_map(|(_, range)| {
-                    let start_position = offset_to_position(range.start, &rope)?;
-                    let end_position = offset_to_position(range.end, &rope)?;
+               let position = params.text_document_position.position;
+               let char = rope.try_line_to_char(position.line as usize).ok()?;
+               let offset = char + position.character as usize;
+               let reference_list = get_reference(&ast, offset, false);
+               let ret = reference_list
+                   .into_iter()
+                   .filter_map(|(_, range)| {
+                       let start_position = offset_to_position(range.start, &rope)?;
+                       let end_position = offset_to_position(range.end, &rope)?;
 
-                    let range = Range::new(start_position, end_position);
+                       let range = Range::new(start_position, end_position);
 
-                    Some(Location::new(uri.clone(), range))
-                })
-                .collect::<Vec<_>>();
-            Some(ret)
-        }();
-        Ok(reference_list)
-    }
- */
+                       Some(Location::new(uri.clone(), range))
+                   })
+                   .collect::<Vec<_>>();
+               Some(ret)
+           }();
+           Ok(reference_list)
+       }
+    */
 
     async fn semantic_tokens_full(
         &self,
@@ -155,7 +157,7 @@ impl LanguageServer for Backend {
         let lsp_tokens = || -> Option<Vec<SemanticToken>> {
             let sem_tokens = self.semantic_token_map.get(&uri)?;
             let rope = self.document_map.get(&uri)?;
-            let lsp_tokens = sem_tokens.as_ref().map(|t| convert_to_lsp_tokens(&rope, &t));
+            let lsp_tokens = sem_tokens.as_ref().map(|t| convert_to_lsp_tokens(&rope, t));
             lsp_tokens
         }();
         if let Some(semantic_token) = lsp_tokens {
@@ -239,8 +241,10 @@ impl Backend {
             .log_message(MessageType::INFO, &format!("{:?}", tokens))
             .await;
 
-        self.semantic_token_map
-            .insert(params.uri.to_string(), tokens.map(semantic_tokens_from_tokens));
+        self.semantic_token_map.insert(
+            params.uri.to_string(),
+            tokens.map(semantic_tokens_from_tokens),
+        );
     }
 }
 

@@ -35,10 +35,10 @@ jobs:
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-
 
-      #- name: Lint
-      #  run: |
-      #    cargo fmt --all -- --check
-      #    cargo clippy -- -D warnings    
+      - name: Lint
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy -- -D warnings
 
       - name: Test Language Server
         run: cargo test --verbose
