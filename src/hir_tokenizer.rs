@@ -4,25 +4,24 @@ use chumsky::Parser;
 use core::fmt;
 
 pub type Span = std::ops::Range<usize>;
+pub type Spanned<T> = (T, Span);
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Token {
-    Comment,            // Started by `#`
-    Num(String),        // Numbers
-    HexNum(String),     // Hexadecimal numbers
-    Str(String),        // Strings
-    LocalName(String),  // Local name, starting with `%`
-    GlobalName(String), // Global name, starting with `@`
-    DebugRef(String),   // `!134` at end of line
-    Type(String),       // Types (int32, void, etc.)
-    Ident(String),      // Any other identifier
-    Punctuation(char),  // Operators; pretty much all punctuation
+    Comment,              // Started by `#`
+    Num(String),          // Numbers
+    HexNum(String),       // Hexadecimal numbers
+    Str(String),          // Strings
+    LocalName(String),    // Local name, starting with `%`
+    GlobalName(String),   // Global name, starting with `@`
+    DebugRef(String),     // `!134` at end of line
+    Type(String),         // Types (int32, void, etc.)
+    Ident(String),        // Any other identifier
+    FuncModifier(String), // Function modifiers
+    Punctuation(char),    // Operators; pretty much all punctuation
     Newline,
     Declare,
     Define,
-    Exported,
-    Async,
-    Memberfunc,
 }
 
 impl fmt::Display for Token {
@@ -37,18 +36,16 @@ impl fmt::Display for Token {
             Token::GlobalName(c) => write!(f, "@{}", c),
             Token::Type(s) => write!(f, "{}", s),
             Token::Ident(s) => write!(f, "{}", s),
+            Token::FuncModifier(s) => write!(f, "{}", s),
             Token::Punctuation(s) => write!(f, "{}", s),
             Token::Newline => write!(f, "\\n"),
             Token::Declare => write!(f, "declare"),
             Token::Define => write!(f, "define"),
-            Token::Exported => write!(f, "exported"),
-            Token::Async => write!(f, "async"),
-            Token::Memberfunc => write!(f, "memberfunc"),
         }
     }
 }
 
-pub fn tokenizer() -> impl Parser<char, Vec<(Token, Span)>, Error = Simple<char>> {
+pub fn tokenizer() -> impl Parser<char, Vec<Spanned<Token>>, Error = Simple<char>> {
     // A newline parser
     let newline = just('\n').to(Token::Newline);
 
@@ -89,9 +86,9 @@ pub fn tokenizer() -> impl Parser<char, Vec<(Token, Span)>, Error = Simple<char>
         .map(|ident: String| match ident.as_str() {
             "declare" => Token::Declare,
             "define" => Token::Define,
-            "exported" => Token::Exported,
-            "async" => Token::Memberfunc,
-            "memberfunc" => Token::Memberfunc,
+            "exported" => Token::FuncModifier(ident),
+            "async" => Token::FuncModifier(ident),
+            "memberfunc" => Token::FuncModifier(ident),
             "void" => Token::Type(ident),
             "int1" => Token::Type(ident),
             "int8" => Token::Type(ident),
@@ -135,8 +132,8 @@ pub fn tokenizer() -> impl Parser<char, Vec<(Token, Span)>, Error = Simple<char>
     .recover_with(skip_then_retry_until([]));
 
     token
-        .padded_by(one_of(" \t").repeated())
         .map_with_span(|tok, span| (tok, span))
+        .padded_by(one_of(" \t").repeated())
         .repeated()
         .then_ignore(end())
 }
@@ -158,8 +155,8 @@ fn test_tokenizer() {
         Ok(Vec::from([Token::Num("123".to_string())]))
     );
     assert_eq!(
-        tokens_only("0xdead0123beef"),
-        Ok(Vec::from([Token::HexNum("dead0123beef".to_string())]))
+        tokens_only("0xDead0123beef"),
+        Ok(Vec::from([Token::HexNum("Dead0123beef".to_string())]))
     );
 
     // Strings
@@ -232,6 +229,20 @@ fn test_tokenizer() {
             Token::Punctuation(':'),
             Token::Punctuation(':'),
         ]))
+    );
+
+    // Function modifiers
+    assert_eq!(
+        tokens_only("exported"),
+        Ok(Vec::from([Token::FuncModifier("exported".to_string())]))
+    );
+    assert_eq!(
+        tokens_only("async"),
+        Ok(Vec::from([Token::FuncModifier("async".to_string())]))
+    );
+    assert_eq!(
+        tokens_only("memberfunc"),
+        Ok(Vec::from([Token::FuncModifier("memberfunc".to_string())]))
     );
 
     // Key words

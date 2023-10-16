@@ -1,7 +1,7 @@
 use ropey::Rope;
 use tower_lsp::lsp_types::{SemanticToken, SemanticTokenType};
 
-use crate::hir_grammar::{Span, Token};
+use crate::hir_tokenizer::{Span, Token};
 
 pub const LEGEND_TYPE: &[SemanticTokenType] = &[
     SemanticTokenType::COMMENT,
@@ -46,9 +46,9 @@ pub fn semantic_tokens_from_tokens(tokens: Vec<(Token, Span)>) -> Vec<HIRSemanti
             Token::Punctuation(_) => None,
             Token::Declare => Some(create_semantic_token(span, &SemanticTokenType::KEYWORD)),
             Token::Define => Some(create_semantic_token(span, &SemanticTokenType::KEYWORD)),
-            Token::Exported => Some(create_semantic_token(span, &SemanticTokenType::MODIFIER)),
-            Token::Async => Some(create_semantic_token(span, &SemanticTokenType::MODIFIER)),
-            Token::Memberfunc => Some(create_semantic_token(span, &SemanticTokenType::MODIFIER)),
+            Token::FuncModifier(_) => {
+                Some(create_semantic_token(span, &SemanticTokenType::MODIFIER))
+            }
         })
         .collect::<Vec<_>>()
 }

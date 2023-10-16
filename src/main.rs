@@ -1,6 +1,6 @@
 use chumsky::Parser;
 use dashmap::DashMap;
-use hir_language_server::hir_grammar::tokenizer;
+use hir_language_server::hir_tokenizer::tokenizer;
 use hir_language_server::semantic_token::{
     convert_to_lsp_tokens, semantic_tokens_from_tokens, HIRSemanticToken, LEGEND_TYPE,
 };

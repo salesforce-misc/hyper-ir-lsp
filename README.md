@@ -20,10 +20,14 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * Somehow Hyperlink the stack trace
     * Code folding on function bodies
     * Code folding on basic blocks; display terminating instruction
+    * incremental sync
+    * tokenizer: only keep spans; don't copy out strings
+    * take care of error recovery / make it robust
     * Control flow graph as Mermaid charts
 * VS Code
     * [x] get a packaged VS Code extension
     * [x] correct word boundaries
+    * use Webassembly instead of native binary
 * configure in neovim
 * Github CI
     * lint JS
