@@ -161,7 +161,7 @@ pub fn parse_from_str(src: &str) -> ParserResult {
 
     // Parse
     let (stmts, parse_errs) = if let Some(tokens) = tokens.as_ref() {
-        let strlen = src.chars().count();
+        let strlen = src.len();
         parser().parse_recovery(Stream::from_iter(
             strlen..strlen + 1,
             // TODO: can we somehow avoid this copy?

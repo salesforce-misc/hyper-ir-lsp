@@ -1,6 +1,5 @@
-use chumsky::Parser;
 use dashmap::DashMap;
-use hir_language_server::hir_tokenizer::tokenizer;
+use hir_language_server::hir_parser::{parse_from_str, ParserResult};
 use hir_language_server::semantic_token::{
     convert_to_lsp_tokens, semantic_tokens_from_tokens, HIRSemanticToken, LEGEND_TYPE,
 };
@@ -182,7 +181,11 @@ impl Backend {
         self.document_map
             .insert(params.uri.to_string(), rope.clone());
 
-        let (tokens, errors) = tokenizer().parse_recovery(rope.to_string());
+        let ParserResult {
+            tokens,
+            stmts: _,
+            errors,
+        } = parse_from_str(&rope.to_string());
 
         let diagnostics = errors
             .into_iter()
