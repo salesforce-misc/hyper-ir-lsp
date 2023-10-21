@@ -26,8 +26,9 @@ async function build() {
         console.log(stdout);
         console.error(stderr);
         const outFolder = release ? "release" : "debug";
-        const src = `../target/${outFolder}/hir-language-server`;
-        await fs.copyFile(src, "./dist/hir-language-server");
+        const ext = process.platform == "win32" ? ".exe" : ""
+        const src = `../target/${outFolder}/hir-language-server${ext}`;
+        await fs.copyFile(src, `./dist/hir-language-server${ext}`);
     }
     // Typescript build
     console.log("build typescript...");
