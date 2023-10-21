@@ -117,7 +117,9 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
     // Function body
     let func_body = recursive(|tree| {
         tree.delimited_by(just(Token::Punctuation('{')), just(Token::Punctuation('}')))
-            .or(none_of([Token::Punctuation('{'), Token::Punctuation('}')]).repeated())
+            .or(none_of([Token::Punctuation('{'), Token::Punctuation('}')]).to(()))
+            .repeated()
+            .to(())
     })
     .delimited_by(just(Token::Punctuation('{')), just(Token::Punctuation('}')))
     .to(Vec::new());
@@ -356,6 +358,11 @@ fn test_recovers_from_bad_line() {
 #[test]
 fn parses_fcf_example() {
     let res = parse_from_str(&std::fs::read_to_string("examples/fcf.hir").unwrap());
-    //assert_eq!(res.errors.len(), 0);
+    assert_eq!(res.errors, []);
+}
+
+#[test]
+fn parses_query_example() {
+    let res = parse_from_str(&std::fs::read_to_string("examples/query.hir").unwrap());
     assert_eq!(res.errors, []);
 }
