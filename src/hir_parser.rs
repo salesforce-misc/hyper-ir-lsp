@@ -1,19 +1,19 @@
-use crate::hir_tokenizer::{tokenizer, Span, Spanned, Token};
+use crate::hir_tokenizer::{tokenizer, Spanned, Token};
 use chumsky::{prelude::Simple, Parser};
 use chumsky::{prelude::*, Stream};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct FuncArg {
-    type_: Spanned<String>,
-    name: Spanned<String>,
+    pub type_: Spanned<String>,
+    pub name: Spanned<String>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct FuncSignature {
-    modifiers: Vec<Spanned<String>>,
-    ret_type: Spanned<String>,
-    name: Spanned<String>,
-    args: Vec<FuncArg>,
+    pub modifiers: Vec<Spanned<String>>,
+    pub ret_type: Spanned<String>,
+    pub name: Spanned<String>,
+    pub args: Vec<FuncArg>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -23,12 +23,10 @@ pub enum Statement {
         def: Vec<Spanned<Token>>,
     },
     FuncDecl {
-        declare_kw: Span,
         signature: FuncSignature,
         addr: Option<Spanned<String>>,
     },
     FuncDef {
-        define_kw: Span,
         signature: FuncSignature,
         body: Vec<Spanned<Token>>,
     },
@@ -104,15 +102,10 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
 
     // Function declaration
     let func_decl = just(Token::Declare)
-        .map_with_span(|_tok, span| span)
-        .then(func_signature.clone())
+        .ignore_then(func_signature.clone())
         .then(func_addr.or_not())
         .then_ignore(eol.clone())
-        .map(|((kw, signature), addr)| Statement::FuncDecl {
-            declare_kw: kw,
-            signature,
-            addr,
-        });
+        .map(|(signature, addr)| Statement::FuncDecl { signature, addr });
 
     // Function body
     let func_body = recursive(|tree| {
@@ -126,15 +119,10 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
 
     // Function declaration
     let func_def = just(Token::Define)
-        .map_with_span(|_tok, span| span)
-        .then(func_signature)
+        .ignore_then(func_signature)
         .then(func_body)
         .then_ignore(eol.clone())
-        .map(|((kw, signature), body)| Statement::FuncDef {
-            define_kw: kw,
-            signature,
-            body,
-        });
+        .map(|(signature, body)| Statement::FuncDef { signature, body });
 
     // Debug annotation
     let dbg_annotation = dbg_ref
@@ -153,8 +141,8 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
 }
 
 pub struct ParserResult {
-    pub tokens: Option<Vec<Spanned<Token>>>,
-    pub stmts: Option<Vec<Statement>>,
+    pub tokens: Vec<Spanned<Token>>,
+    pub stmts: Vec<Statement>,
     pub errors: Vec<Simple<String>>,
 }
 
@@ -182,8 +170,8 @@ pub fn parse_from_str(src: &str) -> ParserResult {
         .collect::<Vec<_>>();
 
     ParserResult {
-        tokens,
-        stmts,
+        tokens: tokens.unwrap_or(Vec::new()),
+        stmts: stmts.unwrap_or(Vec::new()),
         errors,
     }
 }
@@ -192,11 +180,11 @@ pub fn parse_from_str(src: &str) -> ParserResult {
 fn test_parse_globals() {
     let res = parse_from_str("@var1 = [0,0,4,0]");
     assert_eq!(res.errors, []);
-    match res.stmts.as_ref().unwrap()[..] {
+    match res.stmts[..] {
         [Statement::GlobalVar { ref name, def: _ }] => {
             assert_eq!(name.0, "@var1");
         }
-        _ => panic!("Unexpected parse {:?}", res.stmts.as_ref().unwrap()),
+        _ => panic!("Unexpected parse {:?}", res.stmts),
     }
 }
 
@@ -205,9 +193,8 @@ fn test_parse_funcdecl() {
     // Test without arguments and without an address, but with modifiers
     let res = parse_from_str("declare exported int64 @_2_test()");
     assert_eq!(res.errors, []);
-    match res.stmts.as_ref().unwrap()[..] {
+    match res.stmts[..] {
         [Statement::FuncDecl {
-            declare_kw: _,
             signature:
                 FuncSignature {
                     ref modifiers,
@@ -223,15 +210,14 @@ fn test_parse_funcdecl() {
             assert_eq!(name.0, "@_2_test");
             assert_eq!(args.len(), 0);
         }
-        _ => panic!("Unexpected parse {:?}", res.stmts.as_ref().unwrap()),
+        _ => panic!("Unexpected parse {:?}", res.stmts),
     };
 
     // Test with arguments and with an address, but without modifiers
     let res = parse_from_str("declare void @foo::bar(int1 %, data128 %baz) = 0x123");
     assert_eq!(res.errors, []);
-    match res.stmts.as_ref().unwrap()[..] {
+    match res.stmts[..] {
         [Statement::FuncDecl {
-            declare_kw: _,
             signature:
                 FuncSignature {
                     ref modifiers,
@@ -251,7 +237,7 @@ fn test_parse_funcdecl() {
             assert_eq!(args[1].name.0, "%baz");
             assert_eq!(addr.0, "123");
         }
-        _ => panic!("Unexpected parse {:?}", res.stmts.as_ref().unwrap()),
+        _ => panic!("Unexpected parse {:?}", res.stmts),
     };
 }
 
@@ -260,9 +246,8 @@ fn test_parse_funcdef() {
     // Test with arguments and with modifiers
     let res = parse_from_str("define void @foo::bar(int1 %, data128 %baz) {\n some body\n}");
     assert_eq!(res.errors, []);
-    match res.stmts.as_ref().unwrap()[..] {
+    match res.stmts[..] {
         [Statement::FuncDef {
-            define_kw: _,
             signature:
                 FuncSignature {
                     ref modifiers,
@@ -281,7 +266,7 @@ fn test_parse_funcdef() {
             assert_eq!(args[1].type_.0, "data128");
             assert_eq!(args[1].name.0, "%baz");
         }
-        _ => panic!("Unexpected parse {:?}", res.stmts.as_ref().unwrap()),
+        _ => panic!("Unexpected parse {:?}", res.stmts),
     };
 }
 
@@ -289,11 +274,11 @@ fn test_parse_funcdef() {
 fn test_parse_dbgannotation() {
     let res = parse_from_str("!123 {}");
     assert_eq!(res.errors, []);
-    match res.stmts.as_ref().unwrap()[..] {
+    match res.stmts[..] {
         [Statement::DbgAnnotation { ref name, def: _ }] => {
             assert_eq!(name.0, "123");
         }
-        _ => panic!("Unexpected parse {:?}", res.stmts.as_ref().unwrap()),
+        _ => panic!("Unexpected parse {:?}", res.stmts),
     }
 }
 
@@ -305,12 +290,11 @@ fn test_recovers_multistmt() {
     declare void @foo()",
     );
     assert_eq!(res.errors, []);
-    match &res.stmts.as_ref().unwrap()[..] {
+    match &res.stmts[..] {
         [Statement::GlobalVar {
             name: varname,
             def: _,
         }, Statement::FuncDecl {
-            declare_kw: _,
             signature:
                 FuncSignature {
                     modifiers,
@@ -326,7 +310,7 @@ fn test_recovers_multistmt() {
             assert_eq!(modifiers.len(), 0);
             assert_eq!(args.len(), 0);
         }
-        _ => panic!("Unexpected parse {:?}", res.stmts.as_ref().unwrap()),
+        _ => panic!("Unexpected parse {:?}", res.stmts),
     }
 }
 
@@ -340,7 +324,7 @@ fn test_recovers_from_bad_line() {
     ",
     );
     assert_eq!(res.errors.len(), 1);
-    match &res.stmts.as_ref().unwrap()[..] {
+    match &res.stmts[..] {
         [Statement::GlobalVar {
             name: name1,
             def: _,
@@ -351,7 +335,7 @@ fn test_recovers_from_bad_line() {
             assert_eq!(name1.0, "@1");
             assert_eq!(name2.0, "@bar");
         }
-        _ => panic!("Unexpected parse {:?}", res.stmts.as_ref().unwrap()),
+        _ => panic!("Unexpected parse {:?}", res.stmts),
     }
 }
 

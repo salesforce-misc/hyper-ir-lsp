@@ -29,7 +29,7 @@ pub fn create_semantic_token(span: &Span, ttype: &SemanticTokenType) -> HIRSeman
 }
 
 /// Creates semantic tokens from the lexer tokens
-pub fn semantic_tokens_from_tokens(tokens: Vec<(Token, Span)>) -> Vec<HIRSemanticToken> {
+pub fn semantic_tokens_from_tokens(tokens: &[(Token, Span)]) -> Vec<HIRSemanticToken> {
     tokens
         .iter()
         .filter_map(|(token, span)| match token {
