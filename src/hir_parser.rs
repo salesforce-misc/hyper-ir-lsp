@@ -144,6 +144,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .or(func_decl)
         .or(func_def)
         .or(dbg_annotation)
+        .padded_by(just(Token::Newline).repeated())
         .recover_with(skip_then_retry_until([]))
         .repeated()
         .then_ignore(end())
@@ -165,7 +166,7 @@ pub fn parse_from_str(src: &str) -> ParserResult {
         parser().parse_recovery(Stream::from_iter(
             strlen..strlen + 1,
             // TODO: can we somehow avoid this copy?
-            tokens.clone().into_iter(),
+            tokens.clone().into_iter().filter(|t| t.0 != Token::Comment),
         ))
     } else {
         (None, Vec::new())
@@ -350,4 +351,11 @@ fn test_recovers_from_bad_line() {
         }
         _ => panic!("Unexpected parse {:?}", res.stmts.as_ref().unwrap()),
     }
+}
+
+#[test]
+fn parses_fcf_example() {
+    let res = parse_from_str(&std::fs::read_to_string("examples/fcf.hir").unwrap());
+    //assert_eq!(res.errors.len(), 0);
+    assert_eq!(res.errors, []);
 }
