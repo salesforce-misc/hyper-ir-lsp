@@ -47,7 +47,9 @@ impl fmt::Display for Token {
 
 pub fn tokenizer() -> impl Parser<char, Vec<Spanned<Token>>, Error = Simple<char>> {
     // A newline parser
-    let newline = just('\n').to(Token::Newline);
+    let newline = just('\n')
+        .or(just('\r').then_ignore(just('\n')))
+        .to(Token::Newline);
 
     // A comment parser
     let comment = just('#')
@@ -140,7 +142,7 @@ pub fn tokenizer() -> impl Parser<char, Vec<Spanned<Token>>, Error = Simple<char
 
 #[test]
 fn test_tokenizer() {
-    // Our parser expects empty strings
+    // Our parser accepts empty strings
     assert_eq!(tokenizer().parse(""), Ok(Vec::from([])));
 
     let tokens_only = |e: &str| {
@@ -179,6 +181,17 @@ fn test_tokenizer() {
     assert_eq!(
         tokens_only("%"),
         Ok(Vec::from([Token::LocalName("%".to_string())]))
+    );
+
+    // Linux newlines
+    assert_eq!(
+        tokens_only("\n\n"),
+        Ok(Vec::from([Token::Newline, Token::Newline]))
+    );
+    // Windows newlines
+    assert_eq!(
+        tokens_only("\r\n\r\n"),
+        Ok(Vec::from([Token::Newline, Token::Newline]))
     );
 
     // Global name; including `:` and `_`
