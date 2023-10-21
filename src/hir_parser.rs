@@ -115,7 +115,12 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         });
 
     // Function body
-    let func_body = empty().to(Vec::new());
+    let func_body = recursive(|tree| {
+        tree.delimited_by(just(Token::Punctuation('{')), just(Token::Punctuation('}')))
+            .or(none_of([Token::Punctuation('{'), Token::Punctuation('}')]).repeated())
+    })
+    .delimited_by(just(Token::Punctuation('{')), just(Token::Punctuation('}')))
+    .to(Vec::new());
 
     // Function declaration
     let func_def = just(Token::Define)
@@ -251,7 +256,30 @@ fn test_parse_funcdecl() {
 fn test_parse_funcdef() {
     // Test with arguments and with modifiers
     let res = parse_from_str("define void @foo::bar(int1 %, data128 %baz) {\n some body\n}");
-    // XXX assert_eq!(res.errors, []);
+    assert_eq!(res.errors, []);
+    match res.stmts.as_ref().unwrap()[..] {
+        [Statement::FuncDef {
+            define_kw: _,
+            signature:
+                FuncSignature {
+                    ref modifiers,
+                    ref ret_type,
+                    ref name,
+                    ref args,
+                },
+            body: _,
+        }] => {
+            assert_eq!(modifiers.len(), 0);
+            assert_eq!(ret_type.0, "void");
+            assert_eq!(name.0, "@foo::bar");
+            assert_eq!(args.len(), 2);
+            assert_eq!(args[0].type_.0, "int1");
+            assert_eq!(args[0].name.0, "%");
+            assert_eq!(args[1].type_.0, "data128");
+            assert_eq!(args[1].name.0, "%baz");
+        }
+        _ => panic!("Unexpected parse {:?}", res.stmts.as_ref().unwrap()),
+    };
 }
 
 #[test]
