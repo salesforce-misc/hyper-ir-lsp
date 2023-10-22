@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use dashmap::DashMap;
-use hir_language_server::hir_index::{create_index, HIRIndex, UseDef};
+use hir_language_server::hir_index::{create_index, HIRIndex, UseDefList};
 use hir_language_server::hir_parser::{parse_from_str, ParserResult};
 use hir_language_server::hir_tokenizer::Span;
 use hir_language_server::semantic_token::{
@@ -196,7 +196,7 @@ impl LanguageServer for Backend {
             let rope = self.document_map.get(&uri_str)?;
             let mut symbols = Vec::<SymbolInformation>::new();
 
-            let mut add_symbols = |ud: &HashMap<String, UseDef>, kind: SymbolKind| {
+            let mut add_symbols = |ud: &HashMap<String, UseDefList>, kind: SymbolKind| {
                 symbols.extend(ud.iter().flat_map(|f| {
                     f.1.defs.iter().filter_map(|def| {
                         Some(SymbolInformation {
