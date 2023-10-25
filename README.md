@@ -20,7 +20,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
 * LSP functionality
     * [x] Finish tokenizer
     * [x] Basic parser
-    * Parser for function bodies: Assigments & Labels
+    * [x] Parser for function bodies: Assigments & Labels
     * Parser for function bodies: Block terminators
     * [x] Document outline: Variables & Functions
     * Document outline: Function-local Labels

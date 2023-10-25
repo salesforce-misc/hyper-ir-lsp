@@ -1,4 +1,4 @@
-use crate::hir_tokenizer::{tokenizer, Spanned, Token};
+use crate::hir_tokenizer::{tokenizer, Span, Spanned, Token};
 use chumsky::{prelude::Simple, Parser};
 use chumsky::{prelude::*, Stream};
 
@@ -28,12 +28,32 @@ pub enum Statement {
     },
     FuncDef {
         signature: FuncSignature,
-        body: Vec<Spanned<Token>>,
+        body: FuncBody,
     },
     DbgAnnotation {
         name: Spanned<String>,
         def: Vec<Spanned<Token>>,
     },
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct FuncBody {
+    pub opening_bracket: Span,
+    pub closing_bracket: Span,
+    pub basic_blocks: Vec<BasicBlock>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct BasicBlock {
+    label: Option<Spanned<String>>,
+    instructions: Vec<Instruction>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Instruction {
+    assignment_target: Option<Spanned<String>>,
+    instruction: Spanned<String>,
+    jump_targets: Vec<Spanned<Token>>,
 }
 
 pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + Clone {
@@ -53,6 +73,10 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
     let type_ = filter_map(|span, token: Token| match token {
         Token::Type(str) => Ok((str, span)),
         _ => Err(Simple::custom(span, "expected type name")),
+    });
+    let ident = filter_map(|span, token| match token {
+        Token::Ident(str) => Ok((str, span)),
+        _ => Err(Simple::custom(span, "expected global name")),
     });
     let dbg_ref = filter_map(|span, token| match token {
         Token::DebugRef(str) => Ok((str, span)),
@@ -107,15 +131,63 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .then_ignore(eol.clone())
         .map(|(signature, addr)| Statement::FuncDecl { signature, addr });
 
+    // A single instruction
+    let instruction = type_
+        .ignore_then(local_name)
+        .then_ignore(just(Token::Punctuation('=')))
+        .or_not()
+        .then(ident)
+        .then_ignore(none_of(Token::Punctuation(':')).rewind())
+        .then_ignore(none_of(Token::Newline).repeated())
+        .map(|(target, instruction)| Instruction {
+            assignment_target: target,
+            instruction,
+            jump_targets: vec![],
+        });
+
+    // A basic block
+    let basic_block = ident
+        .then_ignore(just(Token::Punctuation(':')))
+        .then_ignore(just(Token::Newline).repeated().at_least(1))
+        .then(
+            instruction
+                .clone()
+                .padded_by(just(Token::Newline).repeated())
+                .repeated()
+                .collect::<Vec<_>>(),
+        )
+        .map(|(label, instructions)| BasicBlock {
+            label: Some(label),
+            instructions,
+        });
+
     // Function body
-    let func_body = recursive(|tree| {
-        tree.delimited_by(just(Token::Punctuation('{')), just(Token::Punctuation('}')))
-            .or(none_of([Token::Punctuation('{'), Token::Punctuation('}')]).to(()))
-            .repeated()
-            .to(())
-    })
-    .delimited_by(just(Token::Punctuation('{')), just(Token::Punctuation('}')))
-    .to(Vec::new());
+    let func_body = just(Token::Punctuation('{'))
+        .map_with_span(|_, span| span)
+        .then_ignore(just(Token::Newline).repeated().at_least(1))
+        .then(
+            instruction
+                .padded_by(just(Token::Newline).repeated())
+                .repeated()
+                .collect::<Vec<_>>()
+                .map(|instructions| BasicBlock {
+                    label: None,
+                    instructions,
+                }),
+        )
+        .then(basic_block.repeated().collect::<Vec<_>>())
+        .then(just(Token::Punctuation('}')).map_with_span(|_, span| span))
+        .map(
+            |(((opening_bracket, initial_bb), mut bbs), closing_bracket)| {
+                let mut basic_blocks = vec![initial_bb];
+                basic_blocks.append(&mut bbs);
+                FuncBody {
+                    opening_bracket,
+                    closing_bracket,
+                    basic_blocks,
+                }
+            },
+        );
 
     // Function declaration
     let func_def = just(Token::Define)
@@ -244,27 +316,59 @@ fn test_parse_funcdecl() {
 #[test]
 fn test_parse_funcdef() {
     // Test with arguments and with modifiers
-    let res = parse_from_str("define void @foo::bar(int1 %, data128 %baz) {\n some body\n}");
+    let res = parse_from_str(
+        "
+    define void @foo::bar(ptr %arg1_2, data128 %baz) {
+        some instruction
+    body_0:
+        int32 %v1 = load int32 ptr %arg1_2 !161  # generateBinaryOperatorFcf
+        # comment on separate line
+        br int1 %v1 doneIsNull_1, elseIsNull_2
+    doneIsNull_1:
+        # empty block; not actually valid but accepted
+    elseIsNull_2:
+        ret
+    }",
+    );
     assert_eq!(res.errors, []);
-    match res.stmts[..] {
+    match &res.stmts[..] {
         [Statement::FuncDef {
             signature:
                 FuncSignature {
-                    ref modifiers,
-                    ref ret_type,
-                    ref name,
-                    ref args,
+                    modifiers,
+                    ret_type,
+                    name,
+                    args,
                 },
-            body: _,
+            body:
+                FuncBody {
+                    opening_bracket,
+                    closing_bracket,
+                    basic_blocks,
+                },
         }] => {
             assert_eq!(modifiers.len(), 0);
             assert_eq!(ret_type.0, "void");
             assert_eq!(name.0, "@foo::bar");
             assert_eq!(args.len(), 2);
-            assert_eq!(args[0].type_.0, "int1");
-            assert_eq!(args[0].name.0, "%");
+            assert_eq!(args[0].type_.0, "ptr");
+            assert_eq!(args[0].name.0, "%arg1_2");
             assert_eq!(args[1].type_.0, "data128");
             assert_eq!(args[1].name.0, "%baz");
+
+            assert_eq!(*opening_bracket, Span { start: 54, end: 55 });
+            assert_eq!(
+                *closing_bracket,
+                Span {
+                    start: 359,
+                    end: 360,
+                }
+            );
+            assert_eq!(basic_blocks.len(), 4);
+            assert_eq!(basic_blocks[0].label, None);
+            assert_eq!(basic_blocks[1].label.as_ref().unwrap().0, "body_0");
+            assert_eq!(basic_blocks[2].label.as_ref().unwrap().0, "doneIsNull_1");
+            assert_eq!(basic_blocks[3].label.as_ref().unwrap().0, "elseIsNull_2");
         }
         _ => panic!("Unexpected parse {:?}", res.stmts),
     };
