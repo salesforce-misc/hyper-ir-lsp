@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use dashmap::DashMap;
-use hir_language_server::hir_index::{create_index, HIRIndex, UseDefList};
+use hir_language_server::hir_index::{create_index, HIRIndex, UseDefKind, UseDefList};
 use hir_language_server::hir_parser::{parse_from_str, ParserResult};
 use hir_language_server::hir_tokenizer::Span;
 use hir_language_server::semantic_token::{
@@ -59,9 +59,9 @@ impl LanguageServer for Backend {
                     ),
                 ),
                 document_symbol_provider: Some(OneOf::Left(true)),
-
-                // definition_provider: Some(OneOf::Left(true)),
-                // references_provider: Some(OneOf::Left(true)),
+                definition_provider: Some(OneOf::Left(true)),
+                //declaration_provider: Some(DeclarationCapability::Simple(true)),
+                //references_provider: Some(OneOf::Left(true)),
                 ..ServerCapabilities::default()
             },
         })
@@ -94,62 +94,70 @@ impl LanguageServer for Backend {
         })
         .await
     }
+
+    async fn goto_definition(
+        &self,
+        params: GotoDefinitionParams,
+    ) -> Result<Option<GotoDefinitionResponse>> {
+        let definition = async {
+            let uri = params.text_document_position_params.text_document.uri;
+            let uri_str = uri.to_string();
+            let rope = self.document_map.get(&uri_str)?;
+            let offset = lsp_pos_to_offset(&rope, &params.text_document_position_params.position)?;
+
+            let index = self.index_map.get(&uri_str)?;
+            let symbol = index.find_symbol_at_position(offset)?;
+            let spans = index
+                .get_by_symbol_kind(symbol.symbol_kind)
+                .get(&symbol.name)?
+                .get_use_def_kind(UseDefKind::Def);
+
+            let origin_selection_range = range_to_lsp(&rope, &symbol.span);
+            let links = spans
+                .iter()
+                .filter_map(|span| {
+                    let range = range_to_lsp(&rope, span)?;
+                    Some(LocationLink {
+                        origin_selection_range,
+                        target_uri: uri.clone(),
+                        target_range: range,
+                        target_selection_range: range,
+                    })
+                })
+                .collect::<Vec<_>>();
+
+            Some(GotoDefinitionResponse::Link(links))
+        }
+        .await;
+        Ok(definition)
+    }
+
     /*
-       async fn goto_definition(
-           &self,
-           params: GotoDefinitionParams,
-       ) -> Result<Option<GotoDefinitionResponse>> {
-           let definition = async {
-               let uri = params.text_document_position_params.text_document.uri;
-               let ast = self.ast_map.get(uri.as_str())?;
-               let rope = self.document_map.get(uri.as_str())?;
+          async fn references(&self, params: ReferenceParams) -> Result<Option<Vec<Location>>> {
+              let reference_list = || -> Option<Vec<Location>> {
+                  let uri = params.text_document_position.text_document.uri;
+                  let ast = self.ast_map.get(&uri.to_string())?;
+                  let rope = self.document_map.get(&uri.to_string())?;
 
-               let position = params.text_document_position_params.position;
-               let char = rope.try_line_to_char(position.line as usize).ok()?;
-               let offset = char + position.character as usize;
-               // self.client.log_message(MessageType::INFO, &format!("{:#?}, {}", ast.value(), offset)).await;
-               let span = get_definition(&ast, offset);
-               self.client
-                   .log_message(MessageType::INFO, &format!("{:?}, ", span))
-                   .await;
-               span.and_then(|(_, range)| {
-                   let start_position = offset_to_position(range.start, &rope)?;
-                   let end_position = offset_to_position(range.end, &rope)?;
+                  let position = params.text_document_position.position;
+                  let char = rope.try_line_to_char(position.line as usize).ok()?;
+                  let offset = char + position.character as usize;
+                  let reference_list = get_reference(&ast, offset, false);
+                  let ret = reference_list
+                      .into_iter()
+                      .filter_map(|(_, range)| {
+                          let start_position = offset_to_position(range.start, &rope)?;
+                          let end_position = offset_to_position(range.end, &rope)?;
 
-                   let range = Range::new(start_position, end_position);
+                          let range = Range::new(start_position, end_position);
 
-                   Some(GotoDefinitionResponse::Scalar(Location::new(uri, range)))
-               })
-           }
-           .await;
-           Ok(definition)
-       }
-
-       async fn references(&self, params: ReferenceParams) -> Result<Option<Vec<Location>>> {
-           let reference_list = || -> Option<Vec<Location>> {
-               let uri = params.text_document_position.text_document.uri;
-               let ast = self.ast_map.get(&uri.to_string())?;
-               let rope = self.document_map.get(&uri.to_string())?;
-
-               let position = params.text_document_position.position;
-               let char = rope.try_line_to_char(position.line as usize).ok()?;
-               let offset = char + position.character as usize;
-               let reference_list = get_reference(&ast, offset, false);
-               let ret = reference_list
-                   .into_iter()
-                   .filter_map(|(_, range)| {
-                       let start_position = offset_to_position(range.start, &rope)?;
-                       let end_position = offset_to_position(range.end, &rope)?;
-
-                       let range = Range::new(start_position, end_position);
-
-                       Some(Location::new(uri.clone(), range))
-                   })
-                   .collect::<Vec<_>>();
-               Some(ret)
-           }();
-           Ok(reference_list)
-       }
+                          Some(Location::new(uri.clone(), range))
+                      })
+                      .collect::<Vec<_>>();
+                  Some(ret)
+              }();
+              Ok(reference_list)
+          }
     */
 
     async fn semantic_tokens_full(
@@ -185,12 +193,6 @@ impl LanguageServer for Backend {
             .log_message(MessageType::LOG, "document_symbol")
             .await;
 
-        let i = self.index_map.get(&uri_str).unwrap();
-        let ii = i.value().clone();
-        self.client
-            .log_message(MessageType::LOG, &format!("idx {:?}", ii))
-            .await;
-
         let symbols = || -> Option<DocumentSymbolResponse> {
             let index = self.index_map.get(&uri_str)?;
             let rope = self.document_map.get(&uri_str)?;
@@ -201,11 +203,11 @@ impl LanguageServer for Backend {
                     f.1.defs.iter().filter_map(|def| {
                         Some(SymbolInformation {
                             name: f.0.to_string(),
-                            kind: kind,
+                            kind,
                             tags: None,
                             location: Location {
                                 uri: uri.clone(),
-                                range: range_to_lsp(&rope, &def)?,
+                                range: range_to_lsp(&rope, def)?,
                             },
                             deprecated: None,
                             container_name: None,
@@ -288,8 +290,8 @@ impl Backend {
                     // let start_line = rope.try_char_to_line(span.start)?;
                     // let first_char = rope.try_line_to_char(start_line)?;
                     // let start_column = span.start - first_char;
-                    let start_position = offset_to_position(span.start, &rope)?;
-                    let end_position = offset_to_position(span.end, &rope)?;
+                    let start_position = offset_to_lsp_pos(&rope, span.start)?;
+                    let end_position = offset_to_lsp_pos(&rope, span.end)?;
                     // let end_line = rope.try_char_to_line(span.end)?;
                     // let first_char = rope.try_line_to_char(end_line)?;
                     // let end_column = span.end - first_char;
@@ -305,6 +307,11 @@ impl Backend {
             .publish_diagnostics(params.uri.clone(), diagnostics, Some(params.version))
             .await;
     }
+}
+
+fn lsp_pos_to_offset(rope: &Rope, pos: &Position) -> Option<usize> {
+    let char = rope.try_line_to_char(pos.line as usize).ok()?;
+    Some(char + pos.character as usize)
 }
 
 fn offset_to_lsp_pos(rope: &Rope, pos: usize) -> Option<Position> {
@@ -340,11 +347,4 @@ async fn main() {
     .finish();
 
     Server::new(stdin, stdout, socket).serve(service).await;
-}
-
-fn offset_to_position(offset: usize, rope: &Rope) -> Option<Position> {
-    let line = rope.try_char_to_line(offset).ok()?;
-    let first_char_of_line = rope.try_line_to_char(line).ok()?;
-    let column = offset - first_char_of_line;
-    Some(Position::new(line as u32, column as u32))
 }

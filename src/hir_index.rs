@@ -4,6 +4,13 @@ use crate::{
 };
 use std::collections::{BTreeMap, HashMap};
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum UseDefKind {
+    Decl,
+    Def,
+    Use,
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct UseDefList {
     pub decls: Vec<Span>,
@@ -11,14 +18,25 @@ pub struct UseDefList {
     pub uses: Vec<Span>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum UseDefKind {
-    Decl,
-    Def,
-    Use,
+impl UseDefList {
+    pub fn get_use_def_kind(&self, ud: UseDefKind) -> &Vec<std::ops::Range<usize>> {
+        match ud {
+            UseDefKind::Decl => &self.decls,
+            UseDefKind::Def => &self.defs,
+            UseDefKind::Use => &self.uses,
+        }
+    }
+
+    pub fn get_use_def_kind_mut(&mut self, ud: UseDefKind) -> &mut Vec<std::ops::Range<usize>> {
+        match ud {
+            UseDefKind::Decl => &mut self.decls,
+            UseDefKind::Def => &mut self.defs,
+            UseDefKind::Use => &mut self.uses,
+        }
+    }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SymbolKind {
     GlobalVar,
     Function,
@@ -42,21 +60,29 @@ pub struct HIRIndex {
 }
 
 impl HIRIndex {
-    pub fn add(&mut self, k: SymbolKind, ud: UseDefKind, span: &Span, name: &str) {
-        let map = match k {
+    pub fn get_by_symbol_kind(&self, k: SymbolKind) -> &HashMap<String, UseDefList> {
+        match k {
+            SymbolKind::GlobalVar => &self.global_vars,
+            SymbolKind::Function => &self.functions,
+            SymbolKind::DbgAnnotation => &self.dgb_annotations,
+        }
+    }
+
+    pub fn get_by_symbol_kind_mut(&mut self, k: SymbolKind) -> &mut HashMap<String, UseDefList> {
+        match k {
             SymbolKind::GlobalVar => &mut self.global_vars,
             SymbolKind::Function => &mut self.functions,
             SymbolKind::DbgAnnotation => &mut self.dgb_annotations,
-        };
+        }
+    }
+
+    pub fn add(&mut self, k: SymbolKind, ud: UseDefKind, span: &Span, name: &str) {
+        let map = self.get_by_symbol_kind_mut(k);
         let e = map.entry(name.to_string()).or_default();
         if e.decls.contains(span) || e.defs.contains(span) || e.uses.contains(span) {
             return;
         }
-        match ud {
-            UseDefKind::Decl => e.decls.push(span.clone()),
-            UseDefKind::Def => e.defs.push(span.clone()),
-            UseDefKind::Use => e.uses.push(span.clone()),
-        };
+        e.get_use_def_kind_mut(ud).push(span.clone());
         self.reverse_idx.insert(
             span.start,
             SymbolOccurrence {
@@ -71,6 +97,19 @@ impl HIRIndex {
     pub fn add_spanned(&mut self, k: SymbolKind, ud: UseDefKind, u: &Spanned<String>) {
         self.add(k, ud, &u.1, &u.0)
     }
+
+    pub fn find_symbol_at_position(&self, pos: usize) -> Option<&SymbolOccurrence> {
+        self.reverse_idx
+            .iter()
+            .map(|e| e.1)
+            .find(|e| e.span.contains(&pos))
+        /* TODO use 'upper_bound'
+        self.reverse_idx
+            .upper_bound(Bound::Included(&pos))
+            .value()
+            .filter(|s| s.span.contains(&pos))
+        */
+    }
 }
 
 pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex {
@@ -82,7 +121,7 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
     for s in stmts.iter() {
         match s {
             Statement::GlobalVar { name, def: _ } => {
-                index.add_spanned(SymbolKind::GlobalVar, UseDefKind::Def, &name)
+                index.add_spanned(SymbolKind::GlobalVar, UseDefKind::Def, name)
             }
             Statement::FuncDecl { signature, addr: _ } => {
                 index.add_spanned(SymbolKind::Function, UseDefKind::Decl, &signature.name)
@@ -91,7 +130,7 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
                 index.add_spanned(SymbolKind::Function, UseDefKind::Def, &signature.name)
             }
             Statement::DbgAnnotation { name, def: _ } => {
-                index.add_spanned(SymbolKind::DbgAnnotation, UseDefKind::Def, &name)
+                index.add_spanned(SymbolKind::DbgAnnotation, UseDefKind::Def, name)
             }
         }
     }
@@ -101,14 +140,14 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
         match &t.0 {
             Token::GlobalName(name) => {
                 if index.global_vars.contains_key(&name.to_string()) {
-                    index.add(SymbolKind::GlobalVar, UseDefKind::Use, &t.1, &name)
+                    index.add(SymbolKind::GlobalVar, UseDefKind::Use, &t.1, name)
                 }
                 if index.functions.contains_key(&name.to_string()) {
-                    index.add(SymbolKind::Function, UseDefKind::Use, &t.1, &name)
+                    index.add(SymbolKind::Function, UseDefKind::Use, &t.1, name)
                 }
             }
             Token::DebugRef(name) => {
-                index.add(SymbolKind::DbgAnnotation, UseDefKind::Use, &t.1, &name)
+                index.add(SymbolKind::DbgAnnotation, UseDefKind::Use, &t.1, name)
             }
             _ => {}
         }
