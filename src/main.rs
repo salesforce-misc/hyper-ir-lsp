@@ -9,6 +9,7 @@ use hir_language_server::semantic_token::{
 };
 use ropey::Rope;
 use tower_lsp::jsonrpc::Result;
+use tower_lsp::lsp_types::request::GotoDeclarationResponse;
 use tower_lsp::lsp_types::*;
 use tower_lsp::{Client, LanguageServer, LspService, Server};
 
@@ -60,7 +61,7 @@ impl LanguageServer for Backend {
                 ),
                 document_symbol_provider: Some(OneOf::Left(true)),
                 definition_provider: Some(OneOf::Left(true)),
-                //declaration_provider: Some(DeclarationCapability::Simple(true)),
+                declaration_provider: Some(DeclarationCapability::Simple(true)),
                 //references_provider: Some(OneOf::Left(true)),
                 ..ServerCapabilities::default()
             },
@@ -99,66 +100,80 @@ impl LanguageServer for Backend {
         &self,
         params: GotoDefinitionParams,
     ) -> Result<Option<GotoDefinitionResponse>> {
-        let definition = async {
-            let uri = params.text_document_position_params.text_document.uri;
-            let uri_str = uri.to_string();
-            let rope = self.document_map.get(&uri_str)?;
-            let offset = lsp_pos_to_offset(&rope, &params.text_document_position_params.position)?;
-
-            let index = self.index_map.get(&uri_str)?;
-            let symbol = index.find_symbol_at_position(offset)?;
-            let spans = index
-                .get_by_symbol_kind(symbol.symbol_kind)
-                .get(&symbol.name)?
-                .get_use_def_kind(UseDefKind::Def);
-
-            let origin_selection_range = range_to_lsp(&rope, &symbol.span);
-            let links = spans
+        let definition = || -> Option<GotoDefinitionResponse> {
+            let (origin_selection_range, ranges) =
+                self.get_use_def_ranges(&params.text_document_position_params, UseDefKind::Def)?;
+            let links = ranges
                 .iter()
-                .filter_map(|span| {
-                    let range = range_to_lsp(&rope, span)?;
-                    Some(LocationLink {
-                        origin_selection_range,
-                        target_uri: uri.clone(),
-                        target_range: range,
-                        target_selection_range: range,
-                    })
+                .map(|&range| LocationLink {
+                    origin_selection_range: Some(origin_selection_range),
+                    target_uri: params
+                        .text_document_position_params
+                        .text_document
+                        .uri
+                        .clone(),
+                    target_range: range,
+                    target_selection_range: range,
                 })
                 .collect::<Vec<_>>();
 
             Some(GotoDefinitionResponse::Link(links))
-        }
-        .await;
+        }();
         Ok(definition)
     }
 
+    async fn goto_declaration(
+        &self,
+        params: GotoDefinitionParams,
+    ) -> Result<Option<GotoDefinitionResponse>> {
+        let decl = || -> Option<GotoDeclarationResponse> {
+            let (origin_selection_range, ranges) =
+                self.get_use_def_ranges(&params.text_document_position_params, UseDefKind::Decl)?;
+            let links = ranges
+                .iter()
+                .map(|&range| LocationLink {
+                    origin_selection_range: Some(origin_selection_range),
+                    target_uri: params
+                        .text_document_position_params
+                        .text_document
+                        .uri
+                        .clone(),
+                    target_range: range,
+                    target_selection_range: range,
+                })
+                .collect::<Vec<_>>();
+
+            Some(GotoDeclarationResponse::Link(links))
+        }();
+        Ok(decl)
+    }
+
     /*
-          async fn references(&self, params: ReferenceParams) -> Result<Option<Vec<Location>>> {
-              let reference_list = || -> Option<Vec<Location>> {
-                  let uri = params.text_document_position.text_document.uri;
-                  let ast = self.ast_map.get(&uri.to_string())?;
-                  let rope = self.document_map.get(&uri.to_string())?;
+    async fn references(&self, params: ReferenceParams) -> Result<Option<Vec<Location>>> {
+        let reference_list = || -> Option<Vec<Location>> {
+            let uri = params.text_document_position.text_document.uri;
+            let ast = self.ast_map.get(&uri.to_string())?;
+            let rope = self.document_map.get(&uri.to_string())?;
 
-                  let position = params.text_document_position.position;
-                  let char = rope.try_line_to_char(position.line as usize).ok()?;
-                  let offset = char + position.character as usize;
-                  let reference_list = get_reference(&ast, offset, false);
-                  let ret = reference_list
-                      .into_iter()
-                      .filter_map(|(_, range)| {
-                          let start_position = offset_to_position(range.start, &rope)?;
-                          let end_position = offset_to_position(range.end, &rope)?;
+            let position = params.text_document_position.position;
+            let char = rope.try_line_to_char(position.line as usize).ok()?;
+            let offset = char + position.character as usize;
+            let reference_list = get_reference(&ast, offset, false);
+            let ret = reference_list
+                .into_iter()
+                .filter_map(|(_, range)| {
+                    let start_position = offset_to_position(range.start, &rope)?;
+                    let end_position = offset_to_position(range.end, &rope)?;
 
-                          let range = Range::new(start_position, end_position);
+                    let range = Range::new(start_position, end_position);
 
-                          Some(Location::new(uri.clone(), range))
-                      })
-                      .collect::<Vec<_>>();
-                  Some(ret)
-              }();
-              Ok(reference_list)
-          }
-    */
+                    Some(Location::new(uri.clone(), range))
+                })
+                .collect::<Vec<_>>();
+            Some(ret)
+        }();
+        Ok(reference_list)
+    } */
 
     async fn semantic_tokens_full(
         &self,
@@ -306,6 +321,30 @@ impl Backend {
         self.client
             .publish_diagnostics(params.uri.clone(), diagnostics, Some(params.version))
             .await;
+    }
+
+    fn get_use_def_ranges(
+        &self,
+        pos: &TextDocumentPositionParams,
+        ud: UseDefKind,
+    ) -> Option<(Range, Vec<Range>)> {
+        let uri_str = pos.text_document.uri.to_string();
+        let rope = self.document_map.get(&uri_str)?;
+        let offset = lsp_pos_to_offset(&rope, &pos.position)?;
+
+        let index = self.index_map.get(&uri_str)?;
+        let symbol = index.find_symbol_at_position(offset)?;
+        let spans = index
+            .get_by_symbol_kind(symbol.symbol_kind)
+            .get(&symbol.name)?
+            .get_use_def_kind(ud);
+
+        let origin_selection_range = range_to_lsp(&rope, &symbol.span)?;
+        let ranges = spans
+            .iter()
+            .filter_map(|span| range_to_lsp(&rope, span))
+            .collect::<Vec<_>>();
+        Some((origin_selection_range, ranges))
     }
 }
 
