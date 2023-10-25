@@ -7,6 +7,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
 
 * syntax highlighting for Hyper IR
 * shows all functions in the document outline
+* Go to definition / references / declaration for functions, variables and debug references
 
 ## Development
 
@@ -19,25 +20,35 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
 * LSP functionality
     * [x] Finish tokenizer
     * [x] Basic parser
-    * Parser for function bodies
-    * [x] Show document outline
-    * Go to definition / declaration / references for function
-    * Go to definition / references for debug refs
-    * Go to definition / references for global variables
+    * Parser for function bodies: Assigments & Labels
+    * Parser for function bodies: Block terminators
+    * [x] Document outline: Variables & Functions
+    * Document outline: Function-local Labels
+    * [x] Go to definition / declaration / references for function
+    * [x] Go to definition / references for debug refs
+    * [x] Go to definition / references for global variables
     * Go to definition / references for local variables
     * Go to definition / references for jump targets / basic blocks
     * Somehow Hyperlink the stack trace
     * Code folding on function bodies
     * Code folding on basic blocks; display terminating instruction
+    * Highlight provider for function-local variables
     * tokenizer: only keep spans; don't copy out strings
     * take care of error recovery / make it robust
-    * report warnings on duplicate function names
+    * report warnings on duplicate function names / variable names
     * incremental sync
     * Control flow graph as Mermaid charts
-* VS Code
+    * Inlay hint at end of function: Display function name
+    * Inlay hint at basic block: List incoming edges
+    * Support renames (functions, global vars, labels, local vars)
+    * Add "Go to definition" for C++ hard-coded proxies
+    * "Inline variables" debugger support?
+* VS Code extension
     * [x] get a packaged VS Code extension
     * [x] correct word boundaries
     * use Webassembly instead of native binary
+    * Proper logo
+    * Proper README
 * configure in neovim
 * Github CI
     * lint JS
@@ -45,3 +56,8 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * [x] run rust test cases
     * package VS Code extension
     * automatically create release artifacts
+* Hyper:
+    * Fix printing of references to unnamed globals
+    * name the "column names" global variables
+    * missing allocas?
+    * missing types?

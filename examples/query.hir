@@ -156,7 +156,7 @@ body_0:
   ptr %constructorCounter_4 = gep {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64} ptr %queryState_0, int32 0, int32 1    !2857 # CompilationContext::constructInitializeStateLogic
   store int32 ptr %constructorCounter_4, int32 0                                  !2899 # CompilationContext::constructInitializeStateFunction
   store {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64} ptr %queryState_0, int64 0, int32 0, int32 4    !2919 # ./external/clang_linux/include/c++/v1/vector:552
-  call hyper::StringRuntime::outputString(ptr 0x0, ptr 0x564bb6a7ecf0, ptr 0x0, ptr @type_25, data128 hdrPtr {8461260270914764823, ptr @v22})    !3054 # CompilationContext::constructInitializeStateLogic
+  call hyper::StringRuntime::outputString(ptr 0x0, ptr 0x564bb6a7ecf0, ptr 0x0, ptr @type_25, data128 hdrPtr {8461260270914764823, ptr @_22})    !3054 # CompilationContext::constructInitializeStateLogic
   call hyper::DebugPrintCerr::printNl()                                           !3086 # ./external/clang_linux/include/c++/v1/string:1682
   int32 %v9 = load int32 ptr %constructorCounter_4                                !3098 # CompilationContext::constructInitializeStateLogic
   int32 %v10 = add int32 %v9, int32 1                                             !3114 # CompilationContext::constructInitializeStateLogic
