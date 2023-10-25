@@ -62,7 +62,7 @@ impl LanguageServer for Backend {
                 document_symbol_provider: Some(OneOf::Left(true)),
                 definition_provider: Some(OneOf::Left(true)),
                 declaration_provider: Some(DeclarationCapability::Simple(true)),
-                //references_provider: Some(OneOf::Left(true)),
+                references_provider: Some(OneOf::Left(true)),
                 ..ServerCapabilities::default()
             },
         })
@@ -148,32 +148,23 @@ impl LanguageServer for Backend {
         Ok(decl)
     }
 
-    /*
     async fn references(&self, params: ReferenceParams) -> Result<Option<Vec<Location>>> {
         let reference_list = || -> Option<Vec<Location>> {
-            let uri = params.text_document_position.text_document.uri;
-            let ast = self.ast_map.get(&uri.to_string())?;
-            let rope = self.document_map.get(&uri.to_string())?;
-
-            let position = params.text_document_position.position;
-            let char = rope.try_line_to_char(position.line as usize).ok()?;
-            let offset = char + position.character as usize;
-            let reference_list = get_reference(&ast, offset, false);
-            let ret = reference_list
-                .into_iter()
-                .filter_map(|(_, range)| {
-                    let start_position = offset_to_position(range.start, &rope)?;
-                    let end_position = offset_to_position(range.end, &rope)?;
-
-                    let range = Range::new(start_position, end_position);
-
-                    Some(Location::new(uri.clone(), range))
+            let (_origin_selection_range, ranges) =
+                self.get_use_def_ranges(&params.text_document_position, UseDefKind::Use)?;
+            let ret = ranges
+                .iter()
+                .map(|&range| {
+                    Location::new(
+                        params.text_document_position.text_document.uri.clone(),
+                        range,
+                    )
                 })
                 .collect::<Vec<_>>();
             Some(ret)
         }();
         Ok(reference_list)
-    } */
+    }
 
     async fn semantic_tokens_full(
         &self,
