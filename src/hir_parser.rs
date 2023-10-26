@@ -27,6 +27,7 @@ pub enum Statement {
         addr: Option<Spanned<String>>,
     },
     FuncDef {
+        define_kw: Span,
         signature: FuncSignature,
         body: FuncBody,
     },
@@ -45,15 +46,15 @@ pub struct FuncBody {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BasicBlock {
-    label: Option<Spanned<String>>,
-    instructions: Vec<Instruction>,
+    pub label: Option<Spanned<String>>,
+    pub instructions: Vec<Instruction>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Instruction {
-    assignment_target: Option<Spanned<String>>,
-    instruction: Spanned<String>,
-    jump_targets: Vec<Spanned<Token>>,
+    pub assignment_target: Option<Spanned<String>>,
+    pub instruction: Spanned<String>,
+    pub jump_targets: Vec<Spanned<Token>>,
 }
 
 pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + Clone {
@@ -191,10 +192,15 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
 
     // Function declaration
     let func_def = just(Token::Define)
-        .ignore_then(func_signature)
+        .map_with_span(|_, span| span)
+        .then(func_signature)
         .then(func_body)
         .then_ignore(eol.clone())
-        .map(|(signature, body)| Statement::FuncDef { signature, body });
+        .map(|((define_kw, signature), body)| Statement::FuncDef {
+            define_kw,
+            signature,
+            body,
+        });
 
     // Debug annotation
     let dbg_annotation = dbg_ref
@@ -333,6 +339,7 @@ fn test_parse_funcdef() {
     assert_eq!(res.errors, []);
     match &res.stmts[..] {
         [Statement::FuncDef {
+            define_kw: _,
             signature:
                 FuncSignature {
                     modifiers,

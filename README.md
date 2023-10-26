@@ -21,13 +21,13 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * [x] Finish tokenizer
     * [x] Basic parser
     * [x] Parser for function bodies: Assigments & Labels
-    * Parser for function bodies: Block terminators
+    * Parser for function bodies: Block terminators & phis
     * [x] Document outline: Variables & Functions
     * Document outline: Function-local Labels
     * [x] Go to definition / declaration / references for function
     * [x] Go to definition / references for debug refs
     * [x] Go to definition / references for global variables
-    * Go to definition / references for local variables
+    * [x] Go to definition / references for local variables
     * Go to definition / references for jump targets / basic blocks
     * Somehow Hyperlink the stack trace
     * Code folding on function bodies

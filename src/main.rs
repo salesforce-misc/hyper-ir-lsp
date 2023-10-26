@@ -326,7 +326,10 @@ impl Backend {
         let index = self.index_map.get(&uri_str)?;
         let symbol = index.find_symbol_at_position(offset)?;
         let spans = index
-            .get_by_symbol_kind(symbol.symbol_kind)
+            .get_by_symbol_kind(
+                symbol.symbol_kind,
+                symbol.func_body_id.map(|id| &index.function_bodies[id]),
+            )
             .get(&symbol.name)?
             .get_use_def_kind(ud);
 
