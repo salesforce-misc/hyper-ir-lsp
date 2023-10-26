@@ -36,9 +36,10 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * tokenizer: only keep spans; don't copy out strings
     * take care of error recovery / make it robust
     * report warnings on duplicate function names / variable names
+    * report warnings on unknown function names / variable names
     * incremental sync
     * Control flow graph as Mermaid charts
-    * Inlay hint at end of function: Display function name
+    * [x] Inlay hint at end of function: Display function name
     * Inlay hint at basic block: List incoming edges
     * Support renames (functions, global vars, labels, local vars)
     * Add "Go to definition" for C++ hard-coded proxies

@@ -63,6 +63,7 @@ impl LanguageServer for Backend {
                 definition_provider: Some(OneOf::Left(true)),
                 declaration_provider: Some(DeclarationCapability::Simple(true)),
                 references_provider: Some(OneOf::Left(true)),
+                inlay_hint_provider: Some(OneOf::Left(true)),
                 ..ServerCapabilities::default()
             },
         })
@@ -101,17 +102,14 @@ impl LanguageServer for Backend {
         params: GotoDefinitionParams,
     ) -> Result<Option<GotoDefinitionResponse>> {
         let definition = || -> Option<GotoDefinitionResponse> {
+            let uri = &params.text_document_position_params.text_document.uri;
             let (origin_selection_range, ranges) =
                 self.get_use_def_ranges(&params.text_document_position_params, UseDefKind::Def)?;
             let links = ranges
                 .iter()
                 .map(|&range| LocationLink {
                     origin_selection_range: Some(origin_selection_range),
-                    target_uri: params
-                        .text_document_position_params
-                        .text_document
-                        .uri
-                        .clone(),
+                    target_uri: uri.clone(),
                     target_range: range,
                     target_selection_range: range,
                 })
@@ -129,15 +127,12 @@ impl LanguageServer for Backend {
         let decl = || -> Option<GotoDeclarationResponse> {
             let (origin_selection_range, ranges) =
                 self.get_use_def_ranges(&params.text_document_position_params, UseDefKind::Decl)?;
+            let uri = &params.text_document_position_params.text_document.uri;
             let links = ranges
                 .iter()
                 .map(|&range| LocationLink {
                     origin_selection_range: Some(origin_selection_range),
-                    target_uri: params
-                        .text_document_position_params
-                        .text_document
-                        .uri
-                        .clone(),
+                    target_uri: uri.clone(),
                     target_range: range,
                     target_selection_range: range,
                 })
@@ -193,18 +188,21 @@ impl LanguageServer for Backend {
         &self,
         params: DocumentSymbolParams,
     ) -> Result<Option<DocumentSymbolResponse>> {
-        let uri = params.text_document.uri.clone();
-        let uri_str = uri.to_string();
+        let uri = params.text_document.uri.to_string();
         self.client
             .log_message(MessageType::LOG, "document_symbol")
             .await;
 
         let symbols = || -> Option<DocumentSymbolResponse> {
-            let index = self.index_map.get(&uri_str)?;
-            let rope = self.document_map.get(&uri_str)?;
+            let index = self.index_map.get(&uri)?;
+            let rope = self.document_map.get(&uri)?;
             let mut symbols = Vec::<DocumentSymbol>::new();
 
-            fn get_def_symbols<'a>(ud: &'a HashMap<String, UseDefList>, rope: &'a Rope, kind: SymbolKind) -> impl Iterator<Item = tower_lsp::lsp_types::DocumentSymbol> + 'a{
+            fn get_def_symbols<'a>(
+                ud: &'a HashMap<String, UseDefList>,
+                rope: &'a Rope,
+                kind: SymbolKind,
+            ) -> impl Iterator<Item = tower_lsp::lsp_types::DocumentSymbol> + 'a {
                 ud.iter().flat_map(move |f| {
                     f.1.defs.iter().filter_map(move |def| {
                         Some(DocumentSymbol {
@@ -215,35 +213,35 @@ impl LanguageServer for Backend {
                             range: range_to_lsp(&rope, def)?,
                             selection_range: range_to_lsp(&rope, def)?,
                             deprecated: None,
-                            children: None
+                            children: None,
                         })
                     })
                 })
             }
 
-            symbols.extend(get_def_symbols(&index.global_vars, &rope, SymbolKind::CONSTANT));
+            symbols.extend(get_def_symbols(
+                &index.global_vars,
+                &rope,
+                SymbolKind::CONSTANT,
+            ));
 
-            symbols.extend(
-                index.function_bodies
-                .iter()
-                .filter_map(|f| {
-                    Some(DocumentSymbol {
-                        name: f.name.0.clone(),
-                        detail: None,
-                        kind: SymbolKind::FUNCTION,
-                        tags: None,
-                        range: range_to_lsp(&rope, &f.complete_range)?,
-                        selection_range: range_to_lsp(&rope, &f.name.1)?,
-                        deprecated: None,
-                        children: None,
-                        // We could add the labels as children of the functions.
-                        // I decided against it, because it looks a bit too crowded.
-                        // children: Some(get_def_symbols(&f.labels, &rope, SymbolKind::KEY).collect::<Vec<_>>()),
-                    })
+            symbols.extend(index.function_bodies.iter().filter_map(|f| {
+                Some(DocumentSymbol {
+                    name: f.name.0.clone(),
+                    detail: None,
+                    kind: SymbolKind::FUNCTION,
+                    tags: None,
+                    range: range_to_lsp(&rope, &f.complete_range)?,
+                    selection_range: range_to_lsp(&rope, &f.name.1)?,
+                    deprecated: None,
+                    children: None,
+                    // We could add the labels as children of the functions.
+                    // I decided against it, because it looks a bit too crowded.
+                    // children: Some(get_def_symbols(&f.labels, &rope, SymbolKind::KEY).collect::<Vec<_>>()),
                 })
-            );
+            }));
 
-            Some(DocumentSymbolResponse::Nested(symbols))
+            Some(DocumentSymbolResponse::from(symbols))
         }();
 
         self.client
@@ -251,6 +249,40 @@ impl LanguageServer for Backend {
             .await;
 
         Ok(symbols)
+    }
+
+    async fn inlay_hint(&self, params: InlayHintParams) -> Result<Option<Vec<InlayHint>>> {
+        let inlay_hints = || -> Option<Vec<InlayHint>> {
+            let uri = &params.text_document.uri;
+            let uri_str = uri.to_string();
+            let index = self.index_map.get(&uri_str)?;
+            let rope = self.document_map.get(&uri_str)?;
+            let mut inlay_hints = Vec::<InlayHint>::new();
+
+            inlay_hints.extend(index.function_bodies.iter().filter_map(|f| {
+                Some(InlayHint {
+                    position: offset_to_lsp_pos(&rope, f.complete_range.end)?,
+                    label: InlayHintLabel::LabelParts(vec![InlayHintLabelPart {
+                        value: f.name.0.clone(),
+                        tooltip: None,
+                        location: Some(Location {
+                            uri: uri.clone(),
+                            range: range_to_lsp(&rope, &f.name.1)?,
+                        }),
+                        command: None,
+                    }]),
+                    kind: None,
+                    text_edits: None,
+                    tooltip: None,
+                    padding_left: Some(true),
+                    padding_right: Some(true),
+                    data: None,
+                })
+            }));
+
+            Some(inlay_hints)
+        }();
+        return Ok(inlay_hints);
     }
 }
 
