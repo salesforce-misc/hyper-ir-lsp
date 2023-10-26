@@ -389,14 +389,8 @@ impl Backend {
                 };
 
                 || -> Option<Diagnostic> {
-                    // let start_line = rope.try_char_to_line(span.start)?;
-                    // let first_char = rope.try_line_to_char(start_line)?;
-                    // let start_column = span.start - first_char;
                     let start_position = offset_to_lsp_pos(&rope, span.start)?;
                     let end_position = offset_to_lsp_pos(&rope, span.end)?;
-                    // let end_line = rope.try_char_to_line(span.end)?;
-                    // let first_char = rope.try_line_to_char(end_line)?;
-                    // let end_column = span.end - first_char;
                     Some(Diagnostic::new_simple(
                         Range::new(start_position, end_position),
                         message,
