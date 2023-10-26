@@ -202,30 +202,48 @@ impl LanguageServer for Backend {
         let symbols = || -> Option<DocumentSymbolResponse> {
             let index = self.index_map.get(&uri_str)?;
             let rope = self.document_map.get(&uri_str)?;
-            let mut symbols = Vec::<SymbolInformation>::new();
+            let mut symbols = Vec::<DocumentSymbol>::new();
 
-            let mut add_symbols = |ud: &HashMap<String, UseDefList>, kind: SymbolKind| {
-                symbols.extend(ud.iter().flat_map(|f| {
-                    f.1.defs.iter().filter_map(|def| {
-                        Some(SymbolInformation {
+            fn get_def_symbols<'a>(ud: &'a HashMap<String, UseDefList>, rope: &'a Rope, kind: SymbolKind) -> impl Iterator<Item = tower_lsp::lsp_types::DocumentSymbol> + 'a{
+                ud.iter().flat_map(move |f| {
+                    f.1.defs.iter().filter_map(move |def| {
+                        Some(DocumentSymbol {
                             name: f.0.to_string(),
+                            detail: None,
                             kind,
                             tags: None,
-                            location: Location {
-                                uri: uri.clone(),
-                                range: range_to_lsp(&rope, def)?,
-                            },
+                            range: range_to_lsp(&rope, def)?,
+                            selection_range: range_to_lsp(&rope, def)?,
                             deprecated: None,
-                            container_name: None,
+                            children: None
                         })
                     })
-                }));
-            };
+                })
+            }
 
-            add_symbols(&index.global_vars, SymbolKind::CONSTANT);
-            add_symbols(&index.functions, SymbolKind::FUNCTION);
+            symbols.extend(get_def_symbols(&index.global_vars, &rope, SymbolKind::CONSTANT));
 
-            Some(DocumentSymbolResponse::Flat(symbols))
+            symbols.extend(
+                index.function_bodies
+                .iter()
+                .filter_map(|f| {
+                    Some(DocumentSymbol {
+                        name: f.name.0.clone(),
+                        detail: None,
+                        kind: SymbolKind::FUNCTION,
+                        tags: None,
+                        range: range_to_lsp(&rope, &f.complete_range)?,
+                        selection_range: range_to_lsp(&rope, &f.name.1)?,
+                        deprecated: None,
+                        children: None,
+                        // We could add the labels as children of the functions.
+                        // I decided against it, because it looks a bit too crowded.
+                        // children: Some(get_def_symbols(&f.labels, &rope, SymbolKind::KEY).collect::<Vec<_>>()),
+                    })
+                })
+            );
+
+            Some(DocumentSymbolResponse::Nested(symbols))
         }();
 
         self.client

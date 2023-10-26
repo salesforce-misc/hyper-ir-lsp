@@ -23,7 +23,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * [x] Parser for function bodies: Assigments & Labels
     * Parser for function bodies: Block terminators & phis
     * [x] Document outline: Variables & Functions
-    * Document outline: Function-local Labels
+    * [x] Document outline: Function-local Labels
     * [x] Go to definition / declaration / references for function
     * [x] Go to definition / references for debug refs
     * [x] Go to definition / references for global variables

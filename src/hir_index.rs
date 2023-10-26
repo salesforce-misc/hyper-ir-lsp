@@ -38,10 +38,10 @@ impl UseDefList {
 
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct FunctionBody {
-    name: Spanned<String>,
-    complete_range: Span,
-    labels: HashMap<String, UseDefList>,
-    local_vars: HashMap<String, UseDefList>,
+    pub name: Spanned<String>,
+    pub complete_range: Span,
+    pub labels: HashMap<String, UseDefList>,
+    pub local_vars: HashMap<String, UseDefList>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
