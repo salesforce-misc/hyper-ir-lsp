@@ -7,7 +7,8 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
 
 * syntax highlighting for Hyper IR
 * shows all functions in the document outline
-* Go to definition / references / declaration for functions, variables and debug references
+* go to definition / references / declaration for functions, variables and debug references
+* code folding support
 
 ## Development
 
@@ -30,9 +31,11 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * [x] Go to definition / references for local variables
     * Go to definition / references for jump targets / basic blocks
     * Somehow Hyperlink the stack trace
-    * Code folding on function bodies
-    * Code folding on basic blocks; display terminating instruction
+    * [x] Code folding on function bodies
+    * [x] Code folding on basic blocks
+    * Code folding: Figure out why "folded text" does not work for VS Code; If we can get it to work, take advantage of it
     * Highlight provider for function-local variables
+    * Hover provider for function-local variables; Show "SSA chain"
     * tokenizer: only keep spans; don't copy out strings
     * take care of error recovery / make it robust
     * report warnings on duplicate function names / variable names
@@ -49,7 +52,8 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * [x] correct word boundaries
     * use Webassembly instead of native binary
     * Proper logo
-    * Proper README
+    * Package README
+    * Write proper README
 * configure in neovim
 * Github CI
     * lint JS
@@ -60,5 +64,6 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
 * Hyper:
     * Fix printing of references to unnamed globals
     * name the "column names" global variables
+    * missing "pure" modifier?
     * missing allocas?
     * missing types?

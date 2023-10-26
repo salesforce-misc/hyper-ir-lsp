@@ -63,6 +63,7 @@ impl LanguageServer for Backend {
                 definition_provider: Some(OneOf::Left(true)),
                 declaration_provider: Some(DeclarationCapability::Simple(true)),
                 references_provider: Some(OneOf::Left(true)),
+                folding_range_provider: Some(FoldingRangeProviderCapability::Simple(true)),
                 inlay_hint_provider: Some(OneOf::Left(true)),
                 ..ServerCapabilities::default()
             },
@@ -249,6 +250,51 @@ impl LanguageServer for Backend {
             .await;
 
         Ok(symbols)
+    }
+
+    async fn folding_range(&self, params: FoldingRangeParams) -> Result<Option<Vec<FoldingRange>>> {
+        let folding_ranges = || -> Option<Vec<FoldingRange>> {
+            let uri = &params.text_document.uri;
+            let uri_str = uri.to_string();
+            let index = self.index_map.get(&uri_str)?;
+            let rope = self.document_map.get(&uri_str)?;
+            let mut folding_ranges = Vec::<FoldingRange>::new();
+
+            folding_ranges.extend(index.function_bodies.iter().filter_map(|f| {
+                let collapsed_text = format!("{} basic blocks", f.labels.len());
+                let range = range_to_lsp(&rope, &f.complete_range)?;
+                Some(FoldingRange {
+                    start_line: range.start.line,
+                    start_character: None,
+                    end_line: range.end.line,
+                    end_character: None,
+                    kind: None,
+                    collapsed_text: Some(collapsed_text),
+                })
+            }));
+
+            folding_ranges.extend(
+                index
+                    .function_bodies
+                    .iter()
+                    .flat_map(|e| e.basic_blocks.iter())
+                    .filter_map(|bb| {
+                        let collapsed_text = format!("{} instructions", bb.instructions.len());
+                        let range = range_to_lsp(&rope, &bb.span)?;
+                        Some(FoldingRange {
+                            start_line: range.start.line,
+                            start_character: None,
+                            end_line: range.end.line,
+                            end_character: None,
+                            kind: None,
+                            collapsed_text: Some(collapsed_text),
+                        })
+                    }),
+            );
+
+            Some(folding_ranges)
+        }();
+        return Ok(folding_ranges);
     }
 
     async fn inlay_hint(&self, params: InlayHintParams) -> Result<Option<Vec<InlayHint>>> {

@@ -1,5 +1,5 @@
 use crate::{
-    hir_parser::Statement,
+    hir_parser::{Statement, BasicBlock},
     hir_tokenizer::{Span, Spanned, Token},
 };
 use std::collections::{BTreeMap, HashMap};
@@ -42,6 +42,7 @@ pub struct FunctionBody {
     pub complete_range: Span,
     pub labels: HashMap<String, UseDefList>,
     pub local_vars: HashMap<String, UseDefList>,
+    pub basic_blocks: Vec<BasicBlock>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -203,6 +204,7 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
                         start: define_kw.start,
                         end: body.closing_bracket.end,
                     },
+                    basic_blocks: body.basic_blocks.clone(),
                     ..Default::default()
                 });
                 let func_body_id = index.function_bodies.len() - 1;
@@ -357,6 +359,7 @@ fn test_index() {
             complete_range,
             labels,
             local_vars,
+            basic_blocks,
         }] => {
             assert_eq!(name.0, "@_test1");
             assert_eq!(
@@ -423,6 +426,7 @@ fn test_index() {
                     ),
                 ])
             );
+            assert_eq!(basic_blocks.len(), 3)
         }
         _ => panic!("Unexpected parse {:?}", res.stmts),
     };

@@ -48,13 +48,15 @@ pub struct FuncBody {
 pub struct BasicBlock {
     pub label: Option<Spanned<String>>,
     pub instructions: Vec<Instruction>,
+    pub span: Span,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Instruction {
     pub assignment_target: Option<Spanned<String>>,
     pub instruction: Spanned<String>,
-    pub jump_targets: Vec<Spanned<Token>>,
+    pub jump_targets: Vec<Spanned<String>>,
+    pub span: Span,
 }
 
 pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + Clone {
@@ -140,10 +142,11 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .then(ident)
         .then_ignore(none_of(Token::Punctuation(':')).rewind())
         .then_ignore(none_of(Token::Newline).repeated())
-        .map(|(target, instruction)| Instruction {
+        .map_with_span(|(target, instruction), span| Instruction {
             assignment_target: target,
             instruction,
             jump_targets: vec![],
+            span,
         });
 
     // A basic block
@@ -157,9 +160,16 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
                 .repeated()
                 .collect::<Vec<_>>(),
         )
-        .map(|(label, instructions)| BasicBlock {
-            label: Some(label),
-            instructions,
+        .map(|(label, instructions)| {
+            let span = Span {
+                start: label.1.start,
+                end: instructions.last().map_or(label.1.end, |i| i.span.end),
+            };
+            BasicBlock {
+                label: Some(label),
+                instructions,
+                span,
+            }
         });
 
     // Function body
@@ -171,9 +181,10 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
                 .padded_by(just(Token::Newline).repeated())
                 .repeated()
                 .collect::<Vec<_>>()
-                .map(|instructions| BasicBlock {
+                .map_with_span(|instructions, span| BasicBlock {
                     label: None,
                     instructions,
+                    span,
                 }),
         )
         .then(basic_block.repeated().collect::<Vec<_>>())
