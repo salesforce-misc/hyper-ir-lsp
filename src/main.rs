@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
 use dashmap::DashMap;
+use hir_language_server::diagnostics::{diagnostics_from_parser, diagnostics_from_statements};
 use hir_language_server::hir_index::{create_index, HIRIndex, UseDefKind, UseDefList};
 use hir_language_server::hir_parser::{parse_from_str, ParserResult};
-use hir_language_server::hir_tokenizer::Span;
+use hir_language_server::lsp_utils::{lsp_pos_to_offset, offset_to_lsp_pos, range_to_lsp};
 use hir_language_server::semantic_token::{
     convert_to_lsp_tokens, semantic_tokens_from_tokens, HIRSemanticToken, LEGEND_TYPE,
 };
@@ -356,48 +357,10 @@ impl Backend {
         self.index_map
             .insert(params.uri.to_string(), create_index(&tokens, &stmts));
 
-        let diagnostics = errors
-            .into_iter()
-            .filter_map(|item| {
-                let (message, span) = match item.reason() {
-                    chumsky::error::SimpleReason::Unclosed { span, delimiter } => {
-                        (format!("Unclosed delimiter {}", delimiter), span.clone())
-                    }
-                    chumsky::error::SimpleReason::Unexpected => (
-                        format!(
-                            "{}, expected {}",
-                            if item.found().is_some() {
-                                "Unexpected token in input"
-                            } else {
-                                "Unexpected end of input"
-                            },
-                            if item.expected().len() == 0 {
-                                "something else".to_string()
-                            } else {
-                                item.expected()
-                                    .map(|expected| match expected {
-                                        Some(expected) => expected.to_string(),
-                                        None => "end of input".to_string(),
-                                    })
-                                    .collect::<Vec<_>>()
-                                    .join(", ")
-                            }
-                        ),
-                        item.span(),
-                    ),
-                    chumsky::error::SimpleReason::Custom(msg) => (msg.to_string(), item.span()),
-                };
+        let mut diagnostics = Vec::<Diagnostic>::new();
 
-                || -> Option<Diagnostic> {
-                    let start_position = offset_to_lsp_pos(&rope, span.start)?;
-                    let end_position = offset_to_lsp_pos(&rope, span.end)?;
-                    Some(Diagnostic::new_simple(
-                        Range::new(start_position, end_position),
-                        message,
-                    ))
-                }()
-            })
-            .collect::<Vec<_>>();
+        diagnostics.extend(diagnostics_from_parser(&rope, &errors));
+        diagnostics.extend(diagnostics_from_statements(&rope, &stmts));
 
         self.client
             .publish_diagnostics(params.uri.clone(), diagnostics, Some(params.version))
@@ -430,28 +393,6 @@ impl Backend {
             .collect::<Vec<_>>();
         Some((origin_selection_range, ranges))
     }
-}
-
-fn lsp_pos_to_offset(rope: &Rope, pos: &Position) -> Option<usize> {
-    let char = rope.try_line_to_char(pos.line as usize).ok()?;
-    Some(char + pos.character as usize)
-}
-
-fn offset_to_lsp_pos(rope: &Rope, pos: usize) -> Option<Position> {
-    let line = rope.try_byte_to_line(pos).ok()?;
-    let first = rope.try_line_to_char(line).ok()?;
-    let character = rope.try_byte_to_char(pos).ok()? - first;
-    Some(Position {
-        line: line.try_into().ok()?,
-        character: character.try_into().ok()?,
-    })
-}
-
-fn range_to_lsp(rope: &Rope, span: &Span) -> Option<Range> {
-    Some(Range {
-        start: offset_to_lsp_pos(rope, span.start).unwrap(),
-        end: offset_to_lsp_pos(rope, span.end).unwrap(),
-    })
 }
 
 #[tokio::main]
