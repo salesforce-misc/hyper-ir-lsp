@@ -19,7 +19,8 @@
 	},
 	"enabledApiProposals": [],
 	"activationEvents": [],
-	"main": "./dist/extension.js",
+	"main": "./extension.js",
+	"markdown": "github",
 	"contributes": {
 		"languages": [
 			{
@@ -39,10 +40,9 @@
 		"watch": "node ./build.js --watch",
 		"test-compile": "tsc -p ./",
 		"lint": "eslint src --ext ts",
-		"vscode:package": "node ./build.js --release",
-		"package": "vsce package --no-dependencies",
-		"vscode:prepublish": "node ./build.js --release",
-		"publish": "vsce publish --no-dependencies"
+		"build": "node ./build.js --release",
+		"package": "pnpm build && cd dist && vsce package --no-dependencies -o ..",
+		"publish": "pnpm build && cd dist && vsce publish --no-dependencies -o .."
 	},
 	"dependencies": {
 		"vscode-languageclient": "^9.0.1"

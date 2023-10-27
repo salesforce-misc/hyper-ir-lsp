@@ -18,6 +18,11 @@ async function build() {
     // Cleanup
     await fs.rm("./dist", { recursive: true, force: true });
     await fs.mkdir("./dist");
+    // Copy static artifacts
+    await fs.copyFile('./package.json', './dist/package.json');
+    await fs.copyFile('./hir-language-configuration.json', './dist/hir-language-configuration.json');
+    await fs.copyFile('../README.md', './dist/README.md');
+    await fs.copyFile('../LICENSE', './dist/LICENSE');
     // Rust build
     console.log("build rust...");
     {

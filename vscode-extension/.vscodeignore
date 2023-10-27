@@ -1,6 +1,0 @@
-node_modules
-src/
-tsconfig.json
-webpack.config.js
-pnpm-lock.yaml
-build.js
