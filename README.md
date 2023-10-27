@@ -26,7 +26,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * Parser for function bodies: phi nodes
     * Parser for function bodies: switch
     * Parser for function bodies: overflow arithmetics (`saddbr`, `longmuldivbr`, ...)
-    * Parser: Support for debug annotation on external functions (forward compatibility)
+    * [x] Parser: Support debug annotation on external functions (forward compatibility)
     * Parser: Support for dependency declarations
     * [x] Document outline: Variables & Functions
     * [x] Document outline: Function-local Labels

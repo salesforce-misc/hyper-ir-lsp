@@ -25,6 +25,7 @@ pub enum Statement {
     FuncDecl {
         signature: FuncSignature,
         addr: Option<Spanned<String>>,
+        dbgref: Option<Spanned<String>>,
     },
     FuncDef {
         define_kw: Span,
@@ -131,8 +132,13 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
     let func_decl = just(Token::Declare)
         .ignore_then(func_signature.clone())
         .then(func_addr.or_not())
+        .then(dbg_ref.or_not())
         .then_ignore(eol.clone())
-        .map(|(signature, addr)| Statement::FuncDecl { signature, addr });
+        .map(|((signature, addr), dbgref)| Statement::FuncDecl {
+            signature,
+            addr,
+            dbgref,
+        });
 
     // An unconditional branch
     let br_instruction = just(Token::Ident("br".to_string()))
@@ -332,6 +338,7 @@ fn test_parse_funcdecl() {
                     ref args,
                 },
             addr: None,
+            dbgref: None,
         }] => {
             assert_eq!(modifiers.len(), 1);
             assert_eq!(modifiers[0].0, "exported");
@@ -343,7 +350,7 @@ fn test_parse_funcdecl() {
     };
 
     // Test with arguments and with an address, but without modifiers
-    let res = parse_from_str("declare void @foo::bar(int1 %, data128 %baz) = 0x123");
+    let res = parse_from_str("declare void @foo::bar(int1 %, data128 %baz) = 0x123 !proxy_12");
     assert_eq!(res.errors, []);
     match res.stmts[..] {
         [Statement::FuncDecl {
@@ -355,6 +362,7 @@ fn test_parse_funcdecl() {
                     ref args,
                 },
             addr: Some(ref addr),
+            dbgref: Some(ref dbgref),
         }] => {
             assert_eq!(modifiers.len(), 0);
             assert_eq!(ret_type.0, "void");
@@ -365,6 +373,7 @@ fn test_parse_funcdecl() {
             assert_eq!(args[1].type_.0, "data128");
             assert_eq!(args[1].name.0, "%baz");
             assert_eq!(addr.0, "123");
+            assert_eq!(dbgref.0, "!proxy_12");
         }
         _ => panic!("Unexpected parse {:?}", res.stmts),
     };
@@ -496,7 +505,7 @@ fn test_parse_dbgannotation() {
     assert_eq!(res.errors, []);
     match res.stmts[..] {
         [Statement::DbgAnnotation { ref name, def: _ }] => {
-            assert_eq!(name.0, "123");
+            assert_eq!(name.0, "!123");
         }
         _ => panic!("Unexpected parse {:?}", res.stmts),
     }
@@ -523,6 +532,7 @@ fn test_recovers_multistmt() {
                     args,
                 },
             addr: None,
+            dbgref: None,
         }] => {
             assert_eq!(varname.0, "@1");
             assert_eq!(funcname.0, "@foo");

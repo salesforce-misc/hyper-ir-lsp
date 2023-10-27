@@ -189,7 +189,7 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
             Statement::GlobalVar { name, def: _ } => {
                 index.add_global_spanned(SymbolKind::GlobalVar, UseDefKind::Def, name)
             }
-            Statement::FuncDecl { signature, addr: _ } => {
+            Statement::FuncDecl { signature, .. } => {
                 index.add_global_spanned(SymbolKind::Function, UseDefKind::Decl, &signature.name)
             }
             Statement::FuncDef {
@@ -352,7 +352,7 @@ fn test_index() {
     assert_eq!(
         idx.dgb_annotations,
         HashMap::from([(
-            "21".to_string(),
+            "!21".to_string(),
             UseDefList {
                 decls: Vec::new(),
                 defs: vec![406..409],

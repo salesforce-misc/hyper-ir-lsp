@@ -116,7 +116,10 @@ pub fn tokenizer() -> impl Parser<char, Vec<Spanned<Token>>, Error = Simple<char
         .map(Token::GlobalName);
 
     // A parser for debug references
-    let debugref = just('!').ignore_then(text::digits(10)).map(Token::DebugRef);
+    let debugref = just('!')
+        .chain::<char, _, _>(ident_tail)
+        .collect::<String>()
+        .map(Token::DebugRef);
 
     // A single token can be one of the above
     let token = choice((
@@ -203,7 +206,11 @@ fn test_tokenizer() {
     // Debug ref
     assert_eq!(
         tokens_only("!123"),
-        Ok(Vec::from([Token::DebugRef("123".to_string())]))
+        Ok(Vec::from([Token::DebugRef("!123".to_string())]))
+    );
+    assert_eq!(
+        tokens_only("!addr_2"),
+        Ok(Vec::from([Token::DebugRef("!addr_2".to_string())]))
     );
 
     // Types
