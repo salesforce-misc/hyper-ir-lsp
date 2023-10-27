@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 
 use dashmap::DashMap;
-use hir_language_server::diagnostics::{diagnostics_from_parser, diagnostics_from_statements};
+use hir_language_server::diagnostics::{
+    diagnostics_from_index, diagnostics_from_parser, diagnostics_from_statements,
+};
 use hir_language_server::hir_index::{create_index, HIRIndex, UseDefKind, UseDefList};
 use hir_language_server::hir_parser::{parse_from_str, ParserResult};
 use hir_language_server::lsp_utils::{lsp_pos_to_offset, offset_to_lsp_pos, range_to_lsp};
@@ -351,16 +353,16 @@ impl Backend {
             errors,
         } = parse_from_str(&rope.to_string());
 
-        self.semantic_token_map
-            .insert(params.uri.to_string(), semantic_tokens_from_tokens(&tokens));
-
-        self.index_map
-            .insert(params.uri.to_string(), create_index(&tokens, &stmts));
+        let index = create_index(&tokens, &stmts);
 
         let mut diagnostics = Vec::<Diagnostic>::new();
-
         diagnostics.extend(diagnostics_from_parser(&rope, &errors));
         diagnostics.extend(diagnostics_from_statements(&rope, &stmts));
+        diagnostics.extend(diagnostics_from_index(&rope, &params.uri, &index));
+
+        self.semantic_token_map
+            .insert(params.uri.to_string(), semantic_tokens_from_tokens(&tokens));
+        self.index_map.insert(params.uri.to_string(), index);
 
         self.client
             .publish_diagnostics(params.uri.clone(), diagnostics, Some(params.version))

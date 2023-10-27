@@ -1,8 +1,11 @@
 use chumsky::prelude::Simple;
 use ropey::Rope;
-use tower_lsp::lsp_types::Diagnostic;
+use tower_lsp::lsp_types::{
+    Diagnostic, DiagnosticRelatedInformation, Location, Url,
+};
 
 use crate::{
+    hir_index::HIRIndex,
     hir_parser::{FuncBody, Statement},
     lsp_utils::range_to_lsp,
 };
@@ -79,4 +82,70 @@ pub fn diagnostics_from_statements<'a>(
                 None
             }
         })
+}
+
+pub fn diagnostics_from_index<'a>(
+    rope: &'a Rope,
+    uri: &'a Url,
+    index: &'a HIRIndex,
+) -> impl Iterator<Item = Diagnostic> + 'a {
+    let all_use_defs = index
+        .global_vars
+        .iter()
+        .chain(index.functions.iter())
+        .chain(index.dgb_annotations.iter())
+        .chain(index.function_bodies.iter().flat_map(|fb| fb.labels.iter()))
+        .chain(
+            index
+                .function_bodies
+                .iter()
+                .flat_map(|fb| fb.local_vars.iter()),
+        );
+
+    all_use_defs
+        .filter_map(move |(name, ud)| {
+            // Diagnose all symbols which are used but not defined / declared
+            if ud.decls.is_empty() && ud.defs.is_empty() {
+                let diags = ud
+                    .uses
+                    .iter()
+                    .filter_map(move |use_| {
+                        let message = format!("Use of undefined symbol `{}`", name);
+                        Some(Diagnostic::new_simple(range_to_lsp(rope, use_)?, message))
+                    })
+                    .collect::<Vec<_>>();
+                Some(diags)
+            } else if ud.defs.len() > 1 {
+                let diags = ud
+                    .defs
+                    .iter()
+                    .skip(1)
+                    .filter_map(move |use_| {
+                        let message = format!("Symbol `{}` already defined previously", name);
+                        let related_information = Some(vec![DiagnosticRelatedInformation {
+                            location: Location {
+                                uri: uri.clone(),
+                                range: range_to_lsp(rope, &ud.defs[0])?,
+                            },
+                            message: "Previously defined here".to_string(),
+                        }]);
+                        Some(Diagnostic {
+                            range: range_to_lsp(rope, use_)?,
+                            message,
+                            severity: None,
+                            code: None,
+                            code_description: None,
+                            source: None,
+                            related_information,
+                            tags: None,
+                            data: None,
+                        })
+                    })
+                    .collect::<Vec<_>>();
+                Some(diags)
+            } else {
+                None
+            }
+        })
+        .flatten()
 }

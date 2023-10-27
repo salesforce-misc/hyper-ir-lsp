@@ -43,8 +43,8 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * Somehow Hyperlink the stack trace
     * Highlight provider for function-local variables
     * Hover provider for function-local variables; Show "SSA chain"
-    * Report warnings on duplicate function names / variable names
-    * Report warnings on unknown function names / variable names
+    * ✔ Report warnings on duplicate function names / variable names
+    * ✔ Report warnings on unknown function names / variable names
     * ✔ Report warnings when we failed to extract the basic blocks from a branching instruction
     * Tokenizer: only keep "string views"; don't copy out strings
     * Take care of error recovery / make it robust
