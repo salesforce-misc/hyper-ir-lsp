@@ -34,7 +34,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * [x] Go to definition / references for debug refs
     * [x] Go to definition / references for global variables
     * [x] Go to definition / references for local variables
-    * Go to definition / references for jump targets / basic blocks
+    * [x] Go to definition / references for basic blocks
     * [x] Code folding on function bodies
     * [x] Code folding on basic blocks
     * Code folding: Figure out why "folded text" does not work for VS Code; If we can get it to work, take advantage of it

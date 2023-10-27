@@ -234,6 +234,14 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
                                 i.assignment_target.as_ref().unwrap(),
                             )
                         }
+                        for bb in &i.jump_targets {
+                            index.add_func_local_spanned(
+                                func_body_id,
+                                SymbolKind::Label,
+                                UseDefKind::Use,
+                                bb,
+                            )
+                        }
                     }
                 }
             }
@@ -380,7 +388,7 @@ fn test_index() {
                         UseDefList {
                             decls: Vec::new(),
                             defs: vec![332..338],
-                            uses: Vec::new(),
+                            uses: vec![315..321],
                         }
                     ),
                 ])
