@@ -211,8 +211,8 @@ impl LanguageServer for Backend {
                             detail: None,
                             kind,
                             tags: None,
-                            range: range_to_lsp(&rope, def)?,
-                            selection_range: range_to_lsp(&rope, def)?,
+                            range: range_to_lsp(rope, def)?,
+                            selection_range: range_to_lsp(rope, def)?,
                             deprecated: None,
                             children: None,
                         })

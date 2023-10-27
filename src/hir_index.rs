@@ -1,5 +1,5 @@
 use crate::{
-    hir_parser::{Statement, BasicBlock},
+    hir_parser::{BasicBlock, Statement},
     hir_tokenizer::{Span, Spanned, Token},
 };
 use std::collections::{BTreeMap, HashMap};
@@ -258,7 +258,7 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
                 index.add_global(SymbolKind::DbgAnnotation, UseDefKind::Use, &t.1, name)
             }
             Token::LocalName(name) => {
-                if !func_body_id.is_some()
+                if func_body_id.is_none()
                     || !index.function_bodies[func_body_id.unwrap()]
                         .complete_range
                         .contains(&t.1.start)
@@ -270,9 +270,9 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
                         .find(|(_, e)| e.complete_range.contains(&t.1.start))
                         .map(|t| t.0);
                 }
-                if func_body_id.is_some() {
+                if let Some(func_body_id) = func_body_id {
                     index.add_func_local(
-                        func_body_id.unwrap(),
+                        func_body_id,
                         SymbolKind::LocalVar,
                         UseDefKind::Use,
                         &t.1,
@@ -362,20 +362,8 @@ fn test_index() {
             basic_blocks,
         }] => {
             assert_eq!(name.0, "@_test1");
-            assert_eq!(
-                name.1,
-                Span {
-                    start: 157,
-                    end: 164
-                }
-            );
-            assert_eq!(
-                *complete_range,
-                Span {
-                    start: 145,
-                    end: 397
-                }
-            );
+            assert_eq!(name.1, 157..164);
+            assert_eq!(*complete_range, 145..397);
             assert_eq!(
                 *labels,
                 HashMap::from([
