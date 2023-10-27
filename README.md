@@ -22,7 +22,12 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * [x] Finish tokenizer
     * [x] Basic parser
     * [x] Parser for function bodies: Assigments & Labels
-    * Parser for function bodies: Block terminators & phis
+    * [x] Parser for function bodies: Branches
+    * Parser for function bodies: phi nodes
+    * Parser for function bodies: switch
+    * Parser for function bodies: overflow arithmetics (`saddbr`, `longmuldivbr`, ...)
+    * Parser: Support for debug annotation on external functions (forward compatibility)
+    * Parser: Support for dependency declarations
     * [x] Document outline: Variables & Functions
     * [x] Document outline: Function-local Labels
     * [x] Go to definition / declaration / references for function
@@ -30,10 +35,12 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * [x] Go to definition / references for global variables
     * [x] Go to definition / references for local variables
     * Go to definition / references for jump targets / basic blocks
-    * Somehow Hyperlink the stack trace
     * [x] Code folding on function bodies
     * [x] Code folding on basic blocks
     * Code folding: Figure out why "folded text" does not work for VS Code; If we can get it to work, take advantage of it
+    * [x] Inlay hint at end of function: Display function name
+    * Inlay hint at basic block: List incoming edges
+    * Somehow Hyperlink the stack trace
     * Highlight provider for function-local variables
     * Hover provider for function-local variables; Show "SSA chain"
     * tokenizer: only keep spans; don't copy out strings
@@ -42,8 +49,6 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * report warnings on unknown function names / variable names
     * incremental sync
     * Control flow graph as Mermaid charts
-    * [x] Inlay hint at end of function: Display function name
-    * Inlay hint at basic block: List incoming edges
     * Support renames (functions, global vars, labels, local vars)
     * Add "Go to definition" for C++ hard-coded proxies
     * "Inline variables" debugger support?
@@ -61,9 +66,13 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * [x] run rust test cases
     * package VS Code extension
     * automatically create release artifacts
+* script to auto-generate the HyperIR dumps using HyperAPI
 * Hyper:
     * Fix printing of references to unnamed globals
     * name the "column names" global variables
+    * phi node: no ',' between incoming edges; compare to LLVM?
+    * phi node: no whitespace around ','
+    * conditional break: no ',' between condition and first basicblock?
     * missing "pure" modifier?
     * missing allocas?
     * missing types?
