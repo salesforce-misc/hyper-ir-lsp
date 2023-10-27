@@ -32,6 +32,10 @@ pub enum Statement {
         signature: FuncSignature,
         body: FuncBody,
     },
+    FuncDependencies {
+        dependent: Spanned<String>,
+        dependencies: Vec<Spanned<String>>,
+    },
     DbgAnnotation {
         name: Spanned<String>,
         def: Vec<Spanned<Token>>,
@@ -153,7 +157,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
             span,
         });
 
-    // An conditional branch
+    // A conditional branch
     let condbr_instruction = just(Token::Ident("br".to_string()))
         .map_with_span(|_, span| ("br".to_string(), span))
         .then_ignore(just(Token::Type("int1".to_string())))
@@ -247,7 +251,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
             },
         );
 
-    // Function declaration
+    // Function definition
     let func_def = just(Token::Define)
         .map_with_span(|_, span| span)
         .then(func_signature)
@@ -259,6 +263,16 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
             body,
         });
 
+    // Function dependencies
+    let func_dependencies = global_name
+        .then_ignore(just(Token::Ident("depends".to_string())))
+        .then_ignore(just(Token::Ident("on".to_string())))
+        .then(global_name.separated_by(just(Token::Punctuation(','))))
+        .map(|(dependent, dependencies)| Statement::FuncDependencies {
+            dependent,
+            dependencies,
+        });
+
     // Debug annotation
     let dbg_annotation = dbg_ref
         .then(token_soup)
@@ -268,6 +282,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
     global_var
         .or(func_decl)
         .or(func_def)
+        .or(func_dependencies)
         .or(dbg_annotation)
         .padded_by(just(Token::Newline).repeated())
         .recover_with(skip_then_retry_until([]))
@@ -497,6 +512,24 @@ fn test_parse_basicblock_refs() {
         }
         _ => panic!("Unexpected parse {:?}", res.stmts),
     };
+}
+
+#[test]
+fn test_parse_func_dependencies() {
+    let res = parse_from_str("@foo depends on @bar, @baz");
+    assert_eq!(res.errors, []);
+    match &res.stmts[..] {
+        [Statement::FuncDependencies {
+            dependent,
+            dependencies,
+        }] => {
+            assert_eq!(dependent.0, "@foo");
+            assert_eq!(dependencies.len(), 2);
+            assert_eq!(dependencies[0].0, "@bar");
+            assert_eq!(dependencies[1].0, "@baz");
+        }
+        _ => panic!("Unexpected parse {:?}", res.stmts),
+    }
 }
 
 #[test]

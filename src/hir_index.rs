@@ -245,6 +245,7 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
                     }
                 }
             }
+            Statement::FuncDependencies { .. } => {}
             Statement::DbgAnnotation { name, def: _ } => {
                 index.add_global_spanned(SymbolKind::DbgAnnotation, UseDefKind::Def, name)
             }

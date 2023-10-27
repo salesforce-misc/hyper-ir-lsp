@@ -22,7 +22,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
 * LSP functionality
     * ✔ Finish tokenizer
     * ✔ Basic parser
-    * Parser: Support for dependency declarations
+    * ✔ Parser: Support for dependency declarations
     * ✔ Parser: Support debug annotation on external functions (forward compatibility)
     * ✔ Parser for function bodies: Assigments & Labels
     * ✔ Parser for function bodies: Branches
@@ -45,7 +45,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * Hover provider for function-local variables; Show "SSA chain"
     * Report warnings on duplicate function names / variable names
     * Report warnings on unknown function names / variable names
-    * Report warnings when we extracting the basic blocks from a break instruction
+    * Report warnings when we failed to extract the basic blocks from a branching instruction
     * Tokenizer: only keep "string views"; don't copy out strings
     * Take care of error recovery / make it robust
     * Incremental sync
