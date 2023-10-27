@@ -26,7 +26,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * ✔ Parser: Support debug annotation on external functions (forward compatibility)
     * ✔ Parser for function bodies: Assigments & Labels
     * ✔ Parser for function bodies: Branches
-    * Parser for function bodies: phi nodes
+    * ✔ Parser for function bodies: phi nodes
     * Parser for function bodies: switch
     * Parser for function bodies: overflow arithmetics (`saddbr`, `longmuldivbr`, ...)
     * ✔ Document outline: Variables & Functions
@@ -40,13 +40,13 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * ✔ Code folding on basic blocks
     * ✔ Inlay hint at end of function: Display function name
     * Inlay hint at basic block: List incoming edges
+    * Figure out what those "*.hir.git" files are about which show up in the problems list
     * Somehow Hyperlink the stack trace
     * Highlight provider for function-local variables
     * Hover provider for function-local variables; Show "SSA chain"
     * ✔ Report warnings on duplicate function names / variable names
     * ✔ Report warnings on unknown function names / variable names
     * ✔ Report warnings when we failed to extract the basic blocks from a branching instruction
-    * Tokenizer: only keep "string views"; don't copy out strings
     * Take care of error recovery / make it robust
     * Incremental sync
     * Control flow graph as Mermaid charts
@@ -63,18 +63,23 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * Use Webassembly instead of native binary
 * Configuration for neovim
 * Github CI
+    * ✔ Compile rust
+    * ✔ Run rust test cases
     * Lint JS
-    * ✔ compile rust
-    * ✔ run rust test cases
     * Package VS Code extension
     * Automatically create release artifacts
 * Script to auto-generate the HyperIR dumps using HyperAPI
 * Hyper:
     * Fix printing of references to unnamed globals
     * Name the "column names" global variables
+    * Stop printing stack traces at `main`
     * Phi node: no ',' between incoming edges; compare to LLVM?
     * Phi node: no whitespace around ','
+    * `switch`: No ',' between value and default; compare to LLVM?
     * Conditional break: no ',' between condition and first basicblock?
     * Missing "pure" modifier?
     * Missing allocas?
     * Missing types?
+* Code Style / Things I still need to learn about Rust
+    * How to avoid the `just` + `map_with_span` pattern when parsing instructions
+    * Tokenizer: only keep "string views"; don't copy out strings

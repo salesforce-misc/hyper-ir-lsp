@@ -60,7 +60,7 @@ pub struct BasicBlock {
 pub struct Instruction {
     pub assignment_target: Option<Spanned<String>>,
     pub instruction: Spanned<String>,
-    pub jump_targets: Vec<Spanned<String>>,
+    pub basic_block_refs: Vec<Spanned<String>>,
     pub span: Span,
 }
 
@@ -153,7 +153,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .map_with_span(|(instruction, target), span| Instruction {
             assignment_target: None,
             instruction,
-            jump_targets: vec![target],
+            basic_block_refs: vec![target],
             span,
         });
 
@@ -171,10 +171,29 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
             |((instruction, then_target), else_target), span| Instruction {
                 assignment_target: None,
                 instruction,
-                jump_targets: vec![then_target, else_target],
+                basic_block_refs: vec![then_target, else_target],
                 span,
             },
         );
+
+    // Phi instructions
+    let phi_instruction = just(Token::Ident("phi".to_string()))
+        .map_with_span(|_, span| ("phi".to_string(), span))
+        .then(
+            ident
+                .then_ignore(just(Token::Punctuation(',')))
+                .then_ignore(none_of([Token::Punctuation(']'), Token::Newline]).repeated())
+                .delimited_by(just(Token::Punctuation('[')), just(Token::Punctuation(']')))
+                .repeated(),
+        )
+        .then_ignore(dbg_ref.or_not())
+        .then_ignore(just(Token::Newline).rewind())
+        .map_with_span(|(instruction, targets), span| Instruction {
+            assignment_target: None,
+            instruction,
+            basic_block_refs: targets,
+            span,
+        });
 
     // Any (unknown) instruction
     let any_instruction = ident
@@ -183,7 +202,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .map_with_span(|instruction, span| Instruction {
             assignment_target: None,
             instruction,
-            jump_targets: vec![],
+            basic_block_refs: vec![],
             span,
         });
 
@@ -192,7 +211,12 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .ignore_then(local_name)
         .then_ignore(just(Token::Punctuation('=')))
         .or_not()
-        .then(br_instruction.or(condbr_instruction).or(any_instruction))
+        .then(
+            br_instruction
+                .or(condbr_instruction)
+                .or(phi_instruction)
+                .or(any_instruction),
+        )
         .map_with_span(|(target, instruction), span| Instruction {
             assignment_target: target,
             span,
@@ -461,12 +485,13 @@ fn test_parse_basicblock_refs() {
     let res = parse_from_str(
         "
     define void @foo::bar(ptr %arg1_2, data128 %baz) {
-    branches_0:
+    test_0:
         br next_1
         br next_1                        !1
         br int1 %v33 loop_2, loopDone_3  !2
-    phi_1:
-        int64 %v10 = phi [body_0,int64 0] [loop_3,int64 %v15]
+        int64 %v10 = phi [body_0, int64 0] [loop_3, int64 %v15]
+        switch int32 %v10 default=unreachable_5, int32 0 label=bb_0, int32 1 label=bb_1, int32 2 label=bb_2
+        int32 %v17 = saddbr int32 %v9, int32 %v11, cont=add_cont_3, overflow=overflow_4    !30
     }",
     );
     assert_eq!(res.errors, []);
@@ -481,34 +506,45 @@ fn test_parse_basicblock_refs() {
                     basic_blocks,
                 },
         }] => {
-            assert_eq!(basic_blocks.len(), 3);
+            assert_eq!(basic_blocks.len(), 2);
+            let instructions = &basic_blocks[1].instructions;
+            assert_eq!(instructions.len(), 6);
 
-            assert_eq!(basic_blocks[1].label.as_ref().unwrap().0, "branches_0");
-            let branch_instructions = &basic_blocks[1].instructions;
-            assert_eq!(branch_instructions.len(), 3);
-            assert_eq!(branch_instructions[0].instruction.0, "br");
+            assert_eq!(instructions[0].instruction.0, "br");
             assert_eq!(
-                branch_instructions[0].jump_targets,
-                vec![("next_1".to_string(), 83..89)]
+                instructions[0].basic_block_refs,
+                vec![("next_1".to_string(), 79..85)]
             );
-            assert_eq!(branch_instructions[1].instruction.0, "br");
+
+            assert_eq!(instructions[1].instruction.0, "br");
             assert_eq!(
-                branch_instructions[1].jump_targets,
-                vec![("next_1".to_string(), 101..107)]
+                instructions[1].basic_block_refs,
+                vec![("next_1".to_string(), 97..103)]
             );
-            assert_eq!(branch_instructions[2].instruction.0, "br");
+
+            assert_eq!(instructions[2].instruction.0, "br");
             assert_eq!(
-                branch_instructions[2].jump_targets,
+                instructions[2].basic_block_refs,
                 vec![
-                    ("loop_2".to_string(), 155..161),
-                    ("loopDone_3".to_string(), 163..173)
+                    ("loop_2".to_string(), 151..157),
+                    ("loopDone_3".to_string(), 159..169)
                 ]
             );
 
-            assert_eq!(basic_blocks[2].label.as_ref().unwrap().0, "phi_1");
-            let phi_instructions = &basic_blocks[2].instructions;
-            assert_eq!(phi_instructions.len(), 1);
-            assert_eq!(phi_instructions[0].instruction.0, "phi");
+            assert_eq!(instructions[3].instruction.0, "phi");
+            assert_eq!(
+                instructions[3].basic_block_refs,
+                vec![
+                    ("body_0".to_string(), 200..206),
+                    ("loop_3".to_string(), 218..224)
+                ]
+            );
+
+            assert_eq!(instructions[4].instruction.0, "switch");
+            assert_eq!(instructions[4].basic_block_refs, vec![]);
+
+            assert_eq!(instructions[5].instruction.0, "saddbr");
+            assert_eq!(instructions[5].basic_block_refs, vec![]);
         }
         _ => panic!("Unexpected parse {:?}", res.stmts),
     };

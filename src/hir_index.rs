@@ -234,7 +234,7 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
                                 i.assignment_target.as_ref().unwrap(),
                             )
                         }
-                        for bb in &i.jump_targets {
+                        for bb in &i.basic_block_refs {
                             index.add_func_local_spanned(
                                 func_body_id,
                                 SymbolKind::Label,

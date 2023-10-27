@@ -1,8 +1,6 @@
 use chumsky::prelude::Simple;
 use ropey::Rope;
-use tower_lsp::lsp_types::{
-    Diagnostic, DiagnosticRelatedInformation, Location, Url,
-};
+use tower_lsp::lsp_types::{Diagnostic, DiagnosticRelatedInformation, Location, Url};
 
 use crate::{
     hir_index::HIRIndex,
@@ -68,7 +66,7 @@ pub fn diagnostics_from_statements<'a>(
         .filter_map(move |i| {
             let inst_name = &i.instruction.0;
             if (inst_name.ends_with("br") || inst_name == "phi" || inst_name == "switch")
-                && i.jump_targets.is_empty()
+                && i.basic_block_refs.is_empty()
             {
                 let message = format!(
                     "Failed to extract basic block references from `{}` instruction",

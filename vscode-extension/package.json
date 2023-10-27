@@ -2,7 +2,7 @@
 	"name": "hir-language-server",
 	"description": "Code intelligence for Hyper IR",
 	"displayName": "Hyper IR language server",
-	"publisher": "vogelsgesang",
+	"publisher": "Adrian Vogelsgesang",
 	"license": "MIT",
 	"version": "0.0.1",
 	"categories": [
