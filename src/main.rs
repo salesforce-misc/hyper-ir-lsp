@@ -209,6 +209,7 @@ impl LanguageServer for Backend {
             ) -> impl Iterator<Item = tower_lsp::lsp_types::DocumentSymbol> + 'a {
                 ud.iter().flat_map(move |f| {
                     f.1.defs.iter().filter_map(move |def| {
+                        #[allow(deprecated)] // https://github.com/rust-lang/rust/issues/102777
                         Some(DocumentSymbol {
                             name: f.0.to_string(),
                             detail: None,
@@ -230,6 +231,7 @@ impl LanguageServer for Backend {
             ));
 
             symbols.extend(index.function_bodies.iter().filter_map(|f| {
+                #[allow(deprecated)] // https://github.com/rust-lang/rust/issues/102777
                 Some(DocumentSymbol {
                     name: f.name.0.clone(),
                     detail: None,
