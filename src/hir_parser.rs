@@ -176,6 +176,41 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
             },
         );
 
+    // Arithmetic instructions with branching overflow checks
+    // int32 %v17 = saddbr int32 %v9, int32 %v11, cont=add_cont_3, overflow=overflow_4    !30
+    let overflowbr_instruction = ident
+        .validate(|x, span, emit| {
+            if !x.0.ends_with("br") {
+                emit(Simple::custom(
+                    span,
+                    "Instruction is not a overflow-branch instruction.",
+                ))
+            }
+            x
+        })
+        .then_ignore(
+            none_of([Token::Punctuation(','), Token::Newline])
+                .or(just(Token::Punctuation(','))
+                    .then_ignore(none_of(Token::Ident("cont".to_string()))))
+                .repeated(),
+        )
+        .then_ignore(just(Token::Punctuation(',')))
+        .then_ignore(just(Token::Ident("cont".to_string())))
+        .then_ignore(just(Token::Punctuation('=')))
+        .then(ident)
+        .then_ignore(just(Token::Punctuation(',')))
+        .then_ignore(just(Token::Ident("overflow".to_string())))
+        .then_ignore(just(Token::Punctuation('=')))
+        .then(ident)
+        .then_ignore(dbg_ref.or_not())
+        .then_ignore(just(Token::Newline).rewind())
+        .map_with_span(|((instruction, target1), target2), span| Instruction {
+            assignment_target: None,
+            instruction,
+            basic_block_refs: vec![target1, target2],
+            span,
+        });
+
     // Phi instructions
     let phi_instruction = just(Token::Ident("phi".to_string()))
         .map_with_span(|_, span| ("phi".to_string(), span))
@@ -214,6 +249,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .then(
             br_instruction
                 .or(condbr_instruction)
+                .or(overflowbr_instruction)
                 .or(phi_instruction)
                 .or(any_instruction),
         )
@@ -490,8 +526,8 @@ fn test_parse_basicblock_refs() {
         br next_1                        !1
         br int1 %v33 loop_2, loopDone_3  !2
         int64 %v10 = phi [body_0, int64 0] [loop_3, int64 %v15]
-        switch int32 %v10 default=unreachable_5, int32 0 label=bb_0, int32 1 label=bb_1, int32 2 label=bb_2
         int32 %v17 = saddbr int32 %v9, int32 %v11, cont=add_cont_3, overflow=overflow_4    !30
+        switch int32 %v10 default=unreachable_5, int32 0 label=bb_0, int32 1 label=bb_1, int32 2 label=bb_2
     }",
     );
     assert_eq!(res.errors, []);
@@ -540,10 +576,16 @@ fn test_parse_basicblock_refs() {
                 ]
             );
 
-            assert_eq!(instructions[4].instruction.0, "switch");
-            assert_eq!(instructions[4].basic_block_refs, vec![]);
+            assert_eq!(instructions[4].instruction.0, "saddbr");
+            assert_eq!(
+                instructions[4].basic_block_refs,
+                vec![
+                    ("add_cont_3".to_string(), 294..304),
+                    ("overflow_4".to_string(), 315..325)
+                ]
+            );
 
-            assert_eq!(instructions[5].instruction.0, "saddbr");
+            assert_eq!(instructions[5].instruction.0, "switch");
             assert_eq!(instructions[5].basic_block_refs, vec![]);
         }
         _ => panic!("Unexpected parse {:?}", res.stmts),

@@ -28,7 +28,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * ✔ Parser for function bodies: Branches
     * ✔ Parser for function bodies: phi nodes
     * Parser for function bodies: switch
-    * Parser for function bodies: overflow arithmetics (`saddbr`, `longmuldivbr`, ...)
+    * ✔ Parser for function bodies: overflow arithmetics (`saddbr`, `longmuldivbr`, ...)
     * ✔ Document outline: Variables & Functions
     * ✔ Document outline: Function-local Labels
     * ✔ Go to definition / declaration / references for function
@@ -73,13 +73,13 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * Fix printing of references to unnamed globals
     * Name the "column names" global variables
     * Stop printing stack traces at `main`
-    * Phi node: no ',' between incoming edges; compare to LLVM?
+    * Phi node: no ',' between incoming edges
     * Phi node: no whitespace around ','
-    * `switch`: No ',' between value and default; compare to LLVM?
-    * Conditional break: no ',' between condition and first basicblock?
+    * `switch`: No ',' between value and default
+    * Conditional break: no ',' between condition and first basicblock
     * Missing "pure" modifier?
     * Missing allocas?
     * Missing types?
 * Code Style / Things I still need to learn about Rust
-    * How to avoid the `just` + `map_with_span` pattern when parsing instructions
+    * Deduplicate the `just` + `map_with_span` pattern when parsing instructions
     * Tokenizer: only keep "string views"; don't copy out strings
