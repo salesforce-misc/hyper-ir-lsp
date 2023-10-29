@@ -10,18 +10,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build_lsp:
-    # Inspired by https://ectobit.com/blog/speed-up-github-actions-rust-pipelines/
-    name: Build Language Server
+  build_lsp_native:
+    name: Build Language Server Standalone
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
 
-
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      # Inspired by https://ectobit.com/blog/speed-up-github-actions-rust-pipelines/
       - name: Set up cargo cache
         uses: actions/cache@v3
         continue-on-error: false
@@ -51,3 +50,68 @@ jobs:
             name: hyper-ir-lsp
             path: ./target/release/hyper-ir-lsp
             retention-days: 1
+            if-no-files-found: error 
+
+  build_vscode_ext:
+    name: Build VS Code extension
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      # Inspired by https://ectobit.com/blog/speed-up-github-actions-rust-pipelines/
+      - name: Set up cargo cache
+        uses: actions/cache@v3
+        continue-on-error: false
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-vscode-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-vscode-
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-cache-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-cache-        
+
+      - name: Install Javascript dependencies
+        working-directory: vscode-extension
+        run: npm install
+
+      - name: Build Language Server
+        run: cargo build --release
+
+      - name: Package VS Code extension
+        working-directory: vscode-extension
+        run: pnpm package
+
+      - uses: actions/upload-artifact@v3
+        with:
+            name: hyper-ir-lsp-0.0.1.vsix
+            path: ./vscode-extension/hyper-ir-lsp-0.0.1.vsix
+            retention-days: 1
+            if-no-files-found: error 

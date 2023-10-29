@@ -42,19 +42,19 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * ✔ Code folding on basic blocks
     * ✔ Inlay hint at end of function: Display function name
     * ✔ Inlay hint at basic block: List incoming edges
-    * Figure out what those "*.hir.git" files are about which show up in the problems list
     * Somehow Hyperlink the stack trace
     * Hover provider for function-local variables; Show "SSA chain"
     * ✔ Report warnings on duplicate function names / variable names
     * ✔ Report warnings on unknown function names / variable names
     * ✔ Report warnings when we failed to extract the basic blocks from a branching instruction
-    * Control flow graph visualization
-    * Take care of error recovery / make it robust
-    * Incremental sync
-    * Highlight provider for function-local variables (not sure it's worth it? How is this used by VSCode?)
-    * Support renames (functions, global vars, labels, local vars)
     * Add "Go to definition" for C++ hard-coded proxies
+    * Control flow graph visualization
     * "Inline variables" debugger support?
+    * Incremental sync
+    * Take care of error recovery / make it robust
+    * Figure out what those "*.hir.git" files are about which show up in the problems list
+    * Support renames (functions, global vars, labels, local vars)
+    * Highlight provider for function-local variables (not sure it's worth it? How is this used by VSCode?)
     * Code folding: Use "folded text" as soon as VS Code supports it
 * VS Code extension
     * ✔ Get a packaged VS Code extension
@@ -68,7 +68,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * ✔ Compile rust
     * ✔ Run rust test cases
     * Lint JS
-    * Package VS Code extension
+    * ✔ Package VS Code extension
     * Automatically create release artifacts
 * Script to auto-generate the HyperIR dumps using HyperAPI
 * Hyper:
