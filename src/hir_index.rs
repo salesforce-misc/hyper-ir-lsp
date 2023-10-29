@@ -43,6 +43,7 @@ pub struct FunctionBody {
     pub labels: HashMap<String, UseDefList>,
     pub local_vars: HashMap<String, UseDefList>,
     pub basic_blocks: Vec<BasicBlock>,
+    pub incoming_bb_branches: HashMap<String, Vec<Spanned<String>>>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -183,7 +184,7 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
         ..Default::default()
     };
 
-    // Index all global symbols
+    // Index all definitions / declarations based on the actual parse tree
     for s in stmts.iter() {
         match s {
             Statement::GlobalVar { name, def: _ } => {
@@ -192,6 +193,12 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
             Statement::FuncDecl { signature, .. } => {
                 index.add_global_spanned(SymbolKind::Function, UseDefKind::Decl, &signature.name)
             }
+            Statement::FuncDependencies { .. } => {}
+            Statement::DbgAnnotation { name, def: _ } => {
+                index.add_global_spanned(SymbolKind::DbgAnnotation, UseDefKind::Def, name)
+            }
+            // FuncDef is a bit more complicated, since we also index the structure of the function body
+            // (labels, local variables) here.
             Statement::FuncDef {
                 define_kw,
                 signature,
@@ -208,6 +215,7 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
                     ..Default::default()
                 });
                 let func_body_id = index.function_bodies.len() - 1;
+                // Index the function arguments
                 for arg in &signature.args {
                     index.add_func_local_spanned(
                         func_body_id,
@@ -216,7 +224,9 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
                         &arg.name,
                     );
                 }
+                // Index the labels and local variables defined in each basic block
                 for bb in &body.basic_blocks {
+                    // Index the label
                     if bb.label.is_some() {
                         index.add_func_local_spanned(
                             func_body_id,
@@ -225,6 +235,7 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
                             bb.label.as_ref().unwrap(),
                         )
                     }
+                    // Index the variables and label references of all instructions in the basic block
                     for i in &bb.instructions {
                         if i.assignment_target.is_some() {
                             index.add_func_local_spanned(
@@ -234,25 +245,32 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
                                 i.assignment_target.as_ref().unwrap(),
                             )
                         }
-                        for bb in &i.basic_block_refs {
+                        for bb_ref in &i.basic_block_refs {
                             index.add_func_local_spanned(
                                 func_body_id,
                                 SymbolKind::Label,
                                 UseDefKind::Use,
-                                bb,
-                            )
+                                bb_ref,
+                            );
+                            if i.instruction.0 != "phi" && bb.label.is_some() {
+                                let label = bb.label.as_ref().unwrap();
+                                let func_body = &mut index.function_bodies[func_body_id];
+                                let incoming_list = func_body
+                                    .incoming_bb_branches
+                                    .entry(bb_ref.0.clone())
+                                    .or_default();
+                                if !incoming_list.contains(label) {
+                                    incoming_list.push(label.clone());
+                                }
+                            }
                         }
                     }
                 }
             }
-            Statement::FuncDependencies { .. } => {}
-            Statement::DbgAnnotation { name, def: _ } => {
-                index.add_global_spanned(SymbolKind::DbgAnnotation, UseDefKind::Def, name)
-            }
         }
     }
 
-    // Index all uses
+    // Index all uses based on the raw token stream
     let mut func_body_id: Option<usize> = None;
     for t in tokens.iter() {
         match &t.0 {
@@ -308,7 +326,9 @@ fn test_index() {
           some instruction
           body_0:
             int32 %res_1 = call @foo::bar(ptr @a, int32 %foo)
-            br done_1
+            br switch_1
+          switch_1:
+            switch int32 %res_1, default=done_1, int32 0 label=done_1
           done_1:
             ret int32 %res_1 !21 # some comment
         }
@@ -356,8 +376,8 @@ fn test_index() {
             "!21".to_string(),
             UseDefList {
                 decls: Vec::new(),
-                defs: vec![406..409],
-                uses: vec![369..372]
+                defs: vec![498..501],
+                uses: vec![461..464]
             }
         )])
     );
@@ -369,10 +389,11 @@ fn test_index() {
             labels,
             local_vars,
             basic_blocks,
+            incoming_bb_branches,
         }] => {
             assert_eq!(name.0, "@_test1");
             assert_eq!(name.1, 157..164);
-            assert_eq!(*complete_range, 145..397);
+            assert_eq!(*complete_range, 145..489);
             assert_eq!(
                 *labels,
                 HashMap::from([
@@ -380,16 +401,24 @@ fn test_index() {
                         "body_0".to_string(),
                         UseDefList {
                             decls: Vec::new(),
-                            defs: vec![230..236],
+                            defs: vec![230..237],
                             uses: Vec::new(),
+                        }
+                    ),
+                    (
+                        "switch_1".to_string(),
+                        UseDefList {
+                            decls: vec![],
+                            defs: vec![334..343],
+                            uses: vec![315..323]
                         }
                     ),
                     (
                         "done_1".to_string(),
                         UseDefList {
                             decls: Vec::new(),
-                            defs: vec![332..338],
-                            uses: vec![315..321],
+                            defs: vec![424..431],
+                            uses: vec![385..391, 407..413]
                         }
                     ),
                 ])
@@ -418,13 +447,28 @@ fn test_index() {
                         UseDefList {
                             decls: Vec::new(),
                             defs: vec![256..262],
-                            uses: vec![362..368],
+                            uses: vec![369..375, 454..460],
                         }
                     ),
                 ])
             );
-            assert_eq!(basic_blocks.len(), 3)
+            assert_eq!(basic_blocks.len(), 4);
+            assert_eq!(
+                *incoming_bb_branches,
+                HashMap::from([
+                    (
+                        "switch_1".to_string(),
+                        vec![("body_0".to_string(), 230..237)]
+                    ),
+                    (
+                        "done_1".to_string(),
+                        // Note that `switch_1` is listed only once, although it mentions `done1`
+                        // as its target twice.
+                        vec![("switch_1".to_string(), 334..343)]
+                    ),
+                ])
+            );
         }
-        _ => panic!("Unexpected parse {:?}", res.stmts),
+        _ => panic!("Unexpected index contents {:?}", res.stmts),
     };
 }

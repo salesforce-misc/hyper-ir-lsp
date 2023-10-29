@@ -308,19 +308,67 @@ impl LanguageServer for Backend {
             let uri_str = uri.to_string();
             let index = self.index_map.get(&uri_str)?;
             let rope = self.document_map.get(&uri_str)?;
-            let mut inlay_hints = Vec::<InlayHint>::new();
+            let mut inlay_hints: Vec<InlayHint> = Vec::<InlayHint>::new();
 
+            // Insert back references for each basic block which point back to the incoming edges
+            inlay_hints.extend(
+                index
+                    .function_bodies
+                    .iter()
+                    .flat_map(|f| {
+                        f.basic_blocks.iter().filter_map(|bb| {
+                            Some((bb, f.incoming_bb_branches.get(&bb.label.as_ref()?.0)?))
+                        })
+                    })
+                    .filter_map(|(bb, incoming_refs)| {
+                        let label_parts = incoming_refs
+                            .iter()
+                            .enumerate()
+                            .filter_map(|(idx, incoming)| {
+                                Some(vec![
+                                    InlayHintLabelPart {
+                                        value: (if idx == 0 { "incoming: " } else { ", " })
+                                            .to_string(),
+                                        ..Default::default()
+                                    },
+                                    InlayHintLabelPart {
+                                        value: incoming.0.clone(),
+                                        location: Some(Location {
+                                            uri: uri.clone(),
+                                            range: range_to_lsp(&rope, &incoming.1)?,
+                                        }),
+                                        ..Default::default()
+                                    },
+                                ])
+                            })
+                            .flatten()
+                            .collect::<Vec<_>>();
+
+                        Some(InlayHint {
+                            position: offset_to_lsp_pos(&rope, bb.label.as_ref()?.1.end)?,
+                            label: InlayHintLabel::LabelParts(label_parts),
+                            kind: None,
+                            text_edits: None,
+                            tooltip: None,
+                            padding_left: Some(true),
+                            padding_right: Some(true),
+                            data: None,
+                        })
+                    }),
+            );
+
+            // Insert hints at the end of a function body which point back to the beginning
+            // of the function definition
             inlay_hints.extend(index.function_bodies.iter().filter_map(|f| {
                 Some(InlayHint {
                     position: offset_to_lsp_pos(&rope, f.complete_range.end)?,
                     label: InlayHintLabel::LabelParts(vec![InlayHintLabelPart {
                         value: f.name.0.clone(),
-                        tooltip: None,
                         location: Some(Location {
                             uri: uri.clone(),
                             range: range_to_lsp(&rope, &f.name.1)?,
                         }),
-                        command: None,
+                        ..Default::default()
                     }]),
                     kind: None,
                     text_edits: None,

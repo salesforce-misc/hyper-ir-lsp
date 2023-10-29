@@ -298,6 +298,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
     // A basic block
     let basic_block = ident
         .then_ignore(just(Token::Punctuation(':')))
+        .map_with_span(|i, span| (i.0, span))
         .then_ignore(just(Token::Newline).repeated().at_least(1))
         .then(
             instruction

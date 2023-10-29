@@ -8,6 +8,8 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
 * Syntax highlighting for Hyper IR
 * Document outline: Directly jump to the function you are interested in
 * Go to definition / references / declaration for functions, variables and debug information
+* Inlay hints listing the incoming edges for each basic block
+* Inlay hints at function end to easily jump back to function beginning
 * Code folding support
 
 ## Building from source
@@ -39,17 +41,17 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * ✔ Code folding on function bodies
     * ✔ Code folding on basic blocks
     * ✔ Inlay hint at end of function: Display function name
-    * Inlay hint at basic block: List incoming edges
+    * ✔ Inlay hint at basic block: List incoming edges
     * Figure out what those "*.hir.git" files are about which show up in the problems list
     * Somehow Hyperlink the stack trace
     * Hover provider for function-local variables; Show "SSA chain"
     * ✔ Report warnings on duplicate function names / variable names
     * ✔ Report warnings on unknown function names / variable names
     * ✔ Report warnings when we failed to extract the basic blocks from a branching instruction
+    * Control flow graph as Mermaid charts
     * Take care of error recovery / make it robust
     * Incremental sync
     * Highlight provider for function-local variables (not sure it's worth it? How is this used by VSCode?)
-    * Control flow graph as Mermaid charts
     * Support renames (functions, global vars, labels, local vars)
     * Add "Go to definition" for C++ hard-coded proxies
     * "Inline variables" debugger support?
@@ -72,11 +74,12 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
 * Hyper:
     * Fix printing of references to unnamed globals
     * Name the "column names" global variables
-    * Stop printing stack traces at `main`
-    * Phi node: no ',' between incoming edges
-    * Phi node: no whitespace around ','
-    * `switch`: No ',' between value and default
+    * Phi node: Missing ',' between incoming edges
+    * Phi node: Missing whitespace around ','
+    * `switch`: Missing ',' between value and default
     * Conditional break: no ',' between condition and first basicblock
+    * Teardown-functions: move `destructDone` to the end
+    * Stop printing stack traces at `main`
     * Missing "pure" modifier?
     * Missing allocas?
     * Missing types?
