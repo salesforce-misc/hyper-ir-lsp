@@ -67,8 +67,9 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
 * Github CI
     * ✔ Compile rust
     * ✔ Run rust test cases
-    * Lint JS
+    * ✔ Lint JS
     * ✔ Package VS Code extension
+    * Compile also for Windows and macos
     * Automatically create release artifacts
 * Script to auto-generate the HyperIR dumps using HyperAPI
 * Hyper:

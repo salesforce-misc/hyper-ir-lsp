@@ -102,6 +102,10 @@ jobs:
         working-directory: vscode-extension
         run: npm install
 
+      - name: Lint VSCode extension
+        working-directory: vscode-extension
+        run: pnpm lint
+
       - name: Build Language Server
         run: cargo build --release
 
