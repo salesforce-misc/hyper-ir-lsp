@@ -173,7 +173,7 @@ define exported void @_3_tearDownQueryState_18(ptr %queryState_0) {
 body_0:
   ptr %constructorCounter_9 = gep {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64} ptr %queryState_0, int32 0, int32 1    !3452 # CompilationContext::constructTearDownStateLogic
   int32 %v10 = load int32 ptr %constructorCounter_9                               !3494 # CompilationContext::constructTearDownStateLogic
-  switch int32 %v10 default=unreachable_5, int32 0 label=destructDone_1, int32 1 label=destructDone_1, int32 2 label=destruct_2    !3510 # void hyper::codegen::CodeGen::switchBranchRaw<hyper::codegen::values::UInt32>
+  switch int32 %v10, default=unreachable_5, int32 0 label=destructDone_1, int32 1 label=destructDone_1, int32 2 label=destruct_2    !3510 # void hyper::codegen::CodeGen::switchBranchRaw<hyper::codegen::values::UInt32>
 destructDone_1:
   ret                                                                             !3557 # CompilationContext::constructTearDownStateFunction
 destruct_2:

@@ -15,7 +15,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
 1. `cd vscode-extension`
 2. `pnpm i`
 3. `pnpm package`
-4. Install the "VSIX" in VS Code
+4. Install the "hir-langauge-server-*.vsix" in VS Code
 
 ## TODO
 
@@ -27,7 +27,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * ✔ Parser for function bodies: Assigments & Labels
     * ✔ Parser for function bodies: Branches
     * ✔ Parser for function bodies: phi nodes
-    * Parser for function bodies: switch
+    * ✔ Parser for function bodies: switch
     * ✔ Parser for function bodies: overflow arithmetics (`saddbr`, `longmuldivbr`, ...)
     * ✔ Document outline: Variables & Functions
     * ✔ Document outline: Function-local Labels
@@ -42,13 +42,13 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * Inlay hint at basic block: List incoming edges
     * Figure out what those "*.hir.git" files are about which show up in the problems list
     * Somehow Hyperlink the stack trace
-    * Highlight provider for function-local variables
     * Hover provider for function-local variables; Show "SSA chain"
     * ✔ Report warnings on duplicate function names / variable names
     * ✔ Report warnings on unknown function names / variable names
     * ✔ Report warnings when we failed to extract the basic blocks from a branching instruction
     * Take care of error recovery / make it robust
     * Incremental sync
+    * Highlight provider for function-local variables (not sure it's worth it? How is this used by VSCode?)
     * Control flow graph as Mermaid charts
     * Support renames (functions, global vars, labels, local vars)
     * Add "Go to definition" for C++ hard-coded proxies
