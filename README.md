@@ -43,12 +43,12 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * ✔ Inlay hint at end of function: Display function name
     * ✔ Inlay hint at basic block: List incoming edges
     * Somehow Hyperlink the stack trace
-    * Hover provider for function-local variables; Show "SSA chain"
     * ✔ Report warnings on duplicate function names / variable names
     * ✔ Report warnings on unknown function names / variable names
     * ✔ Report warnings when we failed to extract the basic blocks from a branching instruction
     * Add "Go to definition" for C++ hard-coded proxies
     * Control flow graph visualization
+    * Hover provider for function-local variables; Show "SSA chain"
     * "Inline variables" debugger support?
     * Incremental sync
     * Take care of error recovery / make it robust
@@ -69,7 +69,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * ✔ Run rust test cases
     * ✔ Lint JS
     * ✔ Package VS Code extension
-    * Compile also for Windows and macos
+    * ✔ Compile also for Windows and macos
     * Automatically create release artifacts
 * Script to auto-generate the HyperIR dumps using HyperAPI
 * Hyper:
