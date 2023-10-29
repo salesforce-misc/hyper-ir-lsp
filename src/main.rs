@@ -170,9 +170,6 @@ impl LanguageServer for Backend {
         params: SemanticTokensParams,
     ) -> Result<Option<SemanticTokensResult>> {
         let uri = params.text_document.uri.to_string();
-        self.client
-            .log_message(MessageType::LOG, "semantic_token_full")
-            .await;
         let lsp_tokens = || -> Option<Vec<SemanticToken>> {
             let sem_tokens = self.semantic_token_map.get(&uri)?;
             let rope = self.document_map.get(&uri)?;
@@ -249,10 +246,6 @@ impl LanguageServer for Backend {
 
             Some(DocumentSymbolResponse::from(symbols))
         }();
-
-        self.client
-            .log_message(MessageType::LOG, &format!("symbols {:?}", symbols))
-            .await;
 
         Ok(symbols)
     }
