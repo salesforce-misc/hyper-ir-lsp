@@ -17,7 +17,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
 1. `cd vscode-extension`
 2. `pnpm i`
 3. `pnpm package`
-4. Install the "hir-langauge-server-*.vsix" in VS Code
+4. Install the "hyper-ir-lsp-*.vsix" in VS Code
 
 ## TODO
 
@@ -48,7 +48,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * ✔ Report warnings on duplicate function names / variable names
     * ✔ Report warnings on unknown function names / variable names
     * ✔ Report warnings when we failed to extract the basic blocks from a branching instruction
-    * Control flow graph as Mermaid charts
+    * Control flow graph visualization
     * Take care of error recovery / make it robust
     * Incremental sync
     * Highlight provider for function-local variables (not sure it's worth it? How is this used by VSCode?)

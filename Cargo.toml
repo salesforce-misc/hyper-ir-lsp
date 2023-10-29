@@ -1,5 +1,5 @@
 [package]
-name = "hir-language-server"
+name = "hyper-ir-lsp"
 version = "0.1.0"
 edition = "2021"
 

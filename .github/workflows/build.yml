@@ -48,6 +48,6 @@ jobs:
       
       - uses: actions/upload-artifact@v3
         with:
-            name: hir-language-server
-            path: ./target/release/hir-language-server
+            name: hyper-ir-lsp
+            path: ./target/release/hyper-ir-lsp
             retention-days: 1

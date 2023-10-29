@@ -20,7 +20,7 @@ async function build() {
     await fs.mkdir("./dist");
     // Copy static artifacts
     await fs.copyFile('./package.json', './dist/package.json');
-    await fs.copyFile('./hir-language-configuration.json', './dist/hir-language-configuration.json');
+    await fs.copyFile('./hyper-ir-language-configuration.json', './dist/hyper-ir-language-configuration.json');
     await fs.copyFile('../README.md', './dist/README.md');
     await fs.copyFile('../LICENSE', './dist/LICENSE');
     // Rust build
@@ -32,8 +32,8 @@ async function build() {
         console.error(stderr);
         const outFolder = release ? "release" : "debug";
         const ext = process.platform == "win32" ? ".exe" : ""
-        const src = `../target/${outFolder}/hir-language-server${ext}`;
-        await fs.copyFile(src, `./dist/hir-language-server${ext}`);
+        const src = `../target/${outFolder}/hyper-ir-lsp${ext}`;
+        await fs.copyFile(src, `./dist/hyper-ir-lsp${ext}`);
     }
     // Typescript build
     console.log("build typescript...");

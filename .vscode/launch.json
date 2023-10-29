@@ -19,7 +19,7 @@
         "path": "vscode-extension"
       },
       "env": {
-        "SERVER_PATH": "${workspaceRoot}/target/debug/hir-language-server"
+        "SERVER_PATH": "${workspaceRoot}/target/debug/hyper-ir-lsp"
       }
     }
   ]

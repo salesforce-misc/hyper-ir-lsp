@@ -1,5 +1,5 @@
 {
-	"name": "hir-language-server",
+	"name": "hyper-ir-lsp",
 	"description": "Code intelligence for Hyper IR",
 	"displayName": "Hyper IR language server",
 	"publisher": "Adrian Vogelsgesang",
@@ -32,7 +32,7 @@
 					"Hyper IR"
 				],
 				"firstLine": "^# Hyper IR",
-				"configuration": "./hir-language-configuration.json"
+				"configuration": "./hyper-ir-language-configuration.json"
 			}
 		]
 	},

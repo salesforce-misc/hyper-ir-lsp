@@ -12,7 +12,7 @@ import {
 let client: LanguageClient;
 
 export async function activate(context: ExtensionContext) {
-  const command = process.env.SERVER_PATH || context.asAbsolutePath("hir-language-server");
+  const command = process.env.SERVER_PATH || context.asAbsolutePath("hyper-ir-lsp");
   const run: Executable = {
     command,
     options: {
@@ -38,7 +38,7 @@ export async function activate(context: ExtensionContext) {
   };
 
   // Create the language client and start the client.
-  client = new LanguageClient("hir-language-server", "Hyper IR language server", serverOptions, clientOptions);
+  client = new LanguageClient("hyper-ir-lsp", "Hyper IR language server", serverOptions, clientOptions);
   client.start();
 }
 

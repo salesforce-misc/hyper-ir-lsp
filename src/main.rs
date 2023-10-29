@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 
 use dashmap::DashMap;
-use hir_language_server::diagnostics::{
+use hyper_ir_lsp::diagnostics::{
     diagnostics_from_index, diagnostics_from_parser, diagnostics_from_statements,
 };
-use hir_language_server::hir_index::{create_index, HIRIndex, UseDefKind, UseDefList};
-use hir_language_server::hir_parser::{parse_from_str, ParserResult};
-use hir_language_server::lsp_utils::{lsp_pos_to_offset, offset_to_lsp_pos, range_to_lsp};
-use hir_language_server::semantic_token::{
+use hyper_ir_lsp::hir_index::{create_index, HIRIndex, UseDefKind, UseDefList};
+use hyper_ir_lsp::hir_parser::{parse_from_str, ParserResult};
+use hyper_ir_lsp::lsp_utils::{lsp_pos_to_offset, offset_to_lsp_pos, range_to_lsp};
+use hyper_ir_lsp::semantic_token::{
     convert_to_lsp_tokens, semantic_tokens_from_tokens, HIRSemanticToken, LEGEND_TYPE,
 };
 use ropey::Rope;
