@@ -76,7 +76,7 @@ You can then simply open any of the `*.hir` files and this extension will help y
 
 ## Development
 
-The source code for this extension lives at https://github.com/vogelsgesang/hir-lsp, a non-public Github repository under my private account.
+The source code for this extension lives at https://github.com/vogelsgesang/hyper-ir-lsp, a non-public Github repository under my private account.
 Unfortunately, I was not able to use our usual `devtools` repository for this project because I needed access to Github Actions, so I could easily build the extension for all operating systems (Linux, Windows, OSX).
 I am happy to give anyone access to the repository (either for contributing, or also if you are just curious about the internal implementation) - just ping me on Slack!
 
