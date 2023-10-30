@@ -311,6 +311,7 @@ dependencies = [
  "log",
  "ropey",
  "serde",
+ "serde_json",
  "tokio",
  "tower-lsp",
 ]

@@ -65,9 +65,7 @@ pub fn diagnostics_from_statements<'a>(
         .flat_map(move |bb| bb.instructions.iter())
         .filter_map(move |i| {
             let inst_name = &i.instruction.0;
-            if (inst_name.ends_with("br") || inst_name == "phi" || inst_name == "switch")
-                && i.basic_block_refs.is_empty()
-            {
+            if (i.is_branching() || inst_name == "phi") && i.basic_block_refs.is_empty() {
                 let message = format!(
                     "Failed to extract basic block references from `{}` instruction",
                     inst_name

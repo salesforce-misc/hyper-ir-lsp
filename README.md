@@ -47,7 +47,7 @@ Pass the `dump_ir=1` parameter to `hyperd` to get Hyper IR dumps.
     * ✔ Report warnings on unknown function names / variable names
     * ✔ Report warnings when we failed to extract the basic blocks from a branching instruction
     * Add "Go to definition" for C++ hard-coded proxies
-    * Control flow graph visualization
+    * ✔ Control flow graph visualization
     * Hover provider for function-local variables; Show "SSA chain"
     * "Inline variables" debugger support?
     * Incremental sync

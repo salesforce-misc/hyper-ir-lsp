@@ -64,6 +64,12 @@ pub struct Instruction {
     pub span: Span,
 }
 
+impl Instruction {
+    pub fn is_branching(&self) -> bool {
+        self.instruction.0.ends_with("br") || self.instruction.0 == "switch"
+    }
+}
+
 pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + Clone {
     let eol = just(Token::Newline).or(end().to(Token::Newline));
     let func_modifier = filter_map(|span, token| match token {

@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use dashmap::DashMap;
+use hyper_ir_lsp::control_flow_graph::create_cfg_dot_visualization;
 use hyper_ir_lsp::diagnostics::{
     diagnostics_from_index, diagnostics_from_parser, diagnostics_from_statements,
 };
@@ -11,8 +12,10 @@ use hyper_ir_lsp::semantic_token::{
     convert_to_lsp_tokens, semantic_tokens_from_tokens, HIRSemanticToken, LEGEND_TYPE,
 };
 use ropey::Rope;
-use tower_lsp::jsonrpc::Result;
-use tower_lsp::lsp_types::request::GotoDeclarationResponse;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use tower_lsp::jsonrpc::{Error, ErrorCode, Result};
+use tower_lsp::lsp_types::request::{GotoDeclarationResponse, Request};
 use tower_lsp::lsp_types::*;
 use tower_lsp::{Client, LanguageServer, LspService, Server};
 
@@ -68,6 +71,13 @@ impl LanguageServer for Backend {
                 references_provider: Some(OneOf::Left(true)),
                 folding_range_provider: Some(FoldingRangeProviderCapability::Simple(true)),
                 inlay_hint_provider: Some(OneOf::Left(true)),
+                code_lens_provider: Some(CodeLensOptions {
+                    resolve_provider: None,
+                }),
+                execute_command_provider: Some(ExecuteCommandOptions {
+                    commands: vec!["visualize-cfg".to_string()],
+                    ..Default::default()
+                }),
                 ..ServerCapabilities::default()
             },
         })
@@ -376,6 +386,105 @@ impl LanguageServer for Backend {
         }();
         return Ok(inlay_hints);
     }
+
+    async fn code_lens(&self, params: CodeLensParams) -> Result<Option<Vec<CodeLens>>> {
+        let codelenses = || -> Option<Vec<CodeLens>> {
+            let uri = &params.text_document.uri;
+            let uri_str = uri.to_string();
+            let index = self.index_map.get(&uri_str)?;
+            let rope = self.document_map.get(&uri_str)?;
+
+            let codelenses = index
+                .functions
+                .iter()
+                .filter_map(|f| {
+                    // Only show the code lens for functions with exactly one definition
+                    if let [def_range] = &f.1.defs[..] {
+                        Some(CodeLens {
+                            range: range_to_lsp(&rope, def_range)?,
+                            command: Some(Command {
+                                // Potential icons: ⇆⭾⧬⌸✍✒✎🧐
+                                title: "⭾ Visualize Controlflow".to_string(),
+                                command: "visualize-cfg".to_string(),
+                                arguments: Some(vec![
+                                    Value::String(uri_str.clone()),
+                                    Value::String(f.0.clone()),
+                                ]),
+                            }),
+                            data: None,
+                        })
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            Some(codelenses)
+        }();
+        return Ok(codelenses);
+    }
+
+    async fn execute_command(&self, params: ExecuteCommandParams) -> Result<Option<Value>> {
+        match (params.command.as_str(), &params.arguments[..]) {
+            ("visualize-cfg", [Value::String(doc_uri), Value::String(func_name)]) => {
+                let index = self.index_map.get(doc_uri).ok_or_else(|| Error {
+                    code: ErrorCode::InvalidParams,
+                    message: format!("document `{}` not found", doc_uri).into(),
+                    data: None,
+                })?;
+                let func_body = index
+                    .function_bodies
+                    .iter()
+                    .find(|b| b.name.0 == *func_name)
+                    .ok_or_else(|| Error {
+                        code: ErrorCode::InvalidParams,
+                        message: format!("function `{}` not found", func_name).into(),
+                        data: None,
+                    })?;
+
+                let title = format!("CFG for {}", func_name);
+                let dot_graph = create_cfg_dot_visualization(func_body);
+
+                // Make this dependent on a client setting / client capability
+                // since it reuqires additional client-siye collabolation
+                self.client
+                    .send_request::<ShowGraph>(ShowGraphParams { title, dot_graph })
+                    .await
+                    .map_err(|e| Error {
+                        code: ErrorCode::InternalError,
+                        message: format!("Failed displaying the dot graph: `{}`", e).into(),
+                        data: None,
+                    })?;
+                Ok(None)
+            }
+            _ => Err(Error {
+                code: ErrorCode::InvalidParams,
+                message: format!("Invalid command `{}`", params.command).into(),
+                data: None,
+            }),
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ShowGraphParams {
+    title: String,
+    dot_graph: String,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ShowGraphResponse {}
+
+/// Custom command to show a dot graph.
+#[derive(Debug)]
+pub enum ShowGraph {}
+
+impl Request for ShowGraph {
+    type Params = ShowGraphParams;
+    type Result = ShowGraphResponse;
+    const METHOD: &'static str = "hyperir/showDot";
 }
 
 struct TextDocumentItem {

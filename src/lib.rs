@@ -1,3 +1,4 @@
+pub mod control_flow_graph;
 pub mod diagnostics;
 pub mod hir_index;
 pub mod hir_parser;

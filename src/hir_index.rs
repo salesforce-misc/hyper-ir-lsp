@@ -252,7 +252,7 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
                                 UseDefKind::Use,
                                 bb_ref,
                             );
-                            if i.instruction.0 != "phi" && bb.label.is_some() {
+                            if i.is_branching() && bb.label.is_some() {
                                 let label = bb.label.as_ref().unwrap();
                                 let func_body = &mut index.function_bodies[func_body_id];
                                 let incoming_list = func_body
