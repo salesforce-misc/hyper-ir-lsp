@@ -1,8 +1,9 @@
 from tableauhyperapi import HyperProcess, Telemetry, Connection
 from tableauhyperapi.impl import hapi
 import shutil
+import os
 
-hyper_path="/Users/avogelsgesang/hyper/hyper-db/bazel-bin/hyper/tools/hyperd"
+hyper_path="/home/avogelsgesang/Documents/hyper/main/bazel-bin/hyper/tools/hyperd"
 
 with HyperProcess(telemetry=Telemetry.SEND_USAGE_DATA_TO_TABLEAU, parameters={"dump_ir": "1"}, hyper_path=hyper_path) as hyper:
     pid = hapi.hyper_instance_get_pid(hyper._HyperProcess__cdata)
@@ -26,3 +27,4 @@ with HyperProcess(telemetry=Telemetry.SEND_USAGE_DATA_TO_TABLEAU, parameters={"d
         shutil.copyfile(f"codegen_{pid}/4_query.hir", "./query.hir")
 
         shutil.rmtree(f"codegen_{pid}")
+        os.remove("hyperd.log")
