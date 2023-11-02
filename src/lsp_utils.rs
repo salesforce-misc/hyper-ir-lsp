@@ -20,7 +20,7 @@ pub fn offset_to_lsp_pos(rope: &Rope, pos: usize) -> Option<Position> {
 
 pub fn range_to_lsp(rope: &Rope, span: &Span) -> Option<Range> {
     Some(Range {
-        start: offset_to_lsp_pos(rope, span.start).unwrap(),
-        end: offset_to_lsp_pos(rope, span.end).unwrap(),
+        start: offset_to_lsp_pos(rope, span.start)?,
+        end: offset_to_lsp_pos(rope, span.end)?,
     })
 }
