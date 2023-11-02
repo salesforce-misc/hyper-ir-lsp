@@ -8,30 +8,14 @@ The plugin focuses on features which make it easier to understand a Hyper IR mod
 Syntax highlighting, code navigation, code visualization, code folding, etc.
 Below you can find small screen recordings of all those features.
 
-### Syntax highlighting
-
-As soon as you open a Hyper IR module, you get proper syntax highlighting:
-
-![](media/syntax-highlighting.png)
-
-### Code folding support
-
-### Control Flow Visualization
-
-### Code Navigation
-
-The **Document Outline** shows you a list of all global variables and functions.
-Double-click on any function to directly jump to it.
-
-![](media/outline.png)
-
-* Go to definition / references / declaration for functions, variables and debug information
-* Inlay hints listing the incoming edges for each basic block
-* Inlay hints at function end to easily jump back to function beginning
-
-### (Self)-Diagnostics
-
-
+* **Syntax Highlighting**:  As soon as you open a Hyper IR module, you get proper syntax highlighting.
+* **Code Folding**: You can fold individual basic blocks or complete functions.
+* **Control Flow Visualization**: Use the "Visualize Controlflow" action directly above a function definition to get a rendering of the functions's control flow graph.
+* **Code Navigation**:
+  * The **Document Outline** shows you a list of all global variables and functions. Double-click on any function to directly jump to it.
+  * Use "**go to definition / references**" on function names, variable names and metadata references.
+  * **Inlay hints** show the incoming control flow edges for each basic block
+* **(Self)-Diagnostics**: The plugin shows syntax errors or other semantic issues. Given that the IR is usually dumped by Hyper, any errors indicate a bug in either Hyper or this extension.
 
 ### Non-features
 
@@ -128,7 +112,7 @@ I am happy to give anyone access to the repository (either for contributing, or 
     * ✔ Get a packaged VS Code extension
     * ✔ Correct word boundaries
     * ✔ Include README
-    * Write proper README
+    * ✔ Write proper README
     * Proper logo
     * Use Webassembly instead of native binary
 * Configuration for neovim
@@ -138,7 +122,7 @@ I am happy to give anyone access to the repository (either for contributing, or 
     * ✔ Lint JS
     * ✔ Package VS Code extension
     * ✔ Compile also for Windows and macos
-* Script to auto-generate the Hyper IR dumps using HyperAPI
+* ✔ Script to auto-generate the Hyper IR dumps using HyperAPI
 * Hyper:
     * ✔ Fix printing of references to unnamed globals
     * ✔ Phi node: Missing whitespace around ','
