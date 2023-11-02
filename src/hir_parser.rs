@@ -334,18 +334,29 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
             instruction
                 .padded_by(just(Token::Newline).repeated())
                 .repeated()
+                .at_least(1)
                 .collect::<Vec<_>>()
-                .map_with_span(|instructions, span| BasicBlock {
-                    label: None,
-                    instructions,
-                    span,
-                }),
+                .map(|instructions| {
+                    let span = Span {
+                        start: instructions.first().unwrap().span.start,
+                        end: instructions.last().unwrap().span.end,
+                    };
+                    BasicBlock {
+                        label: None,
+                        instructions,
+                        span,
+                    }
+                })
+                .or_not(),
         )
         .then(basic_block.repeated().collect::<Vec<_>>())
         .then(just(Token::Punctuation('}')).map_with_span(|_, span| span))
         .map(
             |(((opening_bracket, initial_bb), mut bbs), closing_bracket)| {
-                let mut basic_blocks = vec![initial_bb];
+                let mut basic_blocks = vec![];
+                if let Some(initial_bb) = initial_bb {
+                    basic_blocks.push(initial_bb);
+                }
                 basic_blocks.append(&mut bbs);
                 FuncBody {
                     opening_bracket,
@@ -586,8 +597,8 @@ fn test_parse_basicblock_refs() {
                     basic_blocks,
                 },
         }] => {
-            assert_eq!(basic_blocks.len(), 2);
-            let instructions = &basic_blocks[1].instructions;
+            assert_eq!(basic_blocks.len(), 1);
+            let instructions = &basic_blocks[0].instructions;
             assert_eq!(instructions.len(), 6);
 
             assert_eq!(instructions[0].instruction.0, "br");
