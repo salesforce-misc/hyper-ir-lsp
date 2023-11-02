@@ -168,6 +168,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .map_with_span(|_, span| ("br".to_string(), span))
         .then_ignore(just(Token::Type("int1".to_string())))
         .then_ignore(any())
+        .then_ignore(just(Token::Punctuation(',')))
         .then(ident)
         .then_ignore(just(Token::Punctuation(',')))
         .then(ident)
@@ -260,7 +261,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
                 .then_ignore(just(Token::Punctuation(',')))
                 .then_ignore(none_of([Token::Punctuation(']'), Token::Newline]).repeated())
                 .delimited_by(just(Token::Punctuation('[')), just(Token::Punctuation(']')))
-                .repeated(),
+                .separated_by(just(Token::Punctuation(','))),
         )
         .then_ignore(dbg_ref.or_not())
         .then_ignore(just(Token::Newline).rewind())
@@ -566,9 +567,9 @@ fn test_parse_basicblock_refs() {
     define void @foo::bar(ptr %arg1_2, data128 %baz) {
     test_0:
         br next_1
-        br next_1                        !1
-        br int1 %v33 loop_2, loopDone_3  !2
-        int64 %v10 = phi [body_0, int64 0] [loop_3, int64 %v15]
+        br next_1                         !1
+        br int1 %v33, loop_2, loopDone_3  !2
+        int64 %v10 = phi [body_0, int64 0], [loop_3, int64 %v15]
         int32 %v17 = saddbr int32 %v9, int32 %v11, cont=add_cont_3, overflow=overflow_4    !30
         switch int32 %v10, default=unreachable_5, int32 0 label=bb_0, int32 1 label=bb_1, int32 2 label=bb_2
     }",
@@ -605,8 +606,8 @@ fn test_parse_basicblock_refs() {
             assert_eq!(
                 instructions[2].basic_block_refs,
                 vec![
-                    ("loop_2".to_string(), 151..157),
-                    ("loopDone_3".to_string(), 159..169)
+                    ("loop_2".to_string(), 153..159),
+                    ("loopDone_3".to_string(), 161..171)
                 ]
             );
 
@@ -614,8 +615,8 @@ fn test_parse_basicblock_refs() {
             assert_eq!(
                 instructions[3].basic_block_refs,
                 vec![
-                    ("body_0".to_string(), 200..206),
-                    ("loop_3".to_string(), 218..224)
+                    ("body_0".to_string(), 202..208),
+                    ("loop_3".to_string(), 221..227)
                 ]
             );
 
@@ -623,8 +624,8 @@ fn test_parse_basicblock_refs() {
             assert_eq!(
                 instructions[4].basic_block_refs,
                 vec![
-                    ("add_cont_3".to_string(), 294..304),
-                    ("overflow_4".to_string(), 315..325)
+                    ("add_cont_3".to_string(), 297..307),
+                    ("overflow_4".to_string(), 318..328)
                 ]
             );
 
@@ -632,10 +633,10 @@ fn test_parse_basicblock_refs() {
             assert_eq!(
                 instructions[5].basic_block_refs,
                 vec![
-                    ("unreachable_5".to_string(), 368..381),
-                    ("bb_0".to_string(), 397..401),
-                    ("bb_1".to_string(), 417..421),
-                    ("bb_2".to_string(), 437..441)
+                    ("unreachable_5".to_string(), 371..384),
+                    ("bb_0".to_string(), 400..404),
+                    ("bb_1".to_string(), 420..424),
+                    ("bb_2".to_string(), 440..444)
                 ]
             );
         }

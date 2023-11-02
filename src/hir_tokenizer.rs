@@ -70,7 +70,7 @@ pub fn tokenizer() -> impl Parser<char, Vec<Spanned<Token>>, Error = Simple<char
         .map(Token::Str);
 
     // A parser for punctuation / control characters
-    let punctuation = one_of("[]{}()<>=,;:*").map(Token::Punctuation);
+    let punctuation = one_of("[]{}()<>=,;:*.").map(Token::Punctuation);
 
     // An identifier starts with an alphabetic character or an underscore
     let ident_head = filter(|c: &char| c.is_alphabetic() || c.to_char() == '_');

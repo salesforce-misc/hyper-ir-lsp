@@ -140,13 +140,12 @@ I am happy to give anyone access to the repository (either for contributing, or 
     * ✔ Compile also for Windows and macos
 * Script to auto-generate the Hyper IR dumps using HyperAPI
 * Hyper:
-    * Fix printing of references to unnamed globals
-    * Name the "column names" global variables
-    * Phi node: Missing ',' between incoming edges
-    * Phi node: Missing whitespace around ','
-    * `switch`: Missing ',' between value and default
-    * Conditional break: no ',' between condition and first basicblock
-    * Teardown-functions: move `destructDone` to the end
+    * ✔ Fix printing of references to unnamed globals
+    * ✔ Phi node: Missing whitespace around ','
+    * ✔ Phi node: Missing ',' between incoming edges
+    * ✔ `switch`: Missing ',' between value and default
+    * ✔ Conditional break: no ',' between condition and first basicblock
+    * ✔ Teardown-functions: move `destructDone` to the end
     * Stop printing stack traces at `main`
     * Missing "pure" modifier?
     * Missing allocas?
