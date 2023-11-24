@@ -4,8 +4,9 @@ import shutil
 import os
 
 hyper_path="/home/avogelsgesang/Documents/hyper/main/bazel-bin/hyper/tools/hyperd"
+params={"dump_ir": "1", "ir_instruction_backtrace": "1"}
 
-with HyperProcess(telemetry=Telemetry.SEND_USAGE_DATA_TO_TABLEAU, parameters={"dump_ir": "1"}, hyper_path=hyper_path) as hyper:
+with HyperProcess(telemetry=Telemetry.SEND_USAGE_DATA_TO_TABLEAU, parameters=params, hyper_path=hyper_path) as hyper:
     pid = hapi.hyper_instance_get_pid(hyper._HyperProcess__cdata)
     with Connection(endpoint=hyper.endpoint) as connection:
         connection.execute_scalar_query("SELECT 1+5")

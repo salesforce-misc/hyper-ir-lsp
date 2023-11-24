@@ -130,8 +130,8 @@ I am happy to give anyone access to the repository (either for contributing, or 
     * ✔ `switch`: Missing ',' between value and default
     * ✔ Conditional break: no ',' between condition and first basicblock
     * ✔ Teardown-functions: move `destructDone` to the end
+    * ✔ Missing "pure" modifier
     * Stop printing stack traces at `main`
-    * Missing "pure" modifier?
     * Missing allocas?
     * Missing types?
 * Code Style / Things I still need to learn about Rust

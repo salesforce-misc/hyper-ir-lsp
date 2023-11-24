@@ -1,40 +1,41 @@
 # Hyper IR for 4_query
+
 @type_18 = int8 [0,0,0,0,0,0,4,1]
 @attributes_32 = int32 [1,2]
 
 declare exported int1 @_4_pipeline_0_start_1(ptr %queryState_0)
 declare void @_4_pipeline_0_initializeThreadState_groupby_executiontarget_2(ptr %queryState_0, ptr %threadStatePtr_1)
-declare void @server::WriteBuffer::QueryMessageBuffer::init(ptr %, ptr %, int32 %) = 0x5599623e8c70
+declare void @server::WriteBuffer::QueryMessageBuffer::init(ptr %, ptr %, int32 %) = 0x55a2238daad0 !f2
 declare void @_4_pipeline_0_tearDownThreadState_groupby_executiontarget_4(ptr %queryState_0)
-declare void @server::WriteBuffer::QueryMessageBuffer::destroy(ptr %) = 0x5599623e8e60
-declare ptr @hyper::ThreadStateContainer::create(ptr %, int64 %, int1 %, ptr %, ptr %) = 0x559966312440
-declare void @hyper::QueryRuntime::setLastPipelineReached() = 0x559966138d90
+declare void @server::WriteBuffer::QueryMessageBuffer::destroy(ptr %) = 0x55a2238dacc0 !f4
+declare ptr @hyper::ThreadStateContainer::create(ptr %, int64 %, int1 %, ptr %, ptr %) = 0x55a2278895c0 !f5
+declare void @hyper::QueryRuntime::setLastPipelineReached() = 0x55a2276af120 !f6
 declare int1 @_4_pipeline_0_serialWorker_groupby_executiontarget_8(ptr %arg_0, ptr %arg_1)
-declare void @hyper::NumericRuntime::outputBinaryInteger(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x5599661088e0
-declare void @hyper::NumericRuntime::outputPGBinaryInteger(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x55996610a0a0
-declare void @hyper::NumericRuntime::outputInteger(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x559966107eb0
-declare void @server::LibpqRuntime::sendTuple(ptr %, ptr %, int32 %) = 0x559962398c10
-declare ptr @hyper::ThreadStateContainer::accessStateOfCurrentThread(ptr %) = 0x5599663123b0
-declare memberfunc void @hyper::QueryResources::updateQueryMetricsAndHandleInterrupt(ptr %) = 0x559966135450
-declare memberfunc void @server::WriteBuffer::QueryMessageBuffer::finalFlush(ptr %) = 0x5599623e9370
-declare void @hyper::ThreadStateContainer::destroy(ptr %, ptr %, ptr %) = 0x5599663125f0
+declare void @hyper::NumericRuntime::outputBinaryInteger(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x55a22767e5d0 !f8
+declare void @hyper::NumericRuntime::outputPGBinaryInteger(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x55a22767fd90 !f9
+declare void @hyper::NumericRuntime::outputInteger(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x55a22767dba0 !f10
+declare void @server::LibpqRuntime::sendTuple(ptr %, ptr %, int32 %) = 0x55a22388aa20 !f11
+declare ptr @hyper::ThreadStateContainer::accessStateOfCurrentThread(ptr %) = 0x55a227889530 !f12
+declare memberfunc void @hyper::QueryResources::updateQueryMetricsAndHandleInterrupt(ptr %) = 0x55a2276ab7e0 !f13
+declare memberfunc void @server::WriteBuffer::QueryMessageBuffer::finalFlush(ptr %) = 0x55a2238db1d0 !f14
+declare void @hyper::ThreadStateContainer::destroy(ptr %, ptr %, ptr %) = 0x55a227889770 !f15
 declare exported int1 @_4_pipeline_1_start_17(ptr %queryState_0)
 declare void @_4_pipeline_1_initializeThreadState_tablescan_groupby_18(ptr %queryState_0, ptr %threadStatePtr_1)
 declare void @_4_pipeline_1_tearDownThreadState_tablescan_groupby_19(ptr %queryState_0)
-declare void @hyper::QueryRuntime::executeScan(ptr %, ptr %, ptr %, ptr %, int64 %, ptr %, int32 %, int1 %, ptr %) = 0x559966139490
+declare void @hyper::QueryRuntime::executeScan(ptr %, ptr %, ptr %, ptr %, int64 %, ptr %, int32 %, int1 %, ptr %) = 0x55a2276af820 !f19
 declare int1 @_4_pipeline_1_serialWorker_tablescan_groupby_21(ptr %arg_0, ptr %arg_1, int64 %arg_2, int64 %arg_3)
-declare memberfunc void @hyper::Transaction::getCommitInfoByDatabaseOut(ptr %, ptr %, ptr %) = 0x5599663beaf0
-declare memberfunc ptr @hyper::HyperDatabase::getPartitionSlot(ptr %, int32 %) = 0x559963b39ef0
-declare memberfunc void @hyper::BlockPartition::prepareScan(ptr %, ptr %, ptr %, int64 %, int64 %, ptr %, ptr %) = 0x559964e897c0
-declare memberfunc ptr @hyper::MemoryRegion::allocateAligned(ptr %, int64 %, int32 %, int1 %, int1 %) = 0x559968a249f0
-declare memberfunc int32 @hyper::BlockPartition::scan(ptr %, ptr %, ptr %, ptr %, ptr %, ptr %, ptr %, int32 %) = 0x559964e89f90
-declare void @hyper::RuntimeException::throwAssertionFailedRaw(ptr %, int32 %) = 0x559968a3da40
-declare memberfunc void @hyper::MemoryRegion::deallocateAligned(ptr %, ptr %, int64 %) = 0x559968a24b00
-declare memberfunc void @hyper::BlockPartition::teardownScan(ptr %, ptr %, ptr %, ptr %) = 0x559964e899f0
+declare memberfunc void @hyper::Transaction::getCommitInfoByDatabaseOut(ptr %, ptr %, ptr %) = 0x55a227936690 !f21
+declare memberfunc ptr @hyper::HyperDatabase::getPartitionSlot(ptr %, int32 %) = 0x55a2250ae3c0 !f22
+declare memberfunc void @hyper::BlockPartition::prepareScan(ptr %, ptr %, ptr %, int64 %, int64 %, ptr %, ptr %) = 0x55a2263fd260 !f23
+declare memberfunc ptr @hyper::MemoryRegion::allocateAligned(ptr %, int64 %, int32 %, int1 %, int1 %) = 0x55a22a055390 !f24
+declare memberfunc int32 @hyper::BlockPartition::scan(ptr %, ptr %, ptr %, ptr %, ptr %, ptr %, ptr %, int32 %) = 0x55a2263fda30 !f25
+declare noreturn void @hyper::RuntimeException::throwAssertionFailedRaw(ptr %, int32 %) = 0x55a22a06e450 !f26
+declare memberfunc void @hyper::MemoryRegion::deallocateAligned(ptr %, ptr %, int64 %) = 0x55a22a0554a0 !f27
+declare memberfunc void @hyper::BlockPartition::teardownScan(ptr %, ptr %, ptr %, ptr %) = 0x55a2263fd490 !f28
 declare exported void @_4_initializeQueryState_30(ptr %queryState_0, ptr %queryResources_1)
-declare void @hyper::LambdaWorkRecordBuffer::init(ptr %, ptr %) = 0x559962bf6e90
+declare void @hyper::LambdaWorkRecordBuffer::init(ptr %, ptr %) = 0x55a2240f4ef0 !f30
 declare exported void @_4_tearDownQueryState_32(ptr %queryState_0)
-declare void @hyper::LambdaWorkRecordBuffer::destroy(ptr %) = 0x559962bf6ec0
+declare void @hyper::LambdaWorkRecordBuffer::destroy(ptr %) = 0x55a2240f4f20 !f32
 
 define exported int1 @_4_pipeline_0_start_1(ptr %queryState_0) {
 body_0:
@@ -165,16 +166,16 @@ elseNull_6:
   int1 %v35 = eq int16 %v34, int16 2                                              !1935 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:180
   br int1 %v35, thenIsHyperBinary_8, elseIsHyperBinary_9                          !1950 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:194
 thenIsHyperBinary_8:
-  call hyper::NumericRuntime::outputBinaryInteger(ptr %stringAllocator_28, ptr 0x559962398710, ptr %outputDescription_22, ptr @type_18, int32 %v15)    !1969 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:182
+  call hyper::NumericRuntime::outputBinaryInteger(ptr %stringAllocator_28, ptr 0x55a22388a520, ptr %outputDescription_22, ptr @type_18, int32 %v15)    !1969 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:182
   br doneIsHyperBinary_7                                                          !2001 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:194
 elseIsHyperBinary_9:
   int1 %v39 = eq int16 %v34, int16 1                                              !2021 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:186
   br int1 %v39, thenIsPGBinary_11, elseIsPGBinary_12                              !2036 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:193
 thenIsPGBinary_11:
-  call hyper::NumericRuntime::outputPGBinaryInteger(ptr %stringAllocator_28, ptr 0x559962398710, ptr %outputDescription_22, ptr @type_18, int32 %v15)    !2055 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:188
+  call hyper::NumericRuntime::outputPGBinaryInteger(ptr %stringAllocator_28, ptr 0x55a22388a520, ptr %outputDescription_22, ptr @type_18, int32 %v15)    !2055 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:188
   br doneIsPGBinary_10                                                            !2087 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:193
 elseIsPGBinary_12:
-  call hyper::NumericRuntime::outputInteger(ptr %stringAllocator_28, ptr 0x559962398710, ptr %outputDescription_22, ptr @type_18, int32 %v15)    !2098 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:191
+  call hyper::NumericRuntime::outputInteger(ptr %stringAllocator_28, ptr 0x55a22388a520, ptr %outputDescription_22, ptr @type_18, int32 %v15)    !2098 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:191
   br doneIsPGBinary_10                                                            !2130 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:193
 doneIsPGBinary_10:
   br doneIsHyperBinary_7                                                          !2141 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:194
@@ -200,7 +201,7 @@ body_0:
   ptr %workRecordBuffer_11 = gep {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 7    !4059 # TableScanTranslator::drivePipeline	
   ptr %threadStateContainerPtr_12 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 6    !6393 # TableScanTranslator::drivePipeline	Pipeline::getThreadStateContainerFromQueryState
   ptr %queryResources_13 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 0    !6440 # TableScanTranslator::drivePipeline	QueryStatePtr::getQueryResourcesPtr
-  call hyper::QueryRuntime::executeScan(ptr %queryResources_13, ptr %queryState_0, ptr %threadStateContainerPtr_12, ptr %workRecordBuffer_11, int64 131072, ptr 0x7fa3cc000d40, int32 0, int1 true, ptr lambdaPtr _4_pipeline_1_serialWorker_tablescan_groupby_21)    !6489 # TableScanTranslator::drivePipeline	Pipeline::doLaunch
+  call hyper::QueryRuntime::executeScan(ptr %queryResources_13, ptr %queryState_0, ptr %threadStateContainerPtr_12, ptr %workRecordBuffer_11, int64 131072, ptr 0x7f30f8000d40, int32 0, int1 true, ptr lambdaPtr _4_pipeline_1_serialWorker_tablescan_groupby_21)    !6489 # TableScanTranslator::drivePipeline	Pipeline::doLaunch
   int64 %workerThreads_16 = load hyper::ThreadStateContainer ptr %v2, int32 0, int32 0    !6575 # GroupByTranslator::SingleGroupResultMergingLogic::mergeThreadStates	PipelineContext::generateLoopOverThreadStates
   int64 %threadStateSize_17 = load hyper::ThreadStateContainer ptr %v2, int32 0, int32 1    !6612 # GroupByTranslator::SingleGroupResultMergingLogic::mergeThreadStates	PipelineContext::generateLoopOverThreadStates
   br loopForEachThreadState_1                                                     !6651 # GroupByTranslator::SingleGroupResultMergingLogic::mergeThreadStates	PipelineContext::generateLoopOverThreadStates
@@ -280,10 +281,10 @@ body_0:
   call _4_pipeline_1_initializeThreadState_tablescan_groupby_18(ptr %arg_0, ptr %arg_1)    !4170 # TableScanTranslator::drivePipeline	PipelineContext::initializeThreadState
   ptr %queryResources_6 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %arg_0, int32 0, int32 0    !4201 # TableScanTranslator::drivePipeline	QueryStatePtr::getQueryResourcesPtr
   ptr %transaction_7 = load hyper::QueryResources ptr %queryResources_6, int32 0, int32 0    !4239 # TableScanTranslator::drivePipeline	QueryStatePtr::getTransactionPtr
-  call hyper::Transaction::getCommitInfoByDatabaseOut(ptr %transaction_7, ptr 0x7fa3cc000d40, ptr %commitInfo_8)    !4300 # TransactionTranslator::getCommitInfoByDatabase	auto hyper::codegen::proxy<hyper::Transaction>::getCommitInfoByDatabaseOut<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Database>> const&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::CommitInfo>>>
+  call hyper::Transaction::getCommitInfoByDatabaseOut(ptr %transaction_7, ptr 0x7f30f8000d40, ptr %commitInfo_8)    !4300 # TransactionTranslator::getCommitInfoByDatabase	auto hyper::codegen::proxy<hyper::Transaction>::getCommitInfoByDatabaseOut<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Database>> const&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::CommitInfo>>>
   br cont_v10_2                                                                   !4324 # TableScanTranslator::drivePipeline	
 cont_v10_2:
-  ptr %v11 = call hyper::HyperDatabase::getPartitionSlot(ptr 0x7fa3cc000d40, int32 0)    !4343 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
+  ptr %v11 = call hyper::HyperDatabase::getPartitionSlot(ptr 0x7f30f8000d40, int32 0)    !4343 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
   ptr %v12 = load int8* ptr %v11                                                  !4363 # TableScanTranslator::drivePipeline	Relation::computePartitionPtr
   ptr %queryResources_13 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %arg_0, int32 0, int32 0    !4379 # TableScanTranslator::drivePipeline	QueryStatePtr::getQueryResourcesPtr
   int64 %size_14 = load hyper::BlockPartition ptr %v12, int32 0, int32 1          !4417 # TableScanTranslator::drivePipeline	PartitionBlock::getSize
@@ -342,7 +343,7 @@ thenExistingNull_12:
   br doneExistingNull_11                                                          !5845 # AggregationLogicTranslator::stepValues	
 elseExistingNull_13:
   int32 %v73 = load <{int32, int8[1]}> ptr %groupBySingleResult_61, int32 0, int32 0    !5895 # AggregationLogicTranslator::stepValues	UpdateableStorage::getNotNull
-  int1 %v74 = slt int32 %v73, int32 %legs_51                                      !5919 # AggregationLogicTranslator::stepValues	./hyper/cts/codegen/type/Integer.cpp:163
+  int1 %v74 = slt int32 %v73, int32 %legs_51                                      !5919 # AggregationLogicTranslator::stepValues	./hyper/cts/codegen/type/Integer.cpp:133
   br int1 %v74, thenUpdateMinMax_14, doneUpdateMinMax_15                          !5934 # AggregationLogicTranslator::stepValues	stepValue
 thenUpdateMinMax_14:
   store <{int32, int8[1]}> ptr %groupBySingleResult_61, int32 %legs_51, int32 0, int32 0    !5953 # AggregationLogicTranslator::stepValues	UpdateableStorage::setIgnoringNull
@@ -452,6 +453,31 @@ doneThreadStateContainerNotCleanedUp_8:
 unreachable_9:
   unreachable                                                                     !8686 # CompilationContext::constructTearDownStateLogic
 }
+
+
+!f2 = "./hyper/tools/hyperd/WriteBuffer.cpp:293"
+!f4 = "./hyper/tools/hyperd/WriteBuffer.cpp:302"
+!f5 = "./hyper/rts/runtime/ThreadStateContainer.cpp:40"
+!f6 = "./hyper/rts/runtime/QueryRuntime.cpp:164"
+!f8 = "./hyper/rts/runtime/NumericRuntime.cpp:218"
+!f9 = "./hyper/rts/runtime/NumericRuntime.cpp:323"
+!f10 = "./hyper/rts/runtime/NumericRuntime.cpp:149"
+!f11 = "./hyper/tools/hyperd/LibpqConsumer.cpp:643"
+!f12 = "./hyper/rts/runtime/ThreadStateContainer.cpp:24"
+!f13 = "./hyper/rts/runtime/QueryResources.cpp:109"
+!f14 = "./hyper/tools/hyperd/WriteBuffer.cpp:386"
+!f15 = "./hyper/rts/runtime/ThreadStateContainer.cpp:71"
+!f19 = "./hyper/rts/runtime/QueryRuntime.cpp:419"
+!f21 = "./hyper/rts/transaction/Transaction.cpp:183"
+!f22 = "./hyper/rts/database/HyperDatabase.cpp:384"
+!f23 = "./hyper/rts/partition/BlockPartition.cpp:3514"
+!f24 = "./hyper/infra/util/MemoryRegion.cpp:625"
+!f25 = "./hyper/rts/partition/BlockPartition.cpp:4258"
+!f26 = "./hyper/infra/util/RuntimeException.cpp:523"
+!f27 = "./hyper/infra/util/MemoryRegion.cpp:631"
+!f28 = "./hyper/rts/partition/BlockPartition.cpp:3530"
+!f30 = "./hyper/cts/codegen/adaptive/LambdaProgressTracking.cpp:57"
+!f32 = "./hyper/cts/codegen/adaptive/LambdaProgressTracking.cpp:61"
 
 
 !79 = {"backtrace": ["hyper::ir::IRCodegen::gep", "hyper::codegen::values::PtrBase::addImpl", "hyper::codegen::values::RTPtr::operator+", "hyper::codegen::Pipeline::generateThreadStateInitializer", "hyper::codegen::Pipeline::prepareThreadState", "hyper::codegen::Pipeline::execute", "hyper::codegen::Pipeline::generateExecuteFunction", "hyper::codegen::PipelineCodeGenerator::generateCode", "hyper::codegen::CompilationContext::constructPlan", "hyper::Compiler::createQueryStatement", "hyper::Compiler::createStatement", "server::LibpqConnection::compileQuery", "server::LibpqConnection::compileQuery", "server::LibpqConnection::handleQueryWorker", "server::LibpqConnection::toSuccessFunction", "server::ProtectedSuccessFunctionLockingSerial<server::LibpqConnection::toSuccessFunction", "hyper::Continuation::operator", "hyper::Continuation::operator", "hyper::Continuation::operator", "hyper::JobWorker<hyper::Continuation>::execute", "hyper::Job::execute", "hyper::PriorityScheduler::JobTask::executeMorsel", "hyper::PriorityScheduler::taskLoop", "decltype", "std::__1::__invoke_of<hyper::PriorityScheduler::taskLoop", "decltype", "void std::__1::__invoke_void_return_wrapper<void, true>::__call<std::__1::reference_wrapper<hyper::PriorityScheduler::taskLoop", "std::__1::__function::__alloc_func<std::__1::reference_wrapper<hyper::PriorityScheduler::taskLoop", "std::__1::__function::__func<std::__1::reference_wrapper<hyper::PriorityScheduler::taskLoop", "std::__1::__function::__value_func<void ", "std::__1::function<void ", "hyper::Task::withThreadContext", "hyper::PriorityScheduler::taskLoop", "hyper::PriorityScheduler::Worker::workerLoop", "hyper::PriorityScheduler::PriorityScheduler", "decltype", "void std::__1::__invoke_void_return_wrapper<void, true>::__call<hyper::PriorityScheduler::PriorityScheduler", "std::__1::__function::__alloc_func<hyper::PriorityScheduler::PriorityScheduler", "std::__1::__function::__func<hyper::PriorityScheduler::PriorityScheduler", "std::__1::__function::__value_func<void ", "std::__1::function<void ", "hyper::ThreadPool::spawnThread", "decltype", "void std::__1::__invoke_void_return_wrapper<void, true>::__call<hyper::ThreadPool::spawnThread", "std::__1::__function::__alloc_func<hyper::ThreadPool::spawnThread", "std::__1::__function::__func<hyper::ThreadPool::spawnThread", "std::__1::__function::__value_func<void ", "std::__1::function<void ", "hyper::runThread", "hyper::ThreadHandle::initThread", "boost::detail::thread_data<hyper::ThreadHandle::initThread", "boost::", "<invalid>", "<invalid>"]}

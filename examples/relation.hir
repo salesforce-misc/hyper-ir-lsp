@@ -1,25 +1,26 @@
 # Hyper IR for 2_relation
+
 declare exported int1 @_2_addToIndexesPartition_animals_1(ptr %partition_0, int64 %tid_1)
 declare exported void @_2_removeFromIndexesPartition_animals_2(ptr %partition_0, int64 %tid_1)
 declare exported void @_2_checkUniqueConstraintsPartition_animals_3(ptr %partition_0, ptr %commitInfo_1, int64 %tid_2)
 declare exported void @_2_initPartition_animals_4(ptr %partition_0, int32 %partitionNo_1, ptr %store_2)
-declare memberfunc void @hyper::BlockPartition::init(ptr %, int32 %, ptr %, ptr %, ptr %, ptr %, ptr %) = 0x559964e6de90
+declare memberfunc void @hyper::BlockPartition::init(ptr %, int32 %, ptr %, ptr %, ptr %, ptr %, ptr %) = 0x55a2263e1930 !f4
 declare exported int64 @_2_insertPartitionVersioned_animals_6(ptr %partition_0, ptr %tuple_1, ptr %transaction_2)
-declare memberfunc void @hyper::Transaction::getCommitInfoByDatabaseOut(ptr %, ptr %, ptr %) = 0x5599663beaf0
-declare memberfunc void @hyper::BlockPartition::prepareInsert(ptr %, int64 %) = 0x559964e7eb40
-declare memberfunc ptr @hyper::Transaction::createInsertVersion(ptr %, ptr %, int64 %) = 0x5599663c1870
-declare memberfunc void @hyper::BlockPartition::insertUnversioned(ptr %, int64 %, ptr %, ptr %) = 0x559964e7ed30
-declare memberfunc void @hyper::BlockPartition::bulkInsertBegin(ptr %, ptr %) = 0x559964e79500
+declare memberfunc void @hyper::Transaction::getCommitInfoByDatabaseOut(ptr %, ptr %, ptr %) = 0x55a227936690 !f6
+declare memberfunc void @hyper::BlockPartition::prepareInsert(ptr %, int64 %) = 0x55a2263f25e0 !f7
+declare memberfunc ptr @hyper::Transaction::createInsertVersion(ptr %, ptr %, int64 %) = 0x55a227939410 !f8
+declare memberfunc void @hyper::BlockPartition::insertUnversioned(ptr %, int64 %, ptr %, ptr %) = 0x55a2263f27d0 !f9
+declare memberfunc void @hyper::BlockPartition::bulkInsertBegin(ptr %, ptr %) = 0x55a2263ecfa0 !f10
 declare exported int64 @_2_bulkInsert_animals_12(ptr %partition_0, ptr %queryResources_1, ptr %transaction_2, ptr %tuple_3)
-declare memberfunc int64 @hyper::BlockPartition::bulkInsert(ptr %, ptr %, ptr %) = 0x559964e77560
-declare memberfunc void @hyper::BlockPartition::bulkInsertFinish(ptr %, ptr %) = 0x559964e7d2b0
-declare memberfunc void @hyper::BlockPartition::bulkInsertTeardown(ptr %, ptr %) = 0x559964e7db20
+declare memberfunc int64 @hyper::BlockPartition::bulkInsert(ptr %, ptr %, ptr %) = 0x55a2263eb000 !f12
+declare memberfunc void @hyper::BlockPartition::bulkInsertFinish(ptr %, ptr %) = 0x55a2263f0d50 !f13
+declare memberfunc void @hyper::BlockPartition::bulkInsertTeardown(ptr %, ptr %) = 0x55a2263f15c0 !f14
 declare exported void @_2_removePartitionVersioned_animals_16(ptr %partition_0, int64 %tid_1, ptr %transaction_2, ptr %queryResources_3, int1 %checkFKs_4, ptr %nullOutput_5)
-declare memberfunc void @hyper::BlockPartition::removeVersioned(ptr %, ptr %, int64 %, ptr %) = 0x559964e7f2b0
+declare memberfunc void @hyper::BlockPartition::removeVersioned(ptr %, ptr %, int64 %, ptr %) = 0x55a2263f2d50 !f16
 declare exported void @_2_undoRemoveVersioned_animals_18(ptr %partition_0, int64 %tid_1)
-declare memberfunc void @hyper::BlockPartition::undoRemoveVersioned(ptr %, int64 %) = 0x559964e7f8f0
+declare memberfunc void @hyper::BlockPartition::undoRemoveVersioned(ptr %, int64 %) = 0x55a2263f3390 !f18
 declare exported int64 @_2_insertRelation_animals_20(ptr %db_0, ptr %tuple_1, ptr %transaction_2)
-declare memberfunc ptr @hyper::HyperDatabase::getPartitionSlot(ptr %, int32 %) = 0x559963b39ef0
+declare memberfunc ptr @hyper::HyperDatabase::getPartitionSlot(ptr %, int32 %) = 0x55a2250ae3c0 !f20
 declare exported int64 @_2_bulkInsertRelation_animals_22(ptr %db_0, ptr %tuple_1, ptr %queryResources_2, ptr %transaction_3)
 declare exported void @_2_bulkInsertBeginRelation_animals_23(ptr %db_0, ptr %transaction_1)
 declare exported void @_2_bulkInsertFinishRelation_animals_24(ptr %db_0)
@@ -43,17 +44,17 @@ body_0:
 
 define exported void @_2_initPartition_animals_4(ptr %partition_0, int32 %partitionNo_1, ptr %store_2) {
 body_0:
-  call hyper::BlockPartition::init(ptr %partition_0, int32 %partitionNo_1, ptr %store_2, ptr 0x7fa3cc49e2f0, ptr 0x0, ptr 0x0, ptr 0x0)    !260  # auto hyper::codegen::proxy<hyper::BlockPartition>::init<hyper::codegen::values::UInt32&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::ObjectStore>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::BlockPartition::Description>>, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::PartitionIndexInfo>>&, hyper::codegen::values::ResolvedLambda&, hyper::codegen::values::ResolvedLambda&>
+  call hyper::BlockPartition::init(ptr %partition_0, int32 %partitionNo_1, ptr %store_2, ptr 0x7f30f84b5090, ptr 0x0, ptr 0x0, ptr 0x0)    !260  # auto hyper::codegen::proxy<hyper::BlockPartition>::init<hyper::codegen::values::UInt32&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::ObjectStore>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::BlockPartition::Description>>, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::PartitionIndexInfo>>&, hyper::codegen::values::ResolvedLambda&, hyper::codegen::values::ResolvedLambda&>
   ret                                                                             !300  # Partition::generateInit
 }
 
 define exported int64 @_2_insertPartitionVersioned_animals_6(ptr %partition_0, ptr %tuple_1, ptr %transaction_2) {
   ptr %commitInfo_3 = alloca hyper::CommitInfo align 8
 body_0:
-  call hyper::Transaction::getCommitInfoByDatabaseOut(ptr %transaction_2, ptr 0x7fa3cc000d40, ptr %commitInfo_3)    !406  # TransactionTranslator::getCommitInfoByDatabase	auto hyper::codegen::proxy<hyper::Transaction>::getCommitInfoByDatabaseOut<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Database>> const&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::CommitInfo>>>
+  call hyper::Transaction::getCommitInfoByDatabaseOut(ptr %transaction_2, ptr 0x7f30f8000d40, ptr %commitInfo_3)    !406  # TransactionTranslator::getCommitInfoByDatabase	auto hyper::codegen::proxy<hyper::Transaction>::getCommitInfoByDatabaseOut<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Database>> const&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::CommitInfo>>>
   int64 %size_5 = load hyper::BlockPartition ptr %partition_0, int32 0, int32 1    !452  # PartitionBlock::getSize
   call hyper::BlockPartition::prepareInsert(ptr %partition_0, int64 %size_5)      !480  # Partition::generateInsertVersioned
-  ptr %v7 = call hyper::Transaction::createInsertVersion(ptr %transaction_2, ptr 0x7fa3cc000d40, int64 %size_5)    !500  # auto hyper::codegen::proxy<hyper::Transaction>::createInsertVersion<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Database>>, hyper::codegen::values::UInt64&>
+  ptr %v7 = call hyper::Transaction::createInsertVersion(ptr %transaction_2, ptr 0x7f30f8000d40, int64 %size_5)    !500  # auto hyper::codegen::proxy<hyper::Transaction>::createInsertVersion<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Database>>, hyper::codegen::values::UInt64&>
   call hyper::BlockPartition::insertUnversioned(ptr %partition_0, int64 %size_5, ptr %tuple_1, ptr %v7)    !524  # Partition::generateInsertVersioned
   ret int64 %size_5                                                               !552  # Partition::generateInsertVersioned
 }
@@ -120,6 +121,20 @@ define exported void @_2_checkOutgoingFKs_animals_26(ptr %db_0, ptr %transaction
 body_0:
   ret                                                                             !1595 # Relation::generateCheckOutgoingFKs
 }
+
+
+!f4 = "./hyper/rts/partition/BlockPartition.cpp:171"
+!f6 = "./hyper/rts/transaction/Transaction.cpp:183"
+!f7 = "./hyper/rts/partition/BlockPartition.cpp:2343"
+!f8 = "./hyper/rts/transaction/Transaction.cpp:450"
+!f9 = "./hyper/rts/partition/BlockPartition.cpp:2377"
+!f10 = "./hyper/rts/partition/BlockPartition.cpp:1714"
+!f12 = "./hyper/rts/partition/BlockPartition.cpp:1658"
+!f13 = "./hyper/rts/partition/BlockPartition.cpp:2176"
+!f14 = "./hyper/rts/partition/BlockPartition.cpp:2237"
+!f16 = "./hyper/rts/partition/BlockPartition.cpp:2484"
+!f18 = "./hyper/rts/partition/BlockPartition.cpp:2537"
+!f20 = "./hyper/rts/database/HyperDatabase.cpp:384"
 
 
 !43 = {"backtrace": ["hyper::ir::IRCodegen::ret", "hyper::codegen::CodeGen::returnValue", "hyper::codegen::Partition::generateAddToIndexes", "hyper::codegen::Partition::generateOperations", "hyper::codegen::Relation::generateOperations", "hyper::codegen::Relation::compile", "hyper::Schema::generateCompileCodeAndMigrate", "hyper::Schema::addRelation", "std::__1::pair<hyper::NamespaceEntryReference, bool> hyper::SyncedUnorderedMap<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char>>, hyper::NamespaceEntryReference>::emplace_lazily<hyper::Schema::addRelation", "hyper::Schema::addRelation", "hyper::CreateTable::apply", "void hyper::StatementHelper::applyAndLogDDL<hyper::CreateTable>", "hyper::CreateTable::executeImpl", "hyper::Statement::execute", "hyper::CreateTableSelect::executeImpl", "hyper::Statement::execute", "server::LibpqConnection::execute", "server::LibpqConnection::executeCompiledQuery", "server::LibpqConnection::handleQueryWorker", "server::LibpqConnection::toSuccessFunction", "server::ProtectedSuccessFunctionLockingSerial<server::LibpqConnection::toSuccessFunction", "hyper::Continuation::operator", "hyper::Continuation::operator", "hyper::Continuation::operator", "hyper::JobWorker<hyper::Continuation>::execute", "hyper::Job::execute", "hyper::PriorityScheduler::JobTask::executeMorsel", "hyper::PriorityScheduler::taskLoop", "decltype", "std::__1::__invoke_of<hyper::PriorityScheduler::taskLoop", "decltype", "void std::__1::__invoke_void_return_wrapper<void, true>::__call<std::__1::reference_wrapper<hyper::PriorityScheduler::taskLoop", "std::__1::__function::__alloc_func<std::__1::reference_wrapper<hyper::PriorityScheduler::taskLoop", "std::__1::__function::__func<std::__1::reference_wrapper<hyper::PriorityScheduler::taskLoop", "std::__1::__function::__value_func<void ", "std::__1::function<void ", "hyper::Task::withThreadContext", "hyper::PriorityScheduler::taskLoop", "hyper::PriorityScheduler::Worker::workerLoop", "hyper::PriorityScheduler::PriorityScheduler", "decltype", "void std::__1::__invoke_void_return_wrapper<void, true>::__call<hyper::PriorityScheduler::PriorityScheduler", "std::__1::__function::__alloc_func<hyper::PriorityScheduler::PriorityScheduler", "std::__1::__function::__func<hyper::PriorityScheduler::PriorityScheduler", "std::__1::__function::__value_func<void ", "std::__1::function<void ", "hyper::ThreadPool::spawnThread", "decltype", "void std::__1::__invoke_void_return_wrapper<void, true>::__call<hyper::ThreadPool::spawnThread", "std::__1::__function::__alloc_func<hyper::ThreadPool::spawnThread", "std::__1::__function::__func<hyper::ThreadPool::spawnThread", "std::__1::__function::__value_func<void ", "std::__1::function<void ", "hyper::runThread", "hyper::ThreadHandle::initThread", "boost::detail::thread_data<hyper::ThreadHandle::initThread", "boost::", "<invalid>", "<invalid>"]}
