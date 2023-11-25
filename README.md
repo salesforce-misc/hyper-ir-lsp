@@ -98,7 +98,7 @@ I am happy to give anyone access to the repository (either for contributing, or 
     * ✔ Report warnings on unknown function names / variable names
     * ✔ Report warnings when we failed to extract the basic blocks from a branching instruction
     * ✔ Control flow graph visualization
-    * Add "Go to definition" for proxied functions
+    * ✔ Add "Go to definition" for proxied functions
     * Hyperlink the stack trace, pointing to the place where a function is defined
     * Hover provider for function-local variables; Show "SSA chain"
     * "Inline variables" debugger support?
@@ -133,7 +133,7 @@ I am happy to give anyone access to the repository (either for contributing, or 
     * ✔ Missing "pure" modifier
     * Stop printing stack traces at `main`
     * Missing allocas?
-    * Missing types?
+    * Print threadstate and querystate types better
 * Code Style / Things I still need to learn about Rust
     * Deduplicate the `just` + `map_with_span` pattern when parsing instructions
     * Tokenizer: only keep "string views"; don't copy out strings

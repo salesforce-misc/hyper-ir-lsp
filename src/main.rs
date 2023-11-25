@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::sync::Mutex;
 
 use dashmap::DashMap;
 use hyper_ir_lsp::control_flow_graph::create_cfg_dot_visualization;
@@ -22,6 +23,7 @@ use tower_lsp::{Client, LanguageServer, LspService, Server};
 #[derive(Debug)]
 struct Backend {
     client: Client,
+    root_paths: Mutex<Vec<Url>>,
     document_map: DashMap<String, Rope>,
     semantic_token_map: DashMap<String, Vec<HIRSemanticToken>>,
     index_map: DashMap<String, HIRIndex>,
@@ -29,7 +31,14 @@ struct Backend {
 
 #[tower_lsp::async_trait]
 impl LanguageServer for Backend {
-    async fn initialize(&self, _: InitializeParams) -> Result<InitializeResult> {
+    async fn initialize(& self, params: InitializeParams) -> Result<InitializeResult> {
+        if let Some(workspace_folders) = params.workspace_folders {
+            self.root_paths.lock().unwrap()
+                .extend(workspace_folders.iter().map(|f| f.uri.clone()));
+        } else if let Some(root_uri) = params.root_uri {
+            self.root_paths.lock().unwrap().push(root_uri);
+        }
+
         Ok(InitializeResult {
             server_info: Some(ServerInfo {
                 name: "Hyper IR Language Server".to_string(),
@@ -116,19 +125,17 @@ impl LanguageServer for Backend {
         params: GotoDefinitionParams,
     ) -> Result<Option<GotoDefinitionResponse>> {
         let definition = || -> Option<GotoDefinitionResponse> {
-            let uri = &params.text_document_position_params.text_document.uri;
-            let (origin_selection_range, ranges) =
+            let (origin_selection_range, mut locations) =
                 self.get_use_def_ranges(&params.text_document_position_params, UseDefKind::Def)?;
-            let links = ranges
-                .iter()
-                .map(|&range| LocationLink {
+            let links = locations
+                .drain(..)
+                .map(|loc| LocationLink {
                     origin_selection_range: Some(origin_selection_range),
-                    target_uri: uri.clone(),
-                    target_range: range,
-                    target_selection_range: range,
+                    target_uri: loc.uri,
+                    target_range: loc.range,
+                    target_selection_range: loc.range,
                 })
                 .collect::<Vec<_>>();
-
             Some(GotoDefinitionResponse::Link(links))
         }();
         Ok(definition)
@@ -139,39 +146,26 @@ impl LanguageServer for Backend {
         params: GotoDefinitionParams,
     ) -> Result<Option<GotoDefinitionResponse>> {
         let decl = || -> Option<GotoDeclarationResponse> {
-            let (origin_selection_range, ranges) =
+            let (origin_selection_range, mut locations) =
                 self.get_use_def_ranges(&params.text_document_position_params, UseDefKind::Decl)?;
-            let uri = &params.text_document_position_params.text_document.uri;
-            let links = ranges
-                .iter()
-                .map(|&range| LocationLink {
+            let links = locations
+                .drain(..)
+                .map(|loc| LocationLink {
                     origin_selection_range: Some(origin_selection_range),
-                    target_uri: uri.clone(),
-                    target_range: range,
-                    target_selection_range: range,
+                    target_uri: loc.uri,
+                    target_range: loc.range,
+                    target_selection_range: loc.range,
                 })
                 .collect::<Vec<_>>();
-
             Some(GotoDeclarationResponse::Link(links))
         }();
         Ok(decl)
     }
 
     async fn references(&self, params: ReferenceParams) -> Result<Option<Vec<Location>>> {
-        let reference_list = || -> Option<Vec<Location>> {
-            let (_origin_selection_range, ranges) =
-                self.get_use_def_ranges(&params.text_document_position, UseDefKind::Use)?;
-            let ret = ranges
-                .iter()
-                .map(|&range| {
-                    Location::new(
-                        params.text_document_position.text_document.uri.clone(),
-                        range,
-                    )
-                })
-                .collect::<Vec<_>>();
-            Some(ret)
-        }();
+        let reference_list = self
+            .get_use_def_ranges(&params.text_document_position, UseDefKind::Use)
+            .map(|x| x.1);
         Ok(reference_list)
     }
 
@@ -200,10 +194,6 @@ impl LanguageServer for Backend {
         params: DocumentSymbolParams,
     ) -> Result<Option<DocumentSymbolResponse>> {
         let uri = params.text_document.uri.to_string();
-        self.client
-            .log_message(MessageType::LOG, "document_symbol")
-            .await;
-
         let symbols = || -> Option<DocumentSymbolResponse> {
             let index = self.index_map.get(&uri)?;
             let rope = self.document_map.get(&uri)?;
@@ -525,26 +515,58 @@ impl Backend {
         &self,
         pos: &TextDocumentPositionParams,
         ud: UseDefKind,
-    ) -> Option<(Range, Vec<Range>)> {
+    ) -> Option<(Range, Vec<Location>)> {
         let uri_str = pos.text_document.uri.to_string();
         let rope = self.document_map.get(&uri_str)?;
         let offset = lsp_pos_to_offset(&rope, &pos.position)?;
 
+        // Lookup the symbol at the given location
         let index = self.index_map.get(&uri_str)?;
         let symbol = index.find_symbol_at_position(offset)?;
-        let spans = index
+
+        // Find all use/defs from the index
+        let usedefs = index
             .get_by_symbol_kind(
                 symbol.symbol_kind,
                 symbol.func_body_id.map(|id| &index.function_bodies[id]),
             )
-            .get(&symbol.name)?
-            .get_use_def_kind(ud);
+            .get(&symbol.name)?;
+        let mut ranges = usedefs
+            .get_use_def_kind(ud)
+            .iter()
+            .filter_map(|span| {
+                Some(Location::new(
+                    pos.text_document.uri.clone(),
+                    range_to_lsp(&rope, span)?,
+                ))
+            })
+            .collect::<Vec<_>>();
+
+        // In addition, consider the external_defs
+        if ud == UseDefKind::Def {
+            ranges.extend(usedefs.external_defs.iter().filter_map(|d| {
+                let root_paths = self.root_paths.lock().unwrap();
+                let uri = root_paths.iter().find_map(|baseuri| {
+                    let mut uri = baseuri.clone();
+                    uri.path_segments_mut().unwrap().extend(d.filepath.split('/'));
+                    if uri.to_file_path().ok()?.exists() {
+                        Some(uri)
+                    } else { 
+                        None
+                    }
+                })?;
+
+                Some(Location{
+                    uri,
+                    range: Range {
+                        start: Position::new(d.line - 1, 0),
+                        end: Position::new(d.line - 1, 0),
+                    },
+                })
+            }));
+        }
 
         let origin_selection_range = range_to_lsp(&rope, &symbol.span)?;
-        let ranges = spans
-            .iter()
-            .filter_map(|span| range_to_lsp(&rope, span))
-            .collect::<Vec<_>>();
         Some((origin_selection_range, ranges))
     }
 }
@@ -558,6 +580,7 @@ async fn main() {
 
     let (service, socket) = LspService::build(|client| Backend {
         client,
+        root_paths: Default::default(),
         document_map: DashMap::new(),
         semantic_token_map: DashMap::new(),
         index_map: DashMap::new(),

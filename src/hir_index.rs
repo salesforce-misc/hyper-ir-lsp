@@ -12,9 +12,16 @@ pub enum UseDefKind {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
+pub struct ExternalDef {
+    pub filepath: String,
+    pub line: u32,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct UseDefList {
     pub decls: Vec<Span>,
     pub defs: Vec<Span>,
+    pub external_defs: Vec<ExternalDef>,
     pub uses: Vec<Span>,
 }
 
@@ -185,17 +192,31 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
     };
 
     // Index all definitions / declarations based on the actual parse tree
+    let mut unresolved_function_dbgrefs : HashMap<String, String> = Default::default();
     for s in stmts.iter() {
         match s {
             Statement::GlobalVar { name, def: _ } => {
                 index.add_global_spanned(SymbolKind::GlobalVar, UseDefKind::Def, name)
             }
-            Statement::FuncDecl { signature, .. } => {
-                index.add_global_spanned(SymbolKind::Function, UseDefKind::Decl, &signature.name)
+            Statement::FuncDecl { signature, dbgref, .. } => {
+                index.add_global_spanned(SymbolKind::Function, UseDefKind::Decl, &signature.name);
+                if let Some(dbgref) = dbgref {
+                    unresolved_function_dbgrefs.insert(dbgref.0.clone(), signature.name.0.clone());
+                }
             }
             Statement::FuncDependencies { .. } => {}
-            Statement::DbgAnnotation { name, def: _ } => {
-                index.add_global_spanned(SymbolKind::DbgAnnotation, UseDefKind::Def, name)
+            Statement::DbgAnnotation { name, def } => {
+                index.add_global_spanned(SymbolKind::DbgAnnotation, UseDefKind::Def, name);
+                // Recognize the filenames and numbers associated with function definitions
+                if let Some(funcname) = unresolved_function_dbgrefs.get(&name.0) {
+                    if let [(Token::Str(dbgstr), _)] = &def[..] {
+                        if let [filepath, linestr] = dbgstr.split(":").collect::<Vec<_>>()[..] {
+                            if let Some(line) = linestr.parse::<u32>().ok() {
+                                index.functions.get_mut(funcname).unwrap().external_defs.push(ExternalDef{ filepath: filepath.to_string(), line });
+                            }
+                        }
+                    }
+                }
             }
             // FuncDef is a bit more complicated, since we also index the structure of the function body
             // (labels, local variables) here.
@@ -320,8 +341,9 @@ fn test_index() {
     let res = crate::hir_parser::parse_from_str(
         "
         @a = \"test\"
-        declare int32 @foo::bar(ptr %, int32 %baz) = 0x1234
+        declare int32 @foo::bar(ptr %, int32 %baz) = 0x1234 !f1
         declare int32 @_test1(int32 %foo, data128 %baz)
+
         define void @_test1(int32 %foo, data128 %baz) {
           some instruction
           body_0:
@@ -332,7 +354,10 @@ fn test_index() {
           done_1:
             ret int32 %res_1 !21 # some comment
         }
-        !21 {\"some\": \"data\"}",
+
+        !f1 = \"./test.cpp:12\"
+
+        !21 = {\"some\": \"data\"}",
     );
     assert_eq!(res.errors, []);
     let idx = create_index(&res.tokens, &res.stmts);
@@ -343,7 +368,8 @@ fn test_index() {
             UseDefList {
                 decls: Vec::new(),
                 defs: vec![9..11],
-                uses: vec![284..286]
+                external_defs: Vec::new(),
+                uses: vec![289..291]
             }
         )])
     );
@@ -356,14 +382,16 @@ fn test_index() {
                 UseDefList {
                     decls: vec![43..52],
                     defs: Vec::new(),
-                    uses: vec![270..279]
+                    external_defs: vec![ExternalDef { filepath: "./test.cpp".to_string(), line: 12 }],
+                    uses: vec![275..284]
                 }
             ),
             (
                 "@_test1".to_string(),
                 UseDefList {
-                    decls: vec![103..110],
-                    defs: vec![157..164],
+                    decls: vec![107..114],
+                    defs: vec![162..169],
+                    external_defs: Vec::new(),
                     uses: Vec::new()
                 }
             ),
@@ -376,8 +404,18 @@ fn test_index() {
             "!21".to_string(),
             UseDefList {
                 decls: Vec::new(),
-                defs: vec![498..501],
-                uses: vec![461..464]
+                defs: vec![535..538],
+                external_defs: Vec::new(),
+                uses: vec![466..469]
+            }
+        ),
+        (
+            "!f1".to_string(),
+            UseDefList {
+                decls: Vec::new(),
+                defs: vec![504..507],
+                external_defs: Vec::new(),
+                uses: vec![81..84]
             }
         )])
     );
@@ -392,8 +430,8 @@ fn test_index() {
             incoming_bb_branches,
         }] => {
             assert_eq!(name.0, "@_test1");
-            assert_eq!(name.1, 157..164);
-            assert_eq!(*complete_range, 145..489);
+            assert_eq!(name.1, 162..169);
+            assert_eq!(*complete_range, 150..494);
             assert_eq!(
                 *labels,
                 HashMap::from([
@@ -401,7 +439,8 @@ fn test_index() {
                         "body_0".to_string(),
                         UseDefList {
                             decls: Vec::new(),
-                            defs: vec![230..237],
+                            defs: vec![235..242],
+                            external_defs: Vec::new(),
                             uses: Vec::new(),
                         }
                     ),
@@ -409,16 +448,18 @@ fn test_index() {
                         "switch_1".to_string(),
                         UseDefList {
                             decls: vec![],
-                            defs: vec![334..343],
-                            uses: vec![315..323]
+                            defs: vec![339..348],
+                            external_defs: Vec::new(),
+                            uses: vec![320..328]
                         }
                     ),
                     (
                         "done_1".to_string(),
                         UseDefList {
                             decls: Vec::new(),
-                            defs: vec![424..431],
-                            uses: vec![385..391, 407..413]
+                            defs: vec![429..436],
+                            external_defs: Vec::new(),
+                            uses: vec![390..396, 412..418]
                         }
                     ),
                 ])
@@ -430,15 +471,17 @@ fn test_index() {
                         "%foo".to_string(),
                         UseDefList {
                             decls: Vec::new(),
-                            defs: vec![171..175],
-                            uses: vec![294..298],
+                            defs: vec![176..180],
+                            external_defs: Vec::new(),
+                            uses: vec![299..303],
                         }
                     ),
                     (
                         "%baz".to_string(),
                         UseDefList {
                             decls: Vec::new(),
-                            defs: vec![185..189],
+                            defs: vec![190..194],
+                            external_defs: Vec::new(),
                             uses: Vec::new(),
                         }
                     ),
@@ -446,8 +489,9 @@ fn test_index() {
                         "%res_1".to_string(),
                         UseDefList {
                             decls: Vec::new(),
-                            defs: vec![256..262],
-                            uses: vec![369..375, 454..460],
+                            defs: vec![261..267],
+                            external_defs: Vec::new(),
+                            uses: vec![374..380, 459..465],
                         }
                     ),
                 ])
@@ -458,13 +502,13 @@ fn test_index() {
                 HashMap::from([
                     (
                         "switch_1".to_string(),
-                        vec![("body_0".to_string(), 230..237)]
+                        vec![("body_0".to_string(), 235..242)]
                     ),
                     (
                         "done_1".to_string(),
                         // Note that `switch_1` is listed only once, although it mentions `done1`
                         // as its target twice.
-                        vec![("switch_1".to_string(), 334..343)]
+                        vec![("switch_1".to_string(), 339..348)]
                     ),
                 ])
             );

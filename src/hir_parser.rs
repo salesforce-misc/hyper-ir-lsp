@@ -390,6 +390,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
 
     // Debug annotation
     let dbg_annotation = dbg_ref
+        .then_ignore(just(Token::Punctuation('=')))
         .then(token_soup)
         .then_ignore(eol.clone())
         .map(|(n, def)| Statement::DbgAnnotation { name: n, def });
@@ -675,7 +676,7 @@ fn test_parse_func_dependencies() {
 
 #[test]
 fn test_parse_dbgannotation() {
-    let res = parse_from_str("!123 {}");
+    let res = parse_from_str("!123 = {}");
     assert_eq!(res.errors, []);
     match res.stmts[..] {
         [Statement::DbgAnnotation { ref name, def: _ }] => {
