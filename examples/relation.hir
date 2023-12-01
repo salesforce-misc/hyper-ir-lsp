@@ -4,23 +4,23 @@ declare exported int1 @_2_addToIndexesPartition_animals_1(ptr %partition_0, int6
 declare exported void @_2_removeFromIndexesPartition_animals_2(ptr %partition_0, int64 %tid_1)
 declare exported void @_2_checkUniqueConstraintsPartition_animals_3(ptr %partition_0, ptr %commitInfo_1, int64 %tid_2)
 declare exported void @_2_initPartition_animals_4(ptr %partition_0, int32 %partitionNo_1, ptr %store_2)
-declare memberfunc void @hyper::BlockPartition::init(ptr %, int32 %, ptr %, ptr %, ptr %, ptr %, ptr %) = 0x55a2263e1930 !f4
+declare memberfunc void @hyper::BlockPartition::init(ptr %, int32 %, ptr %, ptr %, ptr %, ptr %, ptr %) = 0x560baee77490 !f4
 declare exported int64 @_2_insertPartitionVersioned_animals_6(ptr %partition_0, ptr %tuple_1, ptr %transaction_2)
-declare memberfunc void @hyper::Transaction::getCommitInfoByDatabaseOut(ptr %, ptr %, ptr %) = 0x55a227936690 !f6
-declare memberfunc void @hyper::BlockPartition::prepareInsert(ptr %, int64 %) = 0x55a2263f25e0 !f7
-declare memberfunc ptr @hyper::Transaction::createInsertVersion(ptr %, ptr %, int64 %) = 0x55a227939410 !f8
-declare memberfunc void @hyper::BlockPartition::insertUnversioned(ptr %, int64 %, ptr %, ptr %) = 0x55a2263f27d0 !f9
-declare memberfunc void @hyper::BlockPartition::bulkInsertBegin(ptr %, ptr %) = 0x55a2263ecfa0 !f10
+declare memberfunc void @hyper::Transaction::getCommitInfoByDatabaseOut(ptr %, ptr %, ptr %) = 0x560bb03cac80 !f6
+declare memberfunc void @hyper::BlockPartition::prepareInsert(ptr %, int64 %) = 0x560baee88140 !f7
+declare memberfunc ptr @hyper::Transaction::createInsertVersion(ptr %, ptr %, int64 %) = 0x560bb03cda00 !f8
+declare memberfunc void @hyper::BlockPartition::insertUnversioned(ptr %, int64 %, ptr %, ptr %) = 0x560baee88330 !f9
+declare memberfunc void @hyper::BlockPartition::bulkInsertBegin(ptr %, ptr %) = 0x560baee82b00 !f10
 declare exported int64 @_2_bulkInsert_animals_12(ptr %partition_0, ptr %queryResources_1, ptr %transaction_2, ptr %tuple_3)
-declare memberfunc int64 @hyper::BlockPartition::bulkInsert(ptr %, ptr %, ptr %) = 0x55a2263eb000 !f12
-declare memberfunc void @hyper::BlockPartition::bulkInsertFinish(ptr %, ptr %) = 0x55a2263f0d50 !f13
-declare memberfunc void @hyper::BlockPartition::bulkInsertTeardown(ptr %, ptr %) = 0x55a2263f15c0 !f14
+declare memberfunc int64 @hyper::BlockPartition::bulkInsert(ptr %, ptr %, ptr %) = 0x560baee80b60 !f12
+declare memberfunc void @hyper::BlockPartition::bulkInsertFinish(ptr %, ptr %) = 0x560baee868b0 !f13
+declare memberfunc void @hyper::BlockPartition::bulkInsertTeardown(ptr %, ptr %) = 0x560baee87120 !f14
 declare exported void @_2_removePartitionVersioned_animals_16(ptr %partition_0, int64 %tid_1, ptr %transaction_2, ptr %queryResources_3, int1 %checkFKs_4, ptr %nullOutput_5)
-declare memberfunc void @hyper::BlockPartition::removeVersioned(ptr %, ptr %, int64 %, ptr %) = 0x55a2263f2d50 !f16
+declare memberfunc void @hyper::BlockPartition::removeVersioned(ptr %, ptr %, int64 %, ptr %) = 0x560baee888b0 !f16
 declare exported void @_2_undoRemoveVersioned_animals_18(ptr %partition_0, int64 %tid_1)
-declare memberfunc void @hyper::BlockPartition::undoRemoveVersioned(ptr %, int64 %) = 0x55a2263f3390 !f18
+declare memberfunc void @hyper::BlockPartition::undoRemoveVersioned(ptr %, int64 %) = 0x560baee88ef0 !f18
 declare exported int64 @_2_insertRelation_animals_20(ptr %db_0, ptr %tuple_1, ptr %transaction_2)
-declare memberfunc ptr @hyper::HyperDatabase::getPartitionSlot(ptr %, int32 %) = 0x55a2250ae3c0 !f20
+declare memberfunc ptr @hyper::HyperDatabase::getPartitionSlot(ptr %, int32 %) = 0x560badabea00 !f20
 declare exported int64 @_2_bulkInsertRelation_animals_22(ptr %db_0, ptr %tuple_1, ptr %queryResources_2, ptr %transaction_3)
 declare exported void @_2_bulkInsertBeginRelation_animals_23(ptr %db_0, ptr %transaction_1)
 declare exported void @_2_bulkInsertFinishRelation_animals_24(ptr %db_0)
@@ -44,76 +44,76 @@ body_0:
 
 define exported void @_2_initPartition_animals_4(ptr %partition_0, int32 %partitionNo_1, ptr %store_2) {
 body_0:
-  call hyper::BlockPartition::init(ptr %partition_0, int32 %partitionNo_1, ptr %store_2, ptr 0x7f30f84b5090, ptr 0x0, ptr 0x0, ptr 0x0)    !260  # auto hyper::codegen::proxy<hyper::BlockPartition>::init<hyper::codegen::values::UInt32&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::ObjectStore>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::BlockPartition::Description>>, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::PartitionIndexInfo>>&, hyper::codegen::values::ResolvedLambda&, hyper::codegen::values::ResolvedLambda&>
+  call @hyper::BlockPartition::init(ptr %partition_0, int32 %partitionNo_1, ptr %store_2, ptr 0x7f26184b5d90, ptr 0x0, ptr 0x0, ptr 0x0)    !260  # auto hyper::codegen::proxy<hyper::BlockPartition>::init<hyper::codegen::values::UInt32&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::ObjectStore>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::BlockPartition::Description>>, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::PartitionIndexInfo>>&, hyper::codegen::values::ResolvedLambda&, hyper::codegen::values::ResolvedLambda&>
   ret                                                                             !300  # Partition::generateInit
 }
 
 define exported int64 @_2_insertPartitionVersioned_animals_6(ptr %partition_0, ptr %tuple_1, ptr %transaction_2) {
   ptr %commitInfo_3 = alloca hyper::CommitInfo align 8
 body_0:
-  call hyper::Transaction::getCommitInfoByDatabaseOut(ptr %transaction_2, ptr 0x7f30f8000d40, ptr %commitInfo_3)    !406  # TransactionTranslator::getCommitInfoByDatabase	auto hyper::codegen::proxy<hyper::Transaction>::getCommitInfoByDatabaseOut<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Database>> const&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::CommitInfo>>>
+  call @hyper::Transaction::getCommitInfoByDatabaseOut(ptr %transaction_2, ptr 0x7f2618000d40, ptr %commitInfo_3)    !406  # TransactionTranslator::getCommitInfoByDatabase	auto hyper::codegen::proxy<hyper::Transaction>::getCommitInfoByDatabaseOut<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Database>> const&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::CommitInfo>>>
   int64 %size_5 = load hyper::BlockPartition ptr %partition_0, int32 0, int32 1    !452  # PartitionBlock::getSize
-  call hyper::BlockPartition::prepareInsert(ptr %partition_0, int64 %size_5)      !480  # Partition::generateInsertVersioned
-  ptr %v7 = call hyper::Transaction::createInsertVersion(ptr %transaction_2, ptr 0x7f30f8000d40, int64 %size_5)    !500  # auto hyper::codegen::proxy<hyper::Transaction>::createInsertVersion<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Database>>, hyper::codegen::values::UInt64&>
-  call hyper::BlockPartition::insertUnversioned(ptr %partition_0, int64 %size_5, ptr %tuple_1, ptr %v7)    !524  # Partition::generateInsertVersioned
+  call @hyper::BlockPartition::prepareInsert(ptr %partition_0, int64 %size_5)     !480  # Partition::generateInsertVersioned
+  ptr %v7 = call @hyper::Transaction::createInsertVersion(ptr %transaction_2, ptr 0x7f2618000d40, int64 %size_5)    !500  # auto hyper::codegen::proxy<hyper::Transaction>::createInsertVersion<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Database>>, hyper::codegen::values::UInt64&>
+  call @hyper::BlockPartition::insertUnversioned(ptr %partition_0, int64 %size_5, ptr %tuple_1, ptr %v7)    !524  # Partition::generateInsertVersioned
   ret int64 %size_5                                                               !552  # Partition::generateInsertVersioned
 }
 
 define exported int64 @_2_bulkInsert_animals_12(ptr %partition_0, ptr %queryResources_1, ptr %transaction_2, ptr %tuple_3) {
 body_0:
-  int64 %v4 = call hyper::BlockPartition::bulkInsert(ptr %partition_0, ptr %tuple_3, ptr %queryResources_1)    !646  # auto hyper::codegen::proxy<hyper::BlockPartition>::bulkInsert<hyper::codegen::values::Ptr<hyper::codegen::values::UInt8>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::QueryResources>>&>
+  int64 %v4 = call @hyper::BlockPartition::bulkInsert(ptr %partition_0, ptr %tuple_3, ptr %queryResources_1)    !646  # auto hyper::codegen::proxy<hyper::BlockPartition>::bulkInsert<hyper::codegen::values::Ptr<hyper::codegen::values::UInt8>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::QueryResources>>&>
   ret int64 %v4                                                                   !670  # Partition::generateBulkInsertWithForeignKeyConstraintsCheckFunction
 }
 
 define exported void @_2_removePartitionVersioned_animals_16(ptr %partition_0, int64 %tid_1, ptr %transaction_2, ptr %queryResources_3, int1 %checkFKs_4, ptr %nullOutput_5) {
 body_0:
-  call hyper::BlockPartition::removeVersioned(ptr %partition_0, ptr %transaction_2, int64 %tid_1, ptr %nullOutput_5)    !802  # auto hyper::codegen::proxy<hyper::BlockPartition>::removeVersioned<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Transaction>>&, hyper::codegen::values::UInt64&, hyper::codegen::values::Ptr<hyper::codegen::values::UInt8>>
+  call @hyper::BlockPartition::removeVersioned(ptr %partition_0, ptr %transaction_2, int64 %tid_1, ptr %nullOutput_5)    !802  # auto hyper::codegen::proxy<hyper::BlockPartition>::removeVersioned<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Transaction>>&, hyper::codegen::values::UInt64&, hyper::codegen::values::Ptr<hyper::codegen::values::UInt8>>
   ret                                                                             !830  # Partition::generateRemoveVersioned
 }
 
 define exported void @_2_undoRemoveVersioned_animals_18(ptr %partition_0, int64 %tid_1) {
 body_0:
-  call hyper::BlockPartition::undoRemoveVersioned(ptr %partition_0, int64 %tid_1)    !871  # auto hyper::codegen::proxy<hyper::BlockPartition>::undoRemoveVersioned<hyper::codegen::values::UInt64&>
+  call @hyper::BlockPartition::undoRemoveVersioned(ptr %partition_0, int64 %tid_1)    !871  # auto hyper::codegen::proxy<hyper::BlockPartition>::undoRemoveVersioned<hyper::codegen::values::UInt64&>
   ret                                                                             !891  # PartitionBlock::generateUndoRemoveVersioned
 }
 
 define exported int64 @_2_insertRelation_animals_20(ptr %db_0, ptr %tuple_1, ptr %transaction_2) {
 body_0:
-  ptr %v3 = call hyper::HyperDatabase::getPartitionSlot(ptr %db_0, int32 0)       !949  # auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
+  ptr %v3 = call @hyper::HyperDatabase::getPartitionSlot(ptr %db_0, int32 0)      !949  # auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
   ptr %v4 = load int8* ptr %v3                                                    !969  # Relation::computePartitionPtr
-  int64 %v5 = call _2_insertPartitionVersioned_animals_6(ptr %v4, ptr %tuple_1, ptr %transaction_2)    !985  # Relation::generateInsert
+  int64 %v5 = call @_2_insertPartitionVersioned_animals_6(ptr %v4, ptr %tuple_1, ptr %transaction_2)    !985  # Relation::generateInsert
   ret int64 %v5                                                                   !1009 # Relation::generateInsert
 }
 
 define exported int64 @_2_bulkInsertRelation_animals_22(ptr %db_0, ptr %tuple_1, ptr %queryResources_2, ptr %transaction_3) {
 body_0:
-  ptr %v4 = call hyper::HyperDatabase::getPartitionSlot(ptr %db_0, int32 0)       !1096 # auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
+  ptr %v4 = call @hyper::HyperDatabase::getPartitionSlot(ptr %db_0, int32 0)      !1096 # auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
   ptr %v5 = load int8* ptr %v4                                                    !1116 # Relation::computePartitionPtr
-  int64 %v6 = call _2_bulkInsert_animals_12(ptr %v5, ptr %queryResources_2, ptr %transaction_3, ptr %tuple_1)    !1132 # Relation::generateBulkInsert
+  int64 %v6 = call @_2_bulkInsert_animals_12(ptr %v5, ptr %queryResources_2, ptr %transaction_3, ptr %tuple_1)    !1132 # Relation::generateBulkInsert
   ret int64 %v6                                                                   !1160 # Relation::generateBulkInsert
 }
 
 define exported void @_2_bulkInsertBeginRelation_animals_23(ptr %db_0, ptr %transaction_1) {
 body_0:
-  ptr %v2 = call hyper::HyperDatabase::getPartitionSlot(ptr %db_0, int32 0)       !1206 # auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
+  ptr %v2 = call @hyper::HyperDatabase::getPartitionSlot(ptr %db_0, int32 0)      !1206 # auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
   ptr %v3 = load int8* ptr %v2                                                    !1226 # Relation::computePartitionPtr
-  call hyper::BlockPartition::bulkInsertBegin(ptr %v3, ptr %transaction_1)        !1242 # Relation::generateBulkInsertBegin
+  call @hyper::BlockPartition::bulkInsertBegin(ptr %v3, ptr %transaction_1)       !1242 # Relation::generateBulkInsertBegin
   ret                                                                             !1262 # Relation::generateBulkInsertBegin
 }
 
 define exported void @_2_bulkInsertFinishRelation_animals_24(ptr %db_0) {
 body_0:
-  ptr %v1 = call hyper::HyperDatabase::getPartitionSlot(ptr %db_0, int32 0)       !1282 # auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
+  ptr %v1 = call @hyper::HyperDatabase::getPartitionSlot(ptr %db_0, int32 0)      !1282 # auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
   ptr %v2 = load int8* ptr %v1                                                    !1302 # Relation::computePartitionPtr
-  call hyper::BlockPartition::bulkInsertFinish(ptr %v2, ptr lambdaPtr _2_checkUniqueConstraintsPartition_animals_3)    !1329 # Relation::generateBulkInsertFinish
+  call @hyper::BlockPartition::bulkInsertFinish(ptr %v2, ptr lambdaPtr @_2_checkUniqueConstraintsPartition_animals_3)    !1329 # Relation::generateBulkInsertFinish
   ret                                                                             !1349 # Relation::generateBulkInsertFinish
 }
 
 define exported void @_2_bulkInsertTeardownRelation_animals_25(ptr %db_0, ptr %transaction_1) {
 body_0:
-  ptr %v2 = call hyper::HyperDatabase::getPartitionSlot(ptr %db_0, int32 0)       !1391 # auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
+  ptr %v2 = call @hyper::HyperDatabase::getPartitionSlot(ptr %db_0, int32 0)      !1391 # auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
   ptr %v3 = load int8* ptr %v2                                                    !1411 # Relation::computePartitionPtr
-  call hyper::BlockPartition::bulkInsertTeardown(ptr %v3, ptr %transaction_1)     !1427 # Relation::generateBulkInsertTeardown
+  call @hyper::BlockPartition::bulkInsertTeardown(ptr %v3, ptr %transaction_1)    !1427 # Relation::generateBulkInsertTeardown
   ret                                                                             !1447 # Relation::generateBulkInsertTeardown
 }
 

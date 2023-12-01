@@ -5,55 +5,55 @@
 
 declare exported int1 @_4_pipeline_0_start_1(ptr %queryState_0)
 declare void @_4_pipeline_0_initializeThreadState_groupby_executiontarget_2(ptr %queryState_0, ptr %threadStatePtr_1)
-declare void @server::WriteBuffer::QueryMessageBuffer::init(ptr %, ptr %, int32 %) = 0x55a2238daad0 !f2
+declare void @server::WriteBuffer::QueryMessageBuffer::init(ptr %, ptr %, int32 %) = 0x560bac2c9a20 !f2
 declare void @_4_pipeline_0_tearDownThreadState_groupby_executiontarget_4(ptr %queryState_0)
-declare void @server::WriteBuffer::QueryMessageBuffer::destroy(ptr %) = 0x55a2238dacc0 !f4
-declare ptr @hyper::ThreadStateContainer::create(ptr %, int64 %, int1 %, ptr %, ptr %) = 0x55a2278895c0 !f5
-declare void @hyper::QueryRuntime::setLastPipelineReached() = 0x55a2276af120 !f6
+declare void @server::WriteBuffer::QueryMessageBuffer::destroy(ptr %) = 0x560bac2c9c10 !f4
+declare ptr @hyper::ThreadStateContainer::create(ptr %, int64 %, int1 %, ptr %, ptr %) = 0x560bb031e960 !f5
+declare void @hyper::QueryRuntime::setLastPipelineReached() = 0x560bb01447a0 !f6
 declare int1 @_4_pipeline_0_serialWorker_groupby_executiontarget_8(ptr %arg_0, ptr %arg_1)
-declare void @hyper::NumericRuntime::outputBinaryInteger(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x55a22767e5d0 !f8
-declare void @hyper::NumericRuntime::outputPGBinaryInteger(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x55a22767fd90 !f9
-declare void @hyper::NumericRuntime::outputInteger(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x55a22767dba0 !f10
-declare void @server::LibpqRuntime::sendTuple(ptr %, ptr %, int32 %) = 0x55a22388aa20 !f11
-declare ptr @hyper::ThreadStateContainer::accessStateOfCurrentThread(ptr %) = 0x55a227889530 !f12
-declare memberfunc void @hyper::QueryResources::updateQueryMetricsAndHandleInterrupt(ptr %) = 0x55a2276ab7e0 !f13
-declare memberfunc void @server::WriteBuffer::QueryMessageBuffer::finalFlush(ptr %) = 0x55a2238db1d0 !f14
-declare void @hyper::ThreadStateContainer::destroy(ptr %, ptr %, ptr %) = 0x55a227889770 !f15
+declare void @hyper::NumericRuntime::outputBinaryInteger(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x560bb0113c50 !f8
+declare void @hyper::NumericRuntime::outputPGBinaryInteger(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x560bb0115410 !f9
+declare void @hyper::NumericRuntime::outputInteger(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x560bb0113220 !f10
+declare void @server::LibpqRuntime::sendTuple(ptr %, ptr %, int32 %) = 0x560bac279970 !f11
+declare ptr @hyper::ThreadStateContainer::accessStateOfCurrentThread(ptr %) = 0x560bb031e8d0 !f12
+declare memberfunc void @hyper::QueryResources::updateQueryMetricsAndHandleInterrupt(ptr %) = 0x560bb0140e60 !f13
+declare memberfunc void @server::WriteBuffer::QueryMessageBuffer::finalFlush(ptr %) = 0x560bac2ca120 !f14
+declare void @hyper::ThreadStateContainer::destroy(ptr %, ptr %, ptr %) = 0x560bb031eb10 !f15
 declare exported int1 @_4_pipeline_1_start_17(ptr %queryState_0)
 declare void @_4_pipeline_1_initializeThreadState_tablescan_groupby_18(ptr %queryState_0, ptr %threadStatePtr_1)
 declare void @_4_pipeline_1_tearDownThreadState_tablescan_groupby_19(ptr %queryState_0)
-declare void @hyper::QueryRuntime::executeScan(ptr %, ptr %, ptr %, ptr %, int64 %, ptr %, int32 %, int1 %, ptr %) = 0x55a2276af820 !f19
+declare void @hyper::QueryRuntime::executeScan(ptr %, ptr %, ptr %, ptr %, int64 %, ptr %, int32 %, int1 %, ptr %) = 0x560bb0144ea0 !f19
 declare int1 @_4_pipeline_1_serialWorker_tablescan_groupby_21(ptr %arg_0, ptr %arg_1, int64 %arg_2, int64 %arg_3)
-declare memberfunc void @hyper::Transaction::getCommitInfoByDatabaseOut(ptr %, ptr %, ptr %) = 0x55a227936690 !f21
-declare memberfunc ptr @hyper::HyperDatabase::getPartitionSlot(ptr %, int32 %) = 0x55a2250ae3c0 !f22
-declare memberfunc void @hyper::BlockPartition::prepareScan(ptr %, ptr %, ptr %, int64 %, int64 %, ptr %, ptr %) = 0x55a2263fd260 !f23
-declare memberfunc ptr @hyper::MemoryRegion::allocateAligned(ptr %, int64 %, int32 %, int1 %, int1 %) = 0x55a22a055390 !f24
-declare memberfunc int32 @hyper::BlockPartition::scan(ptr %, ptr %, ptr %, ptr %, ptr %, ptr %, ptr %, int32 %) = 0x55a2263fda30 !f25
-declare noreturn void @hyper::RuntimeException::throwAssertionFailedRaw(ptr %, int32 %) = 0x55a22a06e450 !f26
-declare memberfunc void @hyper::MemoryRegion::deallocateAligned(ptr %, ptr %, int64 %) = 0x55a22a0554a0 !f27
-declare memberfunc void @hyper::BlockPartition::teardownScan(ptr %, ptr %, ptr %, ptr %) = 0x55a2263fd490 !f28
+declare memberfunc void @hyper::Transaction::getCommitInfoByDatabaseOut(ptr %, ptr %, ptr %) = 0x560bb03cac80 !f21
+declare memberfunc ptr @hyper::HyperDatabase::getPartitionSlot(ptr %, int32 %) = 0x560badabea00 !f22
+declare memberfunc void @hyper::BlockPartition::prepareScan(ptr %, ptr %, ptr %, int64 %, int64 %, ptr %, ptr %) = 0x560baee92dc0 !f23
+declare memberfunc ptr @hyper::MemoryRegion::allocateAligned(ptr %, int64 %, int32 %, int1 %, int1 %) = 0x560bb2aea030 !f24
+declare memberfunc int32 @hyper::BlockPartition::scan(ptr %, ptr %, ptr %, ptr %, ptr %, ptr %, ptr %, int32 %) = 0x560baee93590 !f25
+declare noreturn void @hyper::RuntimeException::throwAssertionFailedRaw(ptr %, int32 %) = 0x560bb2b030d0 !f26
+declare memberfunc void @hyper::MemoryRegion::deallocateAligned(ptr %, ptr %, int64 %) = 0x560bb2aea140 !f27
+declare memberfunc void @hyper::BlockPartition::teardownScan(ptr %, ptr %, ptr %, ptr %) = 0x560baee92ff0 !f28
 declare exported void @_4_initializeQueryState_30(ptr %queryState_0, ptr %queryResources_1)
-declare void @hyper::LambdaWorkRecordBuffer::init(ptr %, ptr %) = 0x55a2240f4ef0 !f30
+declare void @hyper::LambdaWorkRecordBuffer::init(ptr %, ptr %) = 0x560bacae6cc0 !f30
 declare exported void @_4_tearDownQueryState_32(ptr %queryState_0)
-declare void @hyper::LambdaWorkRecordBuffer::destroy(ptr %) = 0x55a2240f4f20 !f32
+declare void @hyper::LambdaWorkRecordBuffer::destroy(ptr %) = 0x560bacae6cf0 !f32
 
 define exported int1 @_4_pipeline_0_start_1(ptr %queryState_0) {
 body_0:
   ptr %queryResources_1 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 0    !807  # QueryStatePtr::getQueryResourcesPtr
-  ptr %v2 = call hyper::ThreadStateContainer::create(ptr %queryResources_1, int64 96, int1 true, ptr lambdaPtr _4_pipeline_0_initializeThreadState_groupby_executiontarget_2, ptr lambdaPtr _4_pipeline_0_tearDownThreadState_groupby_executiontarget_4)    !882  # Pipeline::initPipeline
+  ptr %v2 = call @hyper::ThreadStateContainer::create(ptr %queryResources_1, int64 96, int1 true, ptr lambdaPtr @_4_pipeline_0_initializeThreadState_groupby_executiontarget_2, ptr lambdaPtr @_4_pipeline_0_tearDownThreadState_groupby_executiontarget_4)    !882  # Pipeline::initPipeline
   store {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, ptr %v2, int32 0, int32 3    !914  # Pipeline::initPipeline
-  call hyper::QueryRuntime::setLastPipelineReached()                              !942  # ./hyper/tools/hyperd/LibpqConsumer.cpp:214
-  ptr %v6 = call hyper::ThreadStateContainer::accessStateOfCurrentThread(ptr %v2)    !2245 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	PipelineContext::accessStateOfCurrentThread
+  call @hyper::QueryRuntime::setLastPipelineReached()                             !942  # ./hyper/tools/hyperd/LibpqConsumer.cpp:214
+  ptr %v6 = call @hyper::ThreadStateContainer::accessStateOfCurrentThread(ptr %v2)    !2245 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	PipelineContext::accessStateOfCurrentThread
   ptr %queryResources_7 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 0    !2261 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	QueryStatePtr::getQueryResourcesPtr
   ptr %queryNotification_8 = load hyper::QueryResources ptr %queryResources_7, int32 0, int32 4    !2310 # TransactionTranslator::checkForCancelation	
   int8 %v9 = load atomic int8 ptr %queryNotification_8                            !2351 # TransactionTranslator::checkForCancelation	
   int1 %v10 = isnotzero int8 %v9                                                  !2367 # TransactionTranslator::checkForCancelation	
   br int1 %v10, thencancellationCheckNotified_1, donecancellationCheckNotified_2    !2378 # TransactionTranslator::checkForCancelation	
 thencancellationCheckNotified_1:
-  call hyper::QueryResources::updateQueryMetricsAndHandleInterrupt(ptr %queryResources_7)    !2397 # TransactionTranslator::checkForCancelation	auto hyper::codegen::proxy<hyper::QueryResources>::updateQueryMetricsAndHandleInterrupt<>
+  call @hyper::QueryResources::updateQueryMetricsAndHandleInterrupt(ptr %queryResources_7)    !2397 # TransactionTranslator::checkForCancelation	auto hyper::codegen::proxy<hyper::QueryResources>::updateQueryMetricsAndHandleInterrupt<>
   br donecancellationCheckNotified_2                                              !2413 # TransactionTranslator::checkForCancelation	
 donecancellationCheckNotified_2:
-  int1 %v14 = call _4_pipeline_0_serialWorker_groupby_executiontarget_8(ptr %queryState_0, ptr %v6)    !2424 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	Pipeline::doLaunch
+  int1 %v14 = call @_4_pipeline_0_serialWorker_groupby_executiontarget_8(ptr %queryState_0, ptr %v6)    !2424 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	Pipeline::doLaunch
   ptr %resultTupleCount_15 = gep {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 4    !2444 # ./hyper/tools/hyperd/LibpqConsumer.cpp:218
   int64 %workerThreads_16 = load hyper::ThreadStateContainer ptr %v2, int32 0, int32 0    !2484 # PipelineContext::generateLoopOverThreadStates
   int64 %threadStateSize_17 = load hyper::ThreadStateContainer ptr %v2, int32 0, int32 1    !2521 # PipelineContext::generateLoopOverThreadStates
@@ -72,7 +72,7 @@ thenThreadStateInitialized_5:
   int64 %v28 = add int64 %v27, int64 %tupleCount_26                               !2775 # ./hyper/tools/hyperd/LibpqConsumer.cpp:221
   store int64 ptr %resultTupleCount_15, int64 %v28                                !2790 # ./hyper/tools/hyperd/LibpqConsumer.cpp:221
   ptr %messageBuffer_30 = gep {server::WriteBuffer::QueryMessageBuffer, int64} ptr %v22, int32 0, int32 0    !2810 # ./hyper/tools/hyperd/LibpqConsumer.cpp:224
-  call server::WriteBuffer::QueryMessageBuffer::finalFlush(ptr %messageBuffer_30)    !2847 # auto hyper::codegen::proxy<server::WriteBuffer::MessageBuffer<hyper::RegionAllocator<std::byte, false>>>::finalFlush<>
+  call @server::WriteBuffer::QueryMessageBuffer::finalFlush(ptr %messageBuffer_30)    !2847 # auto hyper::codegen::proxy<server::WriteBuffer::MessageBuffer<hyper::RegionAllocator<std::byte, false>>>::finalFlush<>
   br doneThreadStateInitialized_6                                                 !2863 # PipelineContext::generateLoopOverThreadStates
 doneThreadStateInitialized_6:
   int64 %v33 = add int64 %threadId_19, int64 1                                    !2874 # PipelineContext::generateLoopOverThreadStates
@@ -80,7 +80,7 @@ doneThreadStateInitialized_6:
   br int1 %v34, loopForEachThreadState_3, loopDoneForEachThreadState_4            !2904 # PipelineContext::generateLoopOverThreadStates
 loopDoneForEachThreadState_4:
   ptr %queryResources_36 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 0    !2923 # QueryStatePtr::getQueryResourcesPtr
-  call hyper::ThreadStateContainer::destroy(ptr %queryResources_36, ptr %queryState_0, ptr %v2)    !2961 # Pipeline::finishPipeline
+  call @hyper::ThreadStateContainer::destroy(ptr %queryResources_36, ptr %queryState_0, ptr %v2)    !2961 # Pipeline::finishPipeline
   store {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, ptr 0x0, int32 0, int32 3    !2985 # Pipeline::finishPipeline
   ret int1 false                                                                  !3013 # Pipeline::generateExecuteFunction
 }
@@ -93,7 +93,7 @@ body_0:
 thenUninitialized_1:
   ptr %messageBuffer_6 = gep {server::WriteBuffer::QueryMessageBuffer, int64} ptr %threadStatePtr_1, int32 0, int32 0    !156  # ./hyper/tools/hyperd/LibpqConsumer.cpp:123
   ptr %writeBuffer_7 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 11    !204  # ./hyper/tools/hyperd/LibpqConsumer.cpp:123
-  call server::WriteBuffer::QueryMessageBuffer::init(ptr %messageBuffer_6, ptr %writeBuffer_7, int32 1)    !239  # ./hyper/tools/hyperd/LibpqConsumer.cpp:123
+  call @server::WriteBuffer::QueryMessageBuffer::init(ptr %messageBuffer_6, ptr %writeBuffer_7, int32 1)    !239  # ./hyper/tools/hyperd/LibpqConsumer.cpp:123
   store {server::WriteBuffer::QueryMessageBuffer, int64} ptr %threadStatePtr_1, int64 0, int32 0, int32 1    !278  # ./hyper/tools/hyperd/LibpqConsumer.cpp:125
   store int1 ptr %v2, int1 true                                                   !314  # Pipeline::generateThreadStateInitializer
   br doneUninitialized_2                                                          !334  # Pipeline::generateThreadStateInitializer
@@ -117,7 +117,7 @@ loopForEachThreadState_1:
   br int1 %v10, thenThreadStateInitialized_3, doneThreadStateInitialized_4        !653  # PipelineContext::generateLoopOverThreadStates
 thenThreadStateInitialized_3:
   ptr %messageBuffer_12 = gep {server::WriteBuffer::QueryMessageBuffer, int64} ptr %v8, int32 0, int32 0    !672  # ./hyper/tools/hyperd/LibpqConsumer.cpp:128
-  call server::WriteBuffer::QueryMessageBuffer::destroy(ptr %messageBuffer_12)    !709  # ./hyper/tools/hyperd/LibpqConsumer.cpp:129
+  call @server::WriteBuffer::QueryMessageBuffer::destroy(ptr %messageBuffer_12)    !709  # ./hyper/tools/hyperd/LibpqConsumer.cpp:129
   br doneThreadStateInitialized_4                                                 !725  # PipelineContext::generateLoopOverThreadStates
 doneThreadStateInitialized_4:
   int64 %v15 = add int64 %threadId_5, int64 1                                     !751  # PipelineContext::generateLoopOverThreadStates
@@ -131,7 +131,7 @@ define int1 @_4_pipeline_0_serialWorker_groupby_executiontarget_8(ptr %arg_0, pt
   ptr %values_20 = alloca int8*[2] align 8
   ptr %outputDescription_22 = alloca server::LibpqRuntime::OutputDescription align 8
 body_0:
-  call _4_pipeline_0_initializeThreadState_groupby_executiontarget_2(ptr %arg_0, ptr %arg_1)    !982  # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	PipelineContext::initializeThreadState
+  call @_4_pipeline_0_initializeThreadState_groupby_executiontarget_2(ptr %arg_0, ptr %arg_1)    !982  # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	PipelineContext::initializeThreadState
   ptr %groupBySingleResult_5 = gep {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %arg_0, int32 0, int32 8    !1091 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	
   ptr %v7 = gep <{int32, int8[1]}> ptr %groupBySingleResult_5, int32 0, int32 1    !1172 # AggregationLogicTranslator::computeValues	UpdateableStorage::NullIndicator::NullIndicator
   ptr %v8 = gep int8[1] ptr %v7, int32 0, int32 0                                 !1196 # AggregationLogicTranslator::computeValues	UpdateableStorage::NullIndicator::NullIndicator
@@ -166,42 +166,42 @@ elseNull_6:
   int1 %v35 = eq int16 %v34, int16 2                                              !1935 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:180
   br int1 %v35, thenIsHyperBinary_8, elseIsHyperBinary_9                          !1950 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:194
 thenIsHyperBinary_8:
-  call hyper::NumericRuntime::outputBinaryInteger(ptr %stringAllocator_28, ptr 0x55a22388a520, ptr %outputDescription_22, ptr @type_18, int32 %v15)    !1969 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:182
+  call @hyper::NumericRuntime::outputBinaryInteger(ptr %stringAllocator_28, ptr 0x560bac279470, ptr %outputDescription_22, ptr @type_18, int32 %v15)    !1969 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:182
   br doneIsHyperBinary_7                                                          !2001 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:194
 elseIsHyperBinary_9:
   int1 %v39 = eq int16 %v34, int16 1                                              !2021 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:186
   br int1 %v39, thenIsPGBinary_11, elseIsPGBinary_12                              !2036 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:193
 thenIsPGBinary_11:
-  call hyper::NumericRuntime::outputPGBinaryInteger(ptr %stringAllocator_28, ptr 0x55a22388a520, ptr %outputDescription_22, ptr @type_18, int32 %v15)    !2055 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:188
+  call @hyper::NumericRuntime::outputPGBinaryInteger(ptr %stringAllocator_28, ptr 0x560bac279470, ptr %outputDescription_22, ptr @type_18, int32 %v15)    !2055 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:188
   br doneIsPGBinary_10                                                            !2087 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:193
 elseIsPGBinary_12:
-  call hyper::NumericRuntime::outputInteger(ptr %stringAllocator_28, ptr 0x55a22388a520, ptr %outputDescription_22, ptr @type_18, int32 %v15)    !2098 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:191
+  call @hyper::NumericRuntime::outputInteger(ptr %stringAllocator_28, ptr 0x560bac279470, ptr %outputDescription_22, ptr @type_18, int32 %v15)    !2098 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:191
   br doneIsPGBinary_10                                                            !2130 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:193
 doneIsPGBinary_10:
   br doneIsHyperBinary_7                                                          !2141 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:194
 doneIsHyperBinary_7:
   br doneNull_4                                                                   !2152 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:195
 doneNull_4:
-  call server::LibpqRuntime::sendTuple(ptr %messageBuffer_21, ptr %values_20, int32 1)    !2163 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:208
+  call @server::LibpqRuntime::sendTuple(ptr %messageBuffer_21, ptr %values_20, int32 1)    !2163 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	./hyper/tools/hyperd/LibpqConsumer.cpp:208
   ret int1 true                                                                   !2187 # GroupByTranslator::SingleGroupResultMergingLogic::produceResult	Pipeline::doLaunch
 }
 
 define exported int1 @_4_pipeline_1_start_17(ptr %queryState_0) {
 body_0:
   ptr %queryResources_1 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 0    !3712 # QueryStatePtr::getQueryResourcesPtr
-  ptr %v2 = call hyper::ThreadStateContainer::create(ptr %queryResources_1, int64 6, int1 true, ptr lambdaPtr _4_pipeline_1_initializeThreadState_tablescan_groupby_18, ptr lambdaPtr _4_pipeline_1_tearDownThreadState_tablescan_groupby_19)    !3787 # Pipeline::initPipeline
+  ptr %v2 = call @hyper::ThreadStateContainer::create(ptr %queryResources_1, int64 6, int1 true, ptr lambdaPtr @_4_pipeline_1_initializeThreadState_tablescan_groupby_18, ptr lambdaPtr @_4_pipeline_1_tearDownThreadState_tablescan_groupby_19)    !3787 # Pipeline::initPipeline
   store {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, ptr %v2, int32 0, int32 6    !3819 # Pipeline::initPipeline
   store {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int1 false, int32 0, int32 10    !3858 # GroupByTranslator::SingleGroupResultMergingLogic::reset	
   ptr %groupBySingleResult_5 = gep {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 8    !3886 # GroupByTranslator::SingleGroupResultMergingLogic::reset	
   ptr %v6 = gep <{int32, int8[1]}> ptr %groupBySingleResult_5, int32 0, int32 1    !3929 # AggregationLogicTranslator::createStaticValues	UpdateableStorage::NullIndicator::NullIndicator
   ptr %v7 = gep int8[1] ptr %v6, int32 0, int32 0                                 !3953 # AggregationLogicTranslator::createStaticValues	UpdateableStorage::NullIndicator::NullIndicator
   store int8 ptr %v7, int8 1                                                      !3977 # AggregationLogicTranslator::createStaticValues	UpdateableStorage::NullIndicator::writeChanged
-  ptr %v9 = call hyper::ThreadStateContainer::accessStateOfCurrentThread(ptr %v2)    !4012 # TableScanTranslator::drivePipeline	PipelineContext::accessStateOfCurrentThread
-  call _4_pipeline_1_initializeThreadState_tablescan_groupby_18(ptr %queryState_0, ptr %v9)    !4028 # TableScanTranslator::drivePipeline	PipelineContext::initializeThreadState
+  ptr %v9 = call @hyper::ThreadStateContainer::accessStateOfCurrentThread(ptr %v2)    !4012 # TableScanTranslator::drivePipeline	PipelineContext::accessStateOfCurrentThread
+  call @_4_pipeline_1_initializeThreadState_tablescan_groupby_18(ptr %queryState_0, ptr %v9)    !4028 # TableScanTranslator::drivePipeline	PipelineContext::initializeThreadState
   ptr %workRecordBuffer_11 = gep {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 7    !4059 # TableScanTranslator::drivePipeline	
   ptr %threadStateContainerPtr_12 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 6    !6393 # TableScanTranslator::drivePipeline	Pipeline::getThreadStateContainerFromQueryState
   ptr %queryResources_13 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 0    !6440 # TableScanTranslator::drivePipeline	QueryStatePtr::getQueryResourcesPtr
-  call hyper::QueryRuntime::executeScan(ptr %queryResources_13, ptr %queryState_0, ptr %threadStateContainerPtr_12, ptr %workRecordBuffer_11, int64 131072, ptr 0x7f30f8000d40, int32 0, int1 true, ptr lambdaPtr _4_pipeline_1_serialWorker_tablescan_groupby_21)    !6489 # TableScanTranslator::drivePipeline	Pipeline::doLaunch
+  call @hyper::QueryRuntime::executeScan(ptr %queryResources_13, ptr %queryState_0, ptr %threadStateContainerPtr_12, ptr %workRecordBuffer_11, int64 131072, ptr 0x7f2618000d40, int32 0, int1 true, ptr lambdaPtr @_4_pipeline_1_serialWorker_tablescan_groupby_21)    !6489 # TableScanTranslator::drivePipeline	Pipeline::doLaunch
   int64 %workerThreads_16 = load hyper::ThreadStateContainer ptr %v2, int32 0, int32 0    !6575 # GroupByTranslator::SingleGroupResultMergingLogic::mergeThreadStates	PipelineContext::generateLoopOverThreadStates
   int64 %threadStateSize_17 = load hyper::ThreadStateContainer ptr %v2, int32 0, int32 1    !6612 # GroupByTranslator::SingleGroupResultMergingLogic::mergeThreadStates	PipelineContext::generateLoopOverThreadStates
   br loopForEachThreadState_1                                                     !6651 # GroupByTranslator::SingleGroupResultMergingLogic::mergeThreadStates	PipelineContext::generateLoopOverThreadStates
@@ -226,7 +226,7 @@ doneThreadStateInitialized_4:
   br int1 %v36, loopForEachThreadState_1, loopDoneForEachThreadState_2            !7108 # GroupByTranslator::SingleGroupResultMergingLogic::mergeThreadStates	PipelineContext::generateLoopOverThreadStates
 loopDoneForEachThreadState_2:
   ptr %queryResources_38 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 0    !7127 # QueryStatePtr::getQueryResourcesPtr
-  call hyper::ThreadStateContainer::destroy(ptr %queryResources_38, ptr %queryState_0, ptr %v2)    !7165 # Pipeline::finishPipeline
+  call @hyper::ThreadStateContainer::destroy(ptr %queryResources_38, ptr %queryState_0, ptr %v2)    !7165 # Pipeline::finishPipeline
   store {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, ptr 0x0, int32 0, int32 6    !7189 # Pipeline::finishPipeline
   ret int1 false                                                                  !7217 # Pipeline::generateExecuteFunction
 }
@@ -278,13 +278,13 @@ define int1 @_4_pipeline_1_serialWorker_tablescan_groupby_21(ptr %arg_0, ptr %ar
   ptr %scanState_31 = alloca hyper::BlockPartition::ScanState align 8
   ptr %columns_34 = alloca int8*[2] align 8
 body_0:
-  call _4_pipeline_1_initializeThreadState_tablescan_groupby_18(ptr %arg_0, ptr %arg_1)    !4170 # TableScanTranslator::drivePipeline	PipelineContext::initializeThreadState
+  call @_4_pipeline_1_initializeThreadState_tablescan_groupby_18(ptr %arg_0, ptr %arg_1)    !4170 # TableScanTranslator::drivePipeline	PipelineContext::initializeThreadState
   ptr %queryResources_6 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %arg_0, int32 0, int32 0    !4201 # TableScanTranslator::drivePipeline	QueryStatePtr::getQueryResourcesPtr
   ptr %transaction_7 = load hyper::QueryResources ptr %queryResources_6, int32 0, int32 0    !4239 # TableScanTranslator::drivePipeline	QueryStatePtr::getTransactionPtr
-  call hyper::Transaction::getCommitInfoByDatabaseOut(ptr %transaction_7, ptr 0x7f30f8000d40, ptr %commitInfo_8)    !4300 # TransactionTranslator::getCommitInfoByDatabase	auto hyper::codegen::proxy<hyper::Transaction>::getCommitInfoByDatabaseOut<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Database>> const&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::CommitInfo>>>
+  call @hyper::Transaction::getCommitInfoByDatabaseOut(ptr %transaction_7, ptr 0x7f2618000d40, ptr %commitInfo_8)    !4300 # TransactionTranslator::getCommitInfoByDatabase	auto hyper::codegen::proxy<hyper::Transaction>::getCommitInfoByDatabaseOut<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Database>> const&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::CommitInfo>>>
   br cont_v10_2                                                                   !4324 # TableScanTranslator::drivePipeline	
 cont_v10_2:
-  ptr %v11 = call hyper::HyperDatabase::getPartitionSlot(ptr 0x7f30f8000d40, int32 0)    !4343 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
+  ptr %v11 = call @hyper::HyperDatabase::getPartitionSlot(ptr 0x7f2618000d40, int32 0)    !4343 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::HyperDatabase>::getPartitionSlot<hyper::codegen::values::UInt32>
   ptr %v12 = load int8* ptr %v11                                                  !4363 # TableScanTranslator::drivePipeline	Relation::computePartitionPtr
   ptr %queryResources_13 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %arg_0, int32 0, int32 0    !4379 # TableScanTranslator::drivePipeline	QueryStatePtr::getQueryResourcesPtr
   int64 %size_14 = load hyper::BlockPartition ptr %v12, int32 0, int32 1          !4417 # TableScanTranslator::drivePipeline	PartitionBlock::getSize
@@ -303,12 +303,12 @@ cont_v10_2:
   store hyper::Partition::ScanData ptr %scanData_22, int32 1, int32 0, int32 2    !4765 # TableScanTranslator::drivePipeline	generateConstructAttributeLookup
   store hyper::Partition::ScanData ptr %scanData_22, ptr @attributes_32, int32 0, int32 8    !4828 # TableScanTranslator::drivePipeline	PartitionBlock::generateTidScan
   ptr %memory_32 = gep hyper::QueryResources ptr %queryResources_13, int32 0, int32 1    !4881 # TableScanTranslator::drivePipeline	PartitionBlock::generateTidScan
-  call hyper::BlockPartition::prepareScan(ptr %v12, ptr %scanData_22, ptr %scanState_31, int64 %v20, int64 %v16, ptr %memory_32, ptr 0x0)    !4911 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::BlockPartition>::prepareScan<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Partition::ScanData>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::BlockPartition::ScanState>>&, hyper::codegen::values::UInt64&, hyper::codegen::values::UInt64&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::MemoryRegion>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::DistributionInfo>> const&>
-  ptr %v35 = call hyper::MemoryRegion::allocateAligned(ptr %memory_32, int64 9216, int32 16, int1 false, int1 false)    !5000 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::MemoryRegion>::allocateAligned<hyper::codegen::values::UInt64&, hyper::codegen::values::UInt32, hyper::codegen::values::UInt1, hyper::codegen::values::UInt1>
+  call @hyper::BlockPartition::prepareScan(ptr %v12, ptr %scanData_22, ptr %scanState_31, int64 %v20, int64 %v16, ptr %memory_32, ptr 0x0)    !4911 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::BlockPartition>::prepareScan<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Partition::ScanData>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::BlockPartition::ScanState>>&, hyper::codegen::values::UInt64&, hyper::codegen::values::UInt64&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::MemoryRegion>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::DistributionInfo>> const&>
+  ptr %v35 = call @hyper::MemoryRegion::allocateAligned(ptr %memory_32, int64 9216, int32 16, int1 false, int1 false)    !5000 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::MemoryRegion>::allocateAligned<hyper::codegen::values::UInt64&, hyper::codegen::values::UInt32, hyper::codegen::values::UInt1, hyper::codegen::values::UInt1>
   ptr %memory_36 = gep hyper::QueryResources ptr %queryResources_13, int32 0, int32 1    !5032 # TableScanTranslator::drivePipeline	PartitionBlock::generateTidScan
   br loopBlocks_4                                                                 !5062 # TableScanTranslator::drivePipeline	loopOverTuples
 loopBlocks_4:
-  int32 %v38 = call hyper::BlockPartition::scan(ptr %v12, ptr %scanData_22, ptr %scanState_31, ptr %memory_36, ptr %v35, ptr %columns_34, ptr %commitInfo_8, int32 1024)    !5084 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::BlockPartition>::scan<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Partition::ScanData>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::BlockPartition::ScanState>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::MemoryRegion>>&, hyper::codegen::values::Ptr<hyper::codegen::values::UInt8>&, hyper::codegen::values::Ptr<hyper::codegen::values::Ptr<hyper::codegen::values::UInt8>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::CommitInfo>> const&, hyper::codegen::values::UInt32>
+  int32 %v38 = call @hyper::BlockPartition::scan(ptr %v12, ptr %scanData_22, ptr %scanState_31, ptr %memory_36, ptr %v35, ptr %columns_34, ptr %commitInfo_8, int32 1024)    !5084 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::BlockPartition>::scan<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Partition::ScanData>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::BlockPartition::ScanState>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::MemoryRegion>>&, hyper::codegen::values::Ptr<hyper::codegen::values::UInt8>&, hyper::codegen::values::Ptr<hyper::codegen::values::Ptr<hyper::codegen::values::UInt8>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::CommitInfo>> const&, hyper::codegen::values::UInt32>
   int1 %v39 = iszero int32 %v38                                                   !5128 # TableScanTranslator::drivePipeline	loopOverTuples
   br int1 %v39, loopDoneBlocks_5, cont_v39_6                                      !5139 # TableScanTranslator::drivePipeline	loopOverTuples
 cont_v39_6:
@@ -326,7 +326,7 @@ loopTuples_7:
   int1 %v53 = eq int8 %v49, int8 2                                                !5395 # IURefTranslator::deriveValue	SqlValue::debugAssertNotNull
   br int1 %v53, thenAssertFailed_9, doneAssertFailed_10                           !5410 # IURefTranslator::deriveValue	SqlValue::debugAssertNotNull
 thenAssertFailed_9:
-  call hyper::RuntimeException::throwAssertionFailedRaw(ptr 0x0, int32 0)         !5429 # IURefTranslator::deriveValue	SqlValue::debugAssertNotNull
+  call @hyper::RuntimeException::throwAssertionFailedRaw(ptr 0x0, int32 0)        !5429 # IURefTranslator::deriveValue	SqlValue::debugAssertNotNull
   br doneAssertFailed_10                                                          !5449 # IURefTranslator::deriveValue	SqlValue::debugAssertNotNull
 doneAssertFailed_10:
   store {<{int32, int8[1]}>, int1, <{}>} ptr %arg_1, int1 true, int32 0, int32 1    !5460 # GroupByTranslator::SingleGroupResultMergingLogic::mergeNonDistinctValues	
@@ -359,7 +359,7 @@ doneExistingNull_11:
   int1 %v85 = isnotzero int8 %v84                                                 !6202 # TransactionTranslator::checkForCancelation	
   br int1 %v85, thencancellationCheckNotified_16, donecancellationCheckNotified_17    !6213 # TransactionTranslator::checkForCancelation	
 thencancellationCheckNotified_16:
-  call hyper::QueryResources::updateQueryMetricsAndHandleInterrupt(ptr %queryResources_82)    !6232 # TransactionTranslator::checkForCancelation	auto hyper::codegen::proxy<hyper::QueryResources>::updateQueryMetricsAndHandleInterrupt<>
+  call @hyper::QueryResources::updateQueryMetricsAndHandleInterrupt(ptr %queryResources_82)    !6232 # TransactionTranslator::checkForCancelation	auto hyper::codegen::proxy<hyper::QueryResources>::updateQueryMetricsAndHandleInterrupt<>
   br donecancellationCheckNotified_17                                             !6248 # TransactionTranslator::checkForCancelation	
 donecancellationCheckNotified_17:
   int64 %v89 = add int64 %offset_45, int64 1                                      !6259 # TableScanTranslator::drivePipeline	loopOverTuples
@@ -368,8 +368,8 @@ donecancellationCheckNotified_17:
 loopDoneTuples_8:
   br loopBlocks_4                                                                 !6308 # TableScanTranslator::drivePipeline	loopOverTuples
 loopDoneBlocks_5:
-  call hyper::MemoryRegion::deallocateAligned(ptr %memory_32, ptr %v35, int64 9216)    !6319 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::MemoryRegion>::deallocateAligned<hyper::codegen::values::Ptr<hyper::codegen::values::UInt8>&, hyper::codegen::values::UInt64&>
-  call hyper::BlockPartition::teardownScan(ptr %v12, ptr %scanData_22, ptr %scanState_31, ptr %memory_32)    !6343 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::BlockPartition>::teardownScan<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Partition::ScanData>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::BlockPartition::ScanState>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::MemoryRegion>>&>
+  call @hyper::MemoryRegion::deallocateAligned(ptr %memory_32, ptr %v35, int64 9216)    !6319 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::MemoryRegion>::deallocateAligned<hyper::codegen::values::Ptr<hyper::codegen::values::UInt8>&, hyper::codegen::values::UInt64&>
+  call @hyper::BlockPartition::teardownScan(ptr %v12, ptr %scanData_22, ptr %scanState_31, ptr %memory_32)    !6343 # TableScanTranslator::drivePipeline	auto hyper::codegen::proxy<hyper::BlockPartition>::teardownScan<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Partition::ScanData>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::BlockPartition::ScanState>>&, hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::MemoryRegion>>&>
   br partitionDone_3                                                              !6371 # TableScanTranslator::drivePipeline	Partition::generateScan
 partitionDone_3:
   ret int1 true                                                                   !6382 # TableScanTranslator::drivePipeline	Pipeline::doLaunch
@@ -384,7 +384,7 @@ body_0:
   ptr %queryResources_6 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 0    !7404 # TableScanTranslator::initializeQueryState	QueryStatePtr::getQueryResourcesPtr
   ptr %memory_7 = gep hyper::QueryResources ptr %queryResources_6, int32 0, int32 1    !7442 # TableScanTranslator::initializeQueryState	QueryStatePtr::getQueryMemory
   ptr %workRecordBuffer_8 = gep {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 7    !7472 # TableScanTranslator::initializeQueryState	
-  call hyper::LambdaWorkRecordBuffer::init(ptr %workRecordBuffer_8, ptr %memory_7)    !7512 # TableScanTranslator::initializeQueryState	
+  call @hyper::LambdaWorkRecordBuffer::init(ptr %workRecordBuffer_8, ptr %memory_7)    !7512 # TableScanTranslator::initializeQueryState	
   int32 %v10 = load int32 ptr %constructorCounter_4                               !7532 # CompilationContext::constructInitializeStateLogic
   int32 %v11 = add int32 %v10, int32 1                                            !7548 # CompilationContext::constructInitializeStateLogic
   store int32 ptr %constructorCounter_4, int32 %v11                               !7563 # CompilationContext::constructInitializeStateLogic
@@ -428,7 +428,7 @@ destructDone_1:
   ret                                                                             !8822 # CompilationContext::constructTearDownStateFunction
 destruct_2:
   ptr %workRecordBuffer_1 = gep {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 7    !8297 # TableScanTranslator::tearDownQueryState	
-  call hyper::LambdaWorkRecordBuffer::destroy(ptr %workRecordBuffer_1)            !8337 # TableScanTranslator::tearDownQueryState	
+  call @hyper::LambdaWorkRecordBuffer::destroy(ptr %workRecordBuffer_1)           !8337 # TableScanTranslator::tearDownQueryState	
   br destructDone_1                                                               !8353 # CompilationContext::constructTearDownStateLogic
 destruct_3:
   ptr %threadStateContainerPtr_4 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 3    !8364 # Pipeline::tearDownQueryState
@@ -440,13 +440,13 @@ destruct_6:
   br int1 %v12, thenThreadStateContainerNotCleanedUp_7, doneThreadStateContainerNotCleanedUp_8    !8583 # Pipeline::tearDownQueryState
 thenThreadStateContainerNotCleanedUp_4:
   ptr %queryResources_7 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 0    !8441 # QueryStatePtr::getQueryResourcesPtr
-  call hyper::ThreadStateContainer::destroy(ptr %queryResources_7, ptr %queryState_0, ptr %threadStateContainerPtr_4)    !8479 # Pipeline::tearDownQueryState
+  call @hyper::ThreadStateContainer::destroy(ptr %queryResources_7, ptr %queryState_0, ptr %threadStateContainerPtr_4)    !8479 # Pipeline::tearDownQueryState
   br doneThreadStateContainerNotCleanedUp_5                                       !8503 # Pipeline::tearDownQueryState
 doneThreadStateContainerNotCleanedUp_5:
   br destruct_2                                                                   !8514 # CompilationContext::constructTearDownStateLogic
 thenThreadStateContainerNotCleanedUp_7:
   ptr %queryResources_14 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, int1, hyper::ThreadStateContainer*, hyper::LambdaWorkRecordBuffer, <{int32, int8[1]}>, <{}>, int1, server::WriteBuffer*, int16*} ptr %queryState_0, int32 0, int32 0    !8602 # QueryStatePtr::getQueryResourcesPtr
-  call hyper::ThreadStateContainer::destroy(ptr %queryResources_14, ptr %queryState_0, ptr %threadStateContainerPtr_11)    !8640 # Pipeline::tearDownQueryState
+  call @hyper::ThreadStateContainer::destroy(ptr %queryResources_14, ptr %queryState_0, ptr %threadStateContainerPtr_11)    !8640 # Pipeline::tearDownQueryState
   br doneThreadStateContainerNotCleanedUp_8                                       !8664 # Pipeline::tearDownQueryState
 doneThreadStateContainerNotCleanedUp_8:
   br destruct_3                                                                   !8675 # CompilationContext::constructTearDownStateLogic
@@ -472,7 +472,7 @@ unreachable_9:
 !f22 = "./hyper/rts/database/HyperDatabase.cpp:384"
 !f23 = "./hyper/rts/partition/BlockPartition.cpp:3514"
 !f24 = "./hyper/infra/util/MemoryRegion.cpp:625"
-!f25 = "./hyper/rts/partition/BlockPartition.cpp:4258"
+!f25 = "./hyper/rts/partition/BlockPartition.cpp:4260"
 !f26 = "./hyper/infra/util/RuntimeException.cpp:523"
 !f27 = "./hyper/infra/util/MemoryRegion.cpp:631"
 !f28 = "./hyper/rts/partition/BlockPartition.cpp:3530"

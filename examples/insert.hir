@@ -5,51 +5,51 @@
 
 declare exported int1 @_3_pipeline_0_start_1(ptr %queryState_0)
 declare void @_3_pipeline_0_initializeThreadState_tableconstruction_insert_executiontarget_2(ptr %queryState_0, ptr %threadStatePtr_1)
-declare void @hyper::DebugStringStream::init(ptr %) = 0x55a22797e7b0 !f2
+declare void @hyper::DebugStringStream::init(ptr %) = 0x560bb0412d90 !f2
 declare void @_3_pipeline_0_tearDownThreadState_tableconstruction_insert_executiontarget_4(ptr %queryState_0)
-declare void @hyper::DebugStringStream::destroy(ptr %) = 0x55a22797e7e0 !f4
-declare ptr @hyper::ThreadStateContainer::create(ptr %, int64 %, int1 %, ptr %, ptr %) = 0x55a2278895c0 !f5
-declare memberfunc void @hyper::Transaction::prepareUndoLogging(ptr %, ptr %, int32 %) = 0x55a227937560 !f6
+declare void @hyper::DebugStringStream::destroy(ptr %) = 0x560bb0412dc0 !f4
+declare ptr @hyper::ThreadStateContainer::create(ptr %, int64 %, int1 %, ptr %, ptr %) = 0x560bb031e960 !f5
+declare memberfunc void @hyper::Transaction::prepareUndoLogging(ptr %, ptr %, int32 %) = 0x560bb03cbb50 !f6
 declare int1 @_3_pipeline_0_serialWorker_tableconstruction_insert_executiontarget_8(ptr %arg_0, ptr %arg_1)
-declare data128 @hyper::StringRuntime::build(ptr %, int32 %, int8 %) = 0x55a227854650 !f8
-declare noreturn void @hyper::RuntimeException::throwTupleTooLargeException() = 0x55a22a06bd10 !f9
-declare memberfunc ptr @hyper::BulkInsert::storeInputTuple(ptr %, int64 %) = 0x55a225f89860 !f10
-declare ptr @hyper::StringRuntime::writeStringBody(ptr %, data128 %) = 0x55a2278547f0 !f11
-declare ptr @hyper::ThreadStateContainer::accessStateOfCurrentThread(ptr %) = 0x55a227889530 !f12
-declare memberfunc void @hyper::QueryResources::updateQueryMetricsAndHandleInterrupt(ptr %) = 0x55a2276ab7e0 !f13
-declare memberfunc void @hyper::Insert::updateNullCountRaw(ptr %, int32 %, int64 %) = 0x55a225fbb9b0 !f14
-declare void @hyper::ThreadStateContainer::destroy(ptr %, ptr %, ptr %) = 0x55a227889770 !f15
+declare data128 @hyper::StringRuntime::build(ptr %, int32 %, int8 %) = 0x560bb02e99f0 !f8
+declare noreturn void @hyper::RuntimeException::throwTupleTooLargeException() = 0x560bb2b00990 !f9
+declare memberfunc ptr @hyper::BulkInsert::storeInputTuple(ptr %, int64 %) = 0x560baea49730 !f10
+declare ptr @hyper::StringRuntime::writeStringBody(ptr %, data128 %) = 0x560bb02e9b90 !f11
+declare ptr @hyper::ThreadStateContainer::accessStateOfCurrentThread(ptr %) = 0x560bb031e8d0 !f12
+declare memberfunc void @hyper::QueryResources::updateQueryMetricsAndHandleInterrupt(ptr %) = 0x560bb0140e60 !f13
+declare memberfunc void @hyper::Insert::updateNullCountRaw(ptr %, int32 %, int64 %) = 0x560baea7b880 !f14
+declare void @hyper::ThreadStateContainer::destroy(ptr %, ptr %, ptr %) = 0x560bb031eb10 !f15
 declare exported void @_3_initializeQueryState_17(ptr %queryState_0, ptr %queryResources_1)
-declare void @hyper::BulkInsert::initBulk(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x55a225f897a0 !f17
+declare void @hyper::BulkInsert::initBulk(ptr %, ptr %, ptr %, ptr %, int32 %) = 0x560baea49670 !f17
 declare exported void @_3_tearDownQueryState_19(ptr %queryState_0)
-declare void @hyper::BulkInsert::destroyBulk(ptr %) = 0x55a225f89840 !f19
+declare void @hyper::BulkInsert::destroyBulk(ptr %) = 0x560baea49710 !f19
 
 define exported int1 @_3_pipeline_0_start_1(ptr %queryState_0) {
 body_0:
   ptr %queryResources_1 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 0    !933  # QueryStatePtr::getQueryResourcesPtr
-  ptr %v2 = call hyper::ThreadStateContainer::create(ptr %queryResources_1, int64 288, int1 true, ptr lambdaPtr _3_pipeline_0_initializeThreadState_tableconstruction_insert_executiontarget_2, ptr lambdaPtr _3_pipeline_0_tearDownThreadState_tableconstruction_insert_executiontarget_4)    !1008 # Pipeline::initPipeline
+  ptr %v2 = call @hyper::ThreadStateContainer::create(ptr %queryResources_1, int64 288, int1 true, ptr lambdaPtr @_3_pipeline_0_initializeThreadState_tableconstruction_insert_executiontarget_2, ptr lambdaPtr @_3_pipeline_0_tearDownThreadState_tableconstruction_insert_executiontarget_4)    !1008 # Pipeline::initPipeline
   store {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, ptr %v2, int32 0, int32 3    !1040 # Pipeline::initPipeline
   ptr %queryResources_4 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 0    !1083 # BulkInsertTranslator::beginPipelineWork	QueryStatePtr::getQueryResourcesPtr
   ptr %transaction_5 = load hyper::QueryResources ptr %queryResources_4, int32 0, int32 0    !1121 # BulkInsertTranslator::beginPipelineWork	QueryStatePtr::getTransactionPtr
-  call hyper::Transaction::prepareUndoLogging(ptr %transaction_5, ptr 0x7f30f80014c0, int32 0)    !1156 # BulkInsertTranslator::beginPipelineWork	auto hyper::codegen::proxy<hyper::Transaction>::prepareUndoLogging<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Schema>>&, hyper::codegen::values::UInt32>
-  calllambda {ptr 0x7f30fb364d10} (ptr 0x7f30f8000d40, ptr %transaction_5)        !1216 # BulkInsertTranslator::beginPipelineWork	
-  ptr %v9 = call hyper::ThreadStateContainer::accessStateOfCurrentThread(ptr %v2)    !2388 # TableConstructionTranslator::drivePipeline	PipelineContext::accessStateOfCurrentThread
+  call @hyper::Transaction::prepareUndoLogging(ptr %transaction_5, ptr 0x7f26180014c0, int32 0)    !1156 # BulkInsertTranslator::beginPipelineWork	auto hyper::codegen::proxy<hyper::Transaction>::prepareUndoLogging<hyper::codegen::values::Ptr<hyper::codegen::proxy<hyper::Schema>>&, hyper::codegen::values::UInt32>
+  calllambda {ptr 0x7f261bbe5840} (ptr 0x7f2618000d40, ptr %transaction_5)        !1216 # BulkInsertTranslator::beginPipelineWork	
+  ptr %v9 = call @hyper::ThreadStateContainer::accessStateOfCurrentThread(ptr %v2)    !2388 # TableConstructionTranslator::drivePipeline	PipelineContext::accessStateOfCurrentThread
   ptr %queryResources_10 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 0    !2404 # TableConstructionTranslator::drivePipeline	QueryStatePtr::getQueryResourcesPtr
   ptr %queryNotification_11 = load hyper::QueryResources ptr %queryResources_10, int32 0, int32 4    !2442 # TransactionTranslator::checkForCancelation	
   int8 %v12 = load atomic int8 ptr %queryNotification_11                          !2483 # TransactionTranslator::checkForCancelation	
   int1 %v13 = isnotzero int8 %v12                                                 !2499 # TransactionTranslator::checkForCancelation	
   br int1 %v13, thencancellationCheckNotified_1, donecancellationCheckNotified_2    !2510 # TransactionTranslator::checkForCancelation	
 thencancellationCheckNotified_1:
-  call hyper::QueryResources::updateQueryMetricsAndHandleInterrupt(ptr %queryResources_10)    !2529 # TransactionTranslator::checkForCancelation	auto hyper::codegen::proxy<hyper::QueryResources>::updateQueryMetricsAndHandleInterrupt<>
+  call @hyper::QueryResources::updateQueryMetricsAndHandleInterrupt(ptr %queryResources_10)    !2529 # TransactionTranslator::checkForCancelation	auto hyper::codegen::proxy<hyper::QueryResources>::updateQueryMetricsAndHandleInterrupt<>
   br donecancellationCheckNotified_2                                              !2545 # TransactionTranslator::checkForCancelation	
 donecancellationCheckNotified_2:
-  int1 %v17 = call _3_pipeline_0_serialWorker_tableconstruction_insert_executiontarget_8(ptr %queryState_0, ptr %v9)    !2556 # TableConstructionTranslator::drivePipeline	Pipeline::doLaunch
+  int1 %v17 = call @_3_pipeline_0_serialWorker_tableconstruction_insert_executiontarget_8(ptr %queryState_0, ptr %v9)    !2556 # TableConstructionTranslator::drivePipeline	Pipeline::doLaunch
   ptr %insert_18 = gep {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 5    !2576 # BulkInsertTranslator::finishPipelineWork	
   int64 %nullColumnSlot_19 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 6    !2617 # BulkInsertTranslator::finishPipelineWork	
-  call hyper::Insert::updateNullCountRaw(ptr %insert_18, int32 0, int64 %nullColumnSlot_19)    !2655 # BulkInsertTranslator::finishPipelineWork	auto hyper::codegen::proxy<hyper::Insert>::updateNullCountRaw<hyper::codegen::values::UInt32, hyper::codegen::values::UInt64&>
+  call @hyper::Insert::updateNullCountRaw(ptr %insert_18, int32 0, int64 %nullColumnSlot_19)    !2655 # BulkInsertTranslator::finishPipelineWork	auto hyper::codegen::proxy<hyper::Insert>::updateNullCountRaw<hyper::codegen::values::UInt32, hyper::codegen::values::UInt64&>
   int64 %nullColumnSlot_21 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 7    !2690 # BulkInsertTranslator::finishPipelineWork	
-  call hyper::Insert::updateNullCountRaw(ptr %insert_18, int32 1, int64 %nullColumnSlot_21)    !2728 # BulkInsertTranslator::finishPipelineWork	auto hyper::codegen::proxy<hyper::Insert>::updateNullCountRaw<hyper::codegen::values::UInt32, hyper::codegen::values::UInt64&>
-  calllambda {ptr 0x7f30fb364d28} (ptr 0x7f30f8000d40)                            !2773 # BulkInsertTranslator::finishPipelineWork	
+  call @hyper::Insert::updateNullCountRaw(ptr %insert_18, int32 1, int64 %nullColumnSlot_21)    !2728 # BulkInsertTranslator::finishPipelineWork	auto hyper::codegen::proxy<hyper::Insert>::updateNullCountRaw<hyper::codegen::values::UInt32, hyper::codegen::values::UInt64&>
+  calllambda {ptr 0x7f261bbe5858} (ptr 0x7f2618000d40)                            !2773 # BulkInsertTranslator::finishPipelineWork	
   ptr %resultCount_24 = gep {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 4    !2792 # ./hyper/cts/codegen/querycompilation/ExecutionTarget.cpp:230
   int64 %workerThreads_25 = load hyper::ThreadStateContainer ptr %v2, int32 0, int32 0    !2827 # PipelineContext::generateLoopOverThreadStates
   int64 %threadStateSize_26 = load hyper::ThreadStateContainer ptr %v2, int32 0, int32 1    !2864 # PipelineContext::generateLoopOverThreadStates
@@ -74,7 +74,7 @@ doneThreadStateInitialized_6:
   br int1 %v41, loopForEachThreadState_3, loopDoneForEachThreadState_4            !3194 # PipelineContext::generateLoopOverThreadStates
 loopDoneForEachThreadState_4:
   ptr %queryResources_43 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 0    !3213 # QueryStatePtr::getQueryResourcesPtr
-  call hyper::ThreadStateContainer::destroy(ptr %queryResources_43, ptr %queryState_0, ptr %v2)    !3251 # Pipeline::finishPipeline
+  call @hyper::ThreadStateContainer::destroy(ptr %queryResources_43, ptr %queryState_0, ptr %v2)    !3251 # Pipeline::finishPipeline
   store {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, ptr 0x0, int32 0, int32 3    !3290 # Pipeline::finishPipeline
   ret int1 false                                                                  !3318 # Pipeline::generateExecuteFunction
 }
@@ -86,7 +86,7 @@ body_0:
   br int1 %v3, doneUninitialized_2, thenUninitialized_1                           !282  # Pipeline::generateThreadStateInitializer
 thenUninitialized_1:
   ptr %stringStream_6 = gep {hyper::DebugStringStream, int64} ptr %threadStatePtr_1, int32 0, int32 0    !312  # ./hyper/cts/codegen/querycompilation/ExecutionTarget.cpp:219
-  call hyper::DebugStringStream::init(ptr %stringStream_6)                        !348  # ./hyper/cts/codegen/querycompilation/ExecutionTarget.cpp:220
+  call @hyper::DebugStringStream::init(ptr %stringStream_6)                       !348  # ./hyper/cts/codegen/querycompilation/ExecutionTarget.cpp:220
   ptr %tupleCount_8 = gep {hyper::DebugStringStream, int64} ptr %threadStatePtr_1, int32 0, int32 1    !364  # ./hyper/cts/codegen/querycompilation/ExecutionTarget.cpp:220
   store int64 ptr %tupleCount_8, int64 0                                          !413  # ./hyper/cts/codegen/querycompilation/ExecutionTarget.cpp:221
   store int1 ptr %v2, int1 true                                                   !441  # Pipeline::generateThreadStateInitializer
@@ -111,7 +111,7 @@ loopForEachThreadState_1:
   br int1 %v10, thenThreadStateInitialized_3, doneThreadStateInitialized_4        !780  # PipelineContext::generateLoopOverThreadStates
 thenThreadStateInitialized_3:
   ptr %stringStream_12 = gep {hyper::DebugStringStream, int64} ptr %v8, int32 0, int32 0    !799  # ./hyper/cts/codegen/querycompilation/ExecutionTarget.cpp:224
-  call hyper::DebugStringStream::destroy(ptr %stringStream_12)                    !835  # ./hyper/cts/codegen/querycompilation/ExecutionTarget.cpp:225
+  call @hyper::DebugStringStream::destroy(ptr %stringStream_12)                   !835  # ./hyper/cts/codegen/querycompilation/ExecutionTarget.cpp:225
   br doneThreadStateInitialized_4                                                 !851  # PipelineContext::generateLoopOverThreadStates
 doneThreadStateInitialized_4:
   int64 %v15 = add int64 %threadId_5, int64 1                                     !877  # PipelineContext::generateLoopOverThreadStates
@@ -123,7 +123,7 @@ loopDoneForEachThreadState_2:
 
 define int1 @_3_pipeline_0_serialWorker_tableconstruction_insert_executiontarget_8(ptr %arg_0, ptr %arg_1) {
 body_0:
-  call _3_pipeline_0_initializeThreadState_tableconstruction_insert_executiontarget_2(ptr %arg_0, ptr %arg_1)    !1268 # TableConstructionTranslator::drivePipeline	PipelineContext::initializeThreadState
+  call @_3_pipeline_0_initializeThreadState_tableconstruction_insert_executiontarget_2(ptr %arg_0, ptr %arg_1)    !1268 # TableConstructionTranslator::drivePipeline	PipelineContext::initializeThreadState
   br loopConstValues_2                                                            !1322 # TableConstructionTranslator::consume	
 loopConstValues_2:
   int64 %index_5 = phi [body_0, int64 0], [doneTupleTooLarge_5, int64 %v42]       !1341 # TableConstructionTranslator::consume	
@@ -132,7 +132,7 @@ loopConstValues_2:
   ptr %v8 = gep int8 ptr %v7, int32 8                                             !1425 # TableConstructionTranslator::consume	CompactStorage::unpack
   int32 %v9 = load <{int32, int32}> ptr %v7, int32 0, int32 0                     !1445 # TableConstructionTranslator::consume	CompactStorage::unpack
   int32 %v10 = load <{int32, int32}> ptr %v7, int32 0, int32 1                    !1469 # TableConstructionTranslator::consume	CompactStorage::unpack
-  data128 %v11 = call hyper::StringRuntime::build(ptr %v8, int32 %v9, int8 0)     !1501 # TableConstructionTranslator::consume	SerializedStorage::unpack
+  data128 %v11 = call @hyper::StringRuntime::build(ptr %v8, int32 %v9, int8 0)    !1501 # TableConstructionTranslator::consume	SerializedStorage::unpack
   int64 %stringHeader_15 = extract.d128 data128 %v11, 0                           !1640 # BulkInsertTranslator::consume	values::RTString::getHeader
   int32 %stringLength_16 = trunc int64 %stringHeader_15                           !1664 # BulkInsertTranslator::consume	values::RTString::length
   int64 %v17 = zext int32 %stringLength_16                                        !1687 # BulkInsertTranslator::consume	SerializedStorage::packedSize
@@ -140,11 +140,11 @@ loopConstValues_2:
   int1 %v19 = ugt int64 %v18, int64 4294967295                                    !1728 # BulkInsertTranslator::consume	
   br int1 %v19, thenTupleTooLarge_4, doneTupleTooLarge_5                          !1743 # BulkInsertTranslator::consume	
 thenTupleTooLarge_4:
-  call hyper::RuntimeException::throwTupleTooLargeException()                     !1762 # BulkInsertTranslator::consume	
+  call @hyper::RuntimeException::throwTupleTooLargeException()                    !1762 # BulkInsertTranslator::consume	
   br doneTupleTooLarge_5                                                          !1774 # BulkInsertTranslator::consume	
 doneTupleTooLarge_5:
   ptr %insert_23 = gep {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %arg_0, int32 0, int32 5    !1785 # BulkInsertTranslator::consume	
-  ptr %v24 = call hyper::BulkInsert::storeInputTuple(ptr %insert_23, int64 %v18)    !1815 # BulkInsertTranslator::consume	auto hyper::codegen::proxy<hyper::BulkInsert>::storeInputTuple<hyper::codegen::values::UInt64&>
+  ptr %v24 = call @hyper::BulkInsert::storeInputTuple(ptr %insert_23, int64 %v18)    !1815 # BulkInsertTranslator::consume	auto hyper::codegen::proxy<hyper::BulkInsert>::storeInputTuple<hyper::codegen::values::UInt64&>
   int64 %stringHeader_25 = extract.d128 data128 %v11, 0                           !1835 # BulkInsertTranslator::consume	values::RTString::getHeader
   int32 %stringLength_26 = trunc int64 %stringHeader_25                           !1859 # BulkInsertTranslator::consume	values::RTString::length
   store int8 ptr %v24, int8 0                                                     !1890 # BulkInsertTranslator::consume	CompactStorage::pack
@@ -153,11 +153,11 @@ doneTupleTooLarge_5:
   ptr %v30 = gep int8 ptr %v28, int32 4                                           !1950 # BulkInsertTranslator::consume	CompactStorage::pack
   store int32 ptr %v30, int32 %v10                                                !1970 # BulkInsertTranslator::consume	CompactStorage::pack
   ptr %v32 = gep int8 ptr %v30, int32 4                                           !1990 # BulkInsertTranslator::consume	CompactStorage::pack
-  ptr %v33 = call hyper::StringRuntime::writeStringBody(ptr %v32, data128 %v11)    !2010 # BulkInsertTranslator::consume	SerializedStorage::pack
+  ptr %v33 = call @hyper::StringRuntime::writeStringBody(ptr %v32, data128 %v11)    !2010 # BulkInsertTranslator::consume	SerializedStorage::pack
   ptr %queryResources_34 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %arg_0, int32 0, int32 0    !2030 # BulkInsertTranslator::consume	QueryStatePtr::getQueryResourcesPtr
   ptr %queryResources_35 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %arg_0, int32 0, int32 0    !2068 # BulkInsertTranslator::consume	QueryStatePtr::getQueryResourcesPtr
   ptr %transaction_36 = load hyper::QueryResources ptr %queryResources_35, int32 0, int32 0    !2106 # BulkInsertTranslator::consume	QueryStatePtr::getTransactionPtr
-  int64 %v37 = calllambda {ptr 0x7f30fb364cf8} (ptr 0x7f30f8000d40, ptr %v24, ptr %queryResources_34, ptr %transaction_36)    !2162 # BulkInsertTranslator::consume	
+  int64 %v37 = calllambda {ptr 0x7f261bbe5828} (ptr 0x7f2618000d40, ptr %v24, ptr %queryResources_34, ptr %transaction_36)    !2162 # BulkInsertTranslator::consume	
   ptr %tupleCount_38 = gep {hyper::DebugStringStream, int64} ptr %arg_1, int32 0, int32 1    !2196 # BulkInsertTranslator::consume	./hyper/cts/codegen/querycompilation/ExecutionTarget.cpp:180
   int64 %v39 = load int64 ptr %tupleCount_38                                      !2230 # BulkInsertTranslator::consume	./hyper/cts/codegen/querycompilation/ExecutionTarget.cpp:181
   int64 %v40 = add int64 %v39, int64 1                                            !2246 # BulkInsertTranslator::consume	./hyper/cts/codegen/querycompilation/ExecutionTarget.cpp:181
@@ -179,7 +179,7 @@ body_0:
   ptr %queryResources_7 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 0    !3535 # BulkInsertTranslator::initializeQueryState	QueryStatePtr::getQueryResourcesPtr
   ptr %queryResources_8 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 0    !3573 # BulkInsertTranslator::initializeQueryState	QueryStatePtr::getQueryResourcesPtr
   ptr %transaction_9 = load hyper::QueryResources ptr %queryResources_8, int32 0, int32 0    !3611 # BulkInsertTranslator::initializeQueryState	QueryStatePtr::getTransactionPtr
-  call hyper::BulkInsert::initBulk(ptr %insert_6, ptr %queryResources_7, ptr %transaction_9, ptr 0x7f30f80014c0, int32 0)    !3646 # BulkInsertTranslator::initializeQueryState	
+  call @hyper::BulkInsert::initBulk(ptr %insert_6, ptr %queryResources_7, ptr %transaction_9, ptr 0x7f26180014c0, int32 0)    !3646 # BulkInsertTranslator::initializeQueryState	
   store {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int64 0, int32 0, int32 6    !3678 # BulkInsertTranslator::initializeQueryState	
   store {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int64 0, int32 0, int32 7    !3706 # BulkInsertTranslator::initializeQueryState	
   int32 %v13 = load int32 ptr %constructorCounter_4                               !3734 # CompilationContext::constructInitializeStateLogic
@@ -206,10 +206,10 @@ destructDone_1:
   ret                                                                             !4466 # CompilationContext::constructTearDownStateFunction
 destruct_2:
   ptr %insert_1 = gep {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 5    !4010 # BulkInsertTranslator::tearDownQueryState	
-  call hyper::BulkInsert::destroyBulk(ptr %insert_1)                              !4040 # BulkInsertTranslator::tearDownQueryState	
+  call @hyper::BulkInsert::destroyBulk(ptr %insert_1)                             !4040 # BulkInsertTranslator::tearDownQueryState	
   ptr %queryResources_3 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 0    !4056 # BulkInsertTranslator::tearDownQueryState	QueryStatePtr::getQueryResourcesPtr
   ptr %transaction_4 = load hyper::QueryResources ptr %queryResources_3, int32 0, int32 0    !4094 # BulkInsertTranslator::tearDownQueryState	QueryStatePtr::getTransactionPtr
-  calllambda {ptr 0x7f30fb364d40} (ptr 0x7f30f8000d40, ptr %transaction_4)        !4150 # BulkInsertTranslator::tearDownQueryState	
+  calllambda {ptr 0x7f261bbe5870} (ptr 0x7f2618000d40, ptr %transaction_4)        !4150 # BulkInsertTranslator::tearDownQueryState	
   br destructDone_1                                                               !4174 # CompilationContext::constructTearDownStateLogic
 destruct_3:
   ptr %threadStateContainerPtr_7 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 3    !4185 # Pipeline::tearDownQueryState
@@ -217,7 +217,7 @@ destruct_3:
   br int1 %v8, thenThreadStateContainerNotCleanedUp_4, doneThreadStateContainerNotCleanedUp_5    !4243 # Pipeline::tearDownQueryState
 thenThreadStateContainerNotCleanedUp_4:
   ptr %queryResources_10 = load {hyper::QueryResources*, int32, int1, hyper::ThreadStateContainer*, int64, hyper::BulkInsert, int64, int64} ptr %queryState_0, int32 0, int32 0    !4262 # QueryStatePtr::getQueryResourcesPtr
-  call hyper::ThreadStateContainer::destroy(ptr %queryResources_10, ptr %queryState_0, ptr %threadStateContainerPtr_7)    !4300 # Pipeline::tearDownQueryState
+  call @hyper::ThreadStateContainer::destroy(ptr %queryResources_10, ptr %queryState_0, ptr %threadStateContainerPtr_7)    !4300 # Pipeline::tearDownQueryState
   br doneThreadStateContainerNotCleanedUp_5                                       !4324 # Pipeline::tearDownQueryState
 doneThreadStateContainerNotCleanedUp_5:
   br destruct_2                                                                   !4335 # CompilationContext::constructTearDownStateLogic

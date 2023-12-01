@@ -1,7 +1,7 @@
 # Hyper IR for 1_fcf
 
 declare exported void @_1_add_1(ptr %stringAllocator_0, ptr %threadState_1, ptr %arg1_2, ptr %null1_3, ptr %arg2_4, ptr %null2_5, ptr %res_6, ptr %resNull_7, ptr %collate_8)
-declare noreturn void @hyper::RuntimeException::throwOverflow() = 0x55a22a06c520 !f1
+declare noreturn void @hyper::RuntimeException::throwOverflow() = 0x560bb2b011a0 !f1
 
 define exported void @_1_add_1(ptr %stringAllocator_0, ptr %threadState_1, ptr %arg1_2, ptr %null1_3, ptr %arg2_4, ptr %null2_5, ptr %res_6, ptr %resNull_7, ptr %collate_8) {
 body_0:
@@ -21,7 +21,7 @@ doneIsNull_1:
   store int1 ptr %resNull_7, int1 %v13                                            !387  # ./hyper/rts/fcf/compilefcf.cpp:198
   ret                                                                             !407  # ./hyper/rts/fcf/compilefcf.cpp:200
 overflow_4:
-  call hyper::RuntimeException::throwOverflow()                                   !286  # ./hyper/cts/codegen/type/Integer.cpp:299
+  call @hyper::RuntimeException::throwOverflow()                                  !286  # ./hyper/cts/codegen/type/Integer.cpp:299
   unreachable                                                                     !298  # ./hyper/cts/codegen/type/Integer.cpp:299
 }
 
