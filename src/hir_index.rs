@@ -78,6 +78,7 @@ pub struct HIRIndex {
     pub dgb_annotations: HashMap<String, UseDefList>,
     pub reverse_idx: BTreeMap<usize, SymbolOccurrence>,
     pub function_bodies: Vec<FunctionBody>,
+    pub dgb_annotation_values: HashMap<String, String>,
 }
 
 impl HIRIndex {
@@ -186,7 +187,7 @@ impl HIRIndex {
     }
 }
 
-pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex {
+pub fn create_index(src: &str, tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex {
     let mut index = HIRIndex {
         ..Default::default()
     };
@@ -209,6 +210,14 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
             Statement::FuncDependencies { .. } => {}
             Statement::DbgAnnotation { name, def } => {
                 index.add_global_spanned(SymbolKind::DbgAnnotation, UseDefKind::Def, name);
+                if !def.is_empty() {
+                    let start = def.first().unwrap().1.start;
+                    let end = def.last().unwrap().1.end;
+                    let value = &src[start..end];
+                    index
+                        .dgb_annotation_values
+                        .insert(name.0.clone(), value.to_string());
+                }
                 // Recognize the filenames and numbers associated with function definitions
                 if let Some(funcname) = unresolved_function_dbgrefs.get(&name.0) {
                     if let [(Token::Str(dbgstr), _)] = &def[..] {
@@ -347,9 +356,7 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
 
 #[test]
 fn test_index() {
-    // Test with arguments and with modifiers
-    let res = crate::hir_parser::parse_from_str(
-        "
+    let src = "
         @a = \"test\"
         declare int32 @foo::bar(ptr %, int32 %baz) = 0x1234 !f1
         declare int32 @_test1(int32 %foo, data128 %baz)
@@ -367,10 +374,10 @@ fn test_index() {
 
         !f1 = \"./test.cpp:12\"
 
-        !21 = {\"some\": \"data\"}",
-    );
+        !21 = {\"some\": \"data\"}";
+    let res = crate::hir_parser::parse_from_str(src);
     assert_eq!(res.errors, []);
-    let idx = create_index(&res.tokens, &res.stmts);
+    let idx = create_index(src, &res.tokens, &res.stmts);
     assert_eq!(
         idx.global_vars,
         HashMap::from([(

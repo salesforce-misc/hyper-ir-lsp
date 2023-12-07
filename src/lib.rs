@@ -1,3 +1,4 @@
+pub mod backtrace;
 pub mod control_flow_graph;
 pub mod diagnostics;
 pub mod hir_index;

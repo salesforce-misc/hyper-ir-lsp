@@ -61,6 +61,7 @@ pub struct Instruction {
     pub assignment_target: Option<Spanned<String>>,
     pub instruction: Spanned<String>,
     pub basic_block_refs: Vec<Spanned<String>>,
+    pub dbg_ref: Option<Spanned<String>>,
     pub span: Span,
 }
 
@@ -154,12 +155,13 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
     let br_instruction = just(Token::Ident("br".to_string()))
         .map_with_span(|_, span| ("br".to_string(), span))
         .then(ident)
-        .then_ignore(dbg_ref.or_not())
+        .then(dbg_ref.or_not())
         .then_ignore(just(Token::Newline).rewind())
-        .map_with_span(|(instruction, target), span| Instruction {
+        .map_with_span(|((instruction, target), dbg_ref), span| Instruction {
             assignment_target: None,
             instruction,
             basic_block_refs: vec![target],
+            dbg_ref,
             span,
         });
 
@@ -172,13 +174,14 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .then(ident)
         .then_ignore(just(Token::Punctuation(',')))
         .then(ident)
-        .then_ignore(dbg_ref.or_not())
+        .then(dbg_ref.or_not())
         .then_ignore(just(Token::Newline).rewind())
         .map_with_span(
-            |((instruction, then_target), else_target), span| Instruction {
+            |(((instruction, then_target), else_target), dbg_ref), span| Instruction {
                 assignment_target: None,
                 instruction,
                 basic_block_refs: vec![then_target, else_target],
+                dbg_ref,
                 span,
             },
         );
@@ -209,14 +212,17 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .then_ignore(just(Token::Ident("overflow".to_string())))
         .then_ignore(just(Token::Punctuation('=')))
         .then(ident)
-        .then_ignore(dbg_ref.or_not())
+        .then(dbg_ref.or_not())
         .then_ignore(just(Token::Newline).rewind())
-        .map_with_span(|((instruction, target1), target2), span| Instruction {
-            assignment_target: None,
-            instruction,
-            basic_block_refs: vec![target1, target2],
-            span,
-        });
+        .map_with_span(
+            |(((instruction, target1), target2), dbg_ref), span| Instruction {
+                assignment_target: None,
+                instruction,
+                basic_block_refs: vec![target1, target2],
+                dbg_ref,
+                span,
+            },
+        );
 
     // Switch instruction
     // switch int32 %v10, default=unreachable_5, int32 0 label=bb_0, int32 1 label=bb_1, int32 2 label=bb_2
@@ -241,17 +247,20 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
                 .ignore_then(ident)
                 .separated_by(just(Token::Punctuation(','))),
         )
-        .then_ignore(dbg_ref.or_not())
+        .then(dbg_ref.or_not())
         .then_ignore(just(Token::Newline).rewind())
-        .map_with_span(|((instruction, default_target), mut targets), span| {
-            targets.insert(0, default_target);
-            Instruction {
-                assignment_target: None,
-                instruction,
-                basic_block_refs: targets,
-                span,
-            }
-        });
+        .map_with_span(
+            |(((instruction, default_target), mut targets), dbg_ref), span| {
+                targets.insert(0, default_target);
+                Instruction {
+                    assignment_target: None,
+                    instruction,
+                    basic_block_refs: targets,
+                    dbg_ref,
+                    span,
+                }
+            },
+        );
 
     // Phi instructions
     let phi_instruction = just(Token::Ident("phi".to_string()))
@@ -263,23 +272,32 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
                 .delimited_by(just(Token::Punctuation('[')), just(Token::Punctuation(']')))
                 .separated_by(just(Token::Punctuation(','))),
         )
-        .then_ignore(dbg_ref.or_not())
+        .then(dbg_ref.or_not())
         .then_ignore(just(Token::Newline).rewind())
-        .map_with_span(|(instruction, targets), span| Instruction {
+        .map_with_span(|((instruction, targets), dbg_ref), span| Instruction {
             assignment_target: None,
             instruction,
             basic_block_refs: targets,
+            dbg_ref,
             span,
         });
 
     // Any (unknown) instruction
     let any_instruction = ident
         .then_ignore(none_of(Token::Punctuation(':')).rewind())
-        .then_ignore(none_of(Token::Newline).repeated())
-        .map_with_span(|instruction, span| Instruction {
+        .then_ignore(
+            (just(Token::Newline).ignored())
+                .or(dbg_ref.ignored())
+                .not()
+                .repeated(),
+        )
+        .then(dbg_ref.or_not())
+        .then_ignore(just(Token::Newline).rewind())
+        .map_with_span(|(instruction, dbg_ref), span| Instruction {
             assignment_target: None,
             instruction,
             basic_block_refs: vec![],
+            dbg_ref,
             span,
         });
 

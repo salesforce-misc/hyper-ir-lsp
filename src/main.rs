@@ -2,12 +2,15 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 
 use dashmap::DashMap;
+use hyper_ir_lsp::backtrace::{
+    backtrace_json_to_md, parse_backtrace_from_json, resolve_relative_path,
+};
 use hyper_ir_lsp::control_flow_graph::create_cfg_dot_visualization;
 use hyper_ir_lsp::diagnostics::{
     diagnostics_from_index, diagnostics_from_parser, diagnostics_from_statements,
 };
 use hyper_ir_lsp::hir_index::{create_index, HIRIndex, UseDefKind, UseDefList};
-use hyper_ir_lsp::hir_parser::{parse_from_str, ParserResult};
+use hyper_ir_lsp::hir_parser::{parse_from_str, BasicBlock, Instruction, ParserResult, Statement};
 use hyper_ir_lsp::lsp_utils::{lsp_pos_to_offset, offset_to_lsp_pos, range_to_lsp};
 use hyper_ir_lsp::semantic_token::{
     convert_to_lsp_tokens, semantic_tokens_from_tokens, HIRSemanticToken, LEGEND_TYPE,
@@ -24,6 +27,7 @@ use tower_lsp::{Client, LanguageServer, LspService, Server};
 struct AnalyzedDocument {
     rope: Rope,
     semantic_tokens: Vec<HIRSemanticToken>,
+    stmts: Vec<Statement>,
     index: HIRIndex,
 }
 
@@ -353,6 +357,54 @@ impl LanguageServer for Backend {
                     }),
             );
 
+            // Insert inlay hints for call stacks
+            inlay_hints.extend(
+                doc.stmts
+                    .iter()
+                    .filter_map(|s| match s {
+                        Statement::FuncDef { body, .. } => {
+                            Some::<&Vec<BasicBlock>>(body.basic_blocks.as_ref())
+                        }
+                        _ => None,
+                    })
+                    .flatten()
+                    .flat_map(|bb| -> &Vec<Instruction> { bb.instructions.as_ref() })
+                    .filter_map(|stmt| {
+                        // Parse the backtrace
+                        let dbg_ref = stmt.dbg_ref.as_ref()?;
+                        let json_txt = doc.index.dgb_annotation_values.get(&dbg_ref.0)?;
+                        let json_val = serde_json::from_str::<serde_json::Value>(json_txt).ok()?;
+                        let root_paths: std::sync::MutexGuard<'_, Vec<Url>> =
+                            self.root_paths.lock().unwrap();
+                        let frames = parse_backtrace_from_json(&root_paths, json_val)?;
+
+                        // Put the full backtrace into a tooltip
+                        let mut inlay_hint_parts: Vec<InlayHintLabelPart> = Vec::new();
+                        let tooltip_md = backtrace_json_to_md(&frames)?;
+                        let tooltip = MarkupContent {
+                            kind: MarkupKind::Markdown,
+                            value: tooltip_md,
+                        };
+                        inlay_hint_parts.push(InlayHintLabelPart {
+                            value: "Full backtrace".to_string(),
+                            tooltip: Some(InlayHintLabelPartTooltip::MarkupContent(tooltip)),
+                            location: None,
+                            command: None,
+                        });
+
+                        Some(InlayHint {
+                            position: offset_to_lsp_pos(&doc.rope, dbg_ref.1.end)?,
+                            label: InlayHintLabel::LabelParts(inlay_hint_parts),
+                            kind: None,
+                            text_edits: None,
+                            tooltip: None,
+                            padding_left: Some(true),
+                            padding_right: Some(true),
+                            data: None,
+                        })
+                    }),
+            );
+
             // Insert hints at the end of a function body which point back to the beginning
             // of the function definition
             inlay_hints.extend(doc.index.function_bodies.iter().filter_map(|f| {
@@ -493,14 +545,15 @@ struct TextDocumentItem {
 impl Backend {
     async fn on_change(&self, params: TextDocumentItem) {
         let rope = ropey::Rope::from_str(&params.text);
+        let src = rope.to_string();
 
         let ParserResult {
             tokens,
             stmts,
             errors,
-        } = parse_from_str(&rope.to_string());
+        } = parse_from_str(&src);
         let semantic_tokens = semantic_tokens_from_tokens(&tokens);
-        let index = create_index(&tokens, &stmts);
+        let index = create_index(&src, &tokens, &stmts);
 
         let mut diagnostics = Vec::<Diagnostic>::new();
         diagnostics.extend(diagnostics_from_parser(&rope, &errors));
@@ -512,6 +565,7 @@ impl Backend {
             AnalyzedDocument {
                 rope,
                 semantic_tokens,
+                stmts,
                 index,
             },
         );
@@ -556,17 +610,7 @@ impl Backend {
         if ud == UseDefKind::Def {
             ranges.extend(usedefs.external_defs.iter().filter_map(|d| {
                 let root_paths = self.root_paths.lock().unwrap();
-                let uri = root_paths.iter().find_map(|baseuri| {
-                    let mut uri = baseuri.clone();
-                    uri.path_segments_mut()
-                        .unwrap()
-                        .extend(d.filepath.split('/'));
-                    if uri.to_file_path().ok()?.exists() {
-                        Some(uri)
-                    } else {
-                        None
-                    }
-                })?;
+                let uri = resolve_relative_path(&root_paths, &d.filepath)?;
 
                 Some(Location {
                     uri,
