@@ -192,13 +192,15 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
     };
 
     // Index all definitions / declarations based on the actual parse tree
-    let mut unresolved_function_dbgrefs : HashMap<String, String> = Default::default();
+    let mut unresolved_function_dbgrefs: HashMap<String, String> = Default::default();
     for s in stmts.iter() {
         match s {
             Statement::GlobalVar { name, def: _ } => {
                 index.add_global_spanned(SymbolKind::GlobalVar, UseDefKind::Def, name)
             }
-            Statement::FuncDecl { signature, dbgref, .. } => {
+            Statement::FuncDecl {
+                signature, dbgref, ..
+            } => {
                 index.add_global_spanned(SymbolKind::Function, UseDefKind::Decl, &signature.name);
                 if let Some(dbgref) = dbgref {
                     unresolved_function_dbgrefs.insert(dbgref.0.clone(), signature.name.0.clone());
@@ -210,9 +212,17 @@ pub fn create_index(tokens: &[Spanned<Token>], stmts: &[Statement]) -> HIRIndex 
                 // Recognize the filenames and numbers associated with function definitions
                 if let Some(funcname) = unresolved_function_dbgrefs.get(&name.0) {
                     if let [(Token::Str(dbgstr), _)] = &def[..] {
-                        if let [filepath, linestr] = dbgstr.split(":").collect::<Vec<_>>()[..] {
-                            if let Some(line) = linestr.parse::<u32>().ok() {
-                                index.functions.get_mut(funcname).unwrap().external_defs.push(ExternalDef{ filepath: filepath.to_string(), line });
+                        if let [filepath, linestr] = dbgstr.split(':').collect::<Vec<_>>()[..] {
+                            if let Ok(line) = linestr.parse::<u32>() {
+                                index
+                                    .functions
+                                    .get_mut(funcname)
+                                    .unwrap()
+                                    .external_defs
+                                    .push(ExternalDef {
+                                        filepath: filepath.to_string(),
+                                        line,
+                                    });
                             }
                         }
                     }
@@ -382,7 +392,10 @@ fn test_index() {
                 UseDefList {
                     decls: vec![43..52],
                     defs: Vec::new(),
-                    external_defs: vec![ExternalDef { filepath: "./test.cpp".to_string(), line: 12 }],
+                    external_defs: vec![ExternalDef {
+                        filepath: "./test.cpp".to_string(),
+                        line: 12
+                    }],
                     uses: vec![275..284]
                 }
             ),
@@ -400,24 +413,26 @@ fn test_index() {
 
     assert_eq!(
         idx.dgb_annotations,
-        HashMap::from([(
-            "!21".to_string(),
-            UseDefList {
-                decls: Vec::new(),
-                defs: vec![535..538],
-                external_defs: Vec::new(),
-                uses: vec![466..469]
-            }
-        ),
-        (
-            "!f1".to_string(),
-            UseDefList {
-                decls: Vec::new(),
-                defs: vec![504..507],
-                external_defs: Vec::new(),
-                uses: vec![81..84]
-            }
-        )])
+        HashMap::from([
+            (
+                "!21".to_string(),
+                UseDefList {
+                    decls: Vec::new(),
+                    defs: vec![535..538],
+                    external_defs: Vec::new(),
+                    uses: vec![466..469]
+                }
+            ),
+            (
+                "!f1".to_string(),
+                UseDefList {
+                    decls: Vec::new(),
+                    defs: vec![504..507],
+                    external_defs: Vec::new(),
+                    uses: vec![81..84]
+                }
+            )
+        ])
     );
 
     match &idx.function_bodies[..] {
