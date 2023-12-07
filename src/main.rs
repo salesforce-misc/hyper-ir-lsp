@@ -21,19 +21,26 @@ use tower_lsp::lsp_types::*;
 use tower_lsp::{Client, LanguageServer, LspService, Server};
 
 #[derive(Debug)]
+struct AnalyzedDocument {
+    rope: Rope,
+    semantic_tokens: Vec<HIRSemanticToken>,
+    index: HIRIndex,
+}
+
+#[derive(Debug)]
 struct Backend {
     client: Client,
     root_paths: Mutex<Vec<Url>>,
-    document_map: DashMap<String, Rope>,
-    semantic_token_map: DashMap<String, Vec<HIRSemanticToken>>,
-    index_map: DashMap<String, HIRIndex>,
+    document_map: DashMap<String, AnalyzedDocument>,
 }
 
 #[tower_lsp::async_trait]
 impl LanguageServer for Backend {
-    async fn initialize(& self, params: InitializeParams) -> Result<InitializeResult> {
+    async fn initialize(&self, params: InitializeParams) -> Result<InitializeResult> {
         if let Some(workspace_folders) = params.workspace_folders {
-            self.root_paths.lock().unwrap()
+            self.root_paths
+                .lock()
+                .unwrap()
                 .extend(workspace_folders.iter().map(|f| f.uri.clone()));
         } else if let Some(root_uri) = params.root_uri {
             self.root_paths.lock().unwrap().push(root_uri);
@@ -175,9 +182,8 @@ impl LanguageServer for Backend {
     ) -> Result<Option<SemanticTokensResult>> {
         let uri = params.text_document.uri.to_string();
         let lsp_tokens = || -> Option<Vec<SemanticToken>> {
-            let sem_tokens = self.semantic_token_map.get(&uri)?;
-            let rope = self.document_map.get(&uri)?;
-            let lsp_tokens = convert_to_lsp_tokens(&rope, &sem_tokens);
+            let doc = self.document_map.get(&uri)?;
+            let lsp_tokens = convert_to_lsp_tokens(&doc.rope, &doc.semantic_tokens);
             Some(lsp_tokens)
         }();
         if let Some(semantic_token) = lsp_tokens {
@@ -195,8 +201,7 @@ impl LanguageServer for Backend {
     ) -> Result<Option<DocumentSymbolResponse>> {
         let uri = params.text_document.uri.to_string();
         let symbols = || -> Option<DocumentSymbolResponse> {
-            let index = self.index_map.get(&uri)?;
-            let rope = self.document_map.get(&uri)?;
+            let doc = self.document_map.get(&uri)?;
             let mut symbols = Vec::<DocumentSymbol>::new();
 
             fn get_def_symbols<'a>(
@@ -222,20 +227,20 @@ impl LanguageServer for Backend {
             }
 
             symbols.extend(get_def_symbols(
-                &index.global_vars,
-                &rope,
+                &doc.index.global_vars,
+                &doc.rope,
                 SymbolKind::CONSTANT,
             ));
 
-            symbols.extend(index.function_bodies.iter().filter_map(|f| {
+            symbols.extend(doc.index.function_bodies.iter().filter_map(|f| {
                 #[allow(deprecated)] // https://github.com/rust-lang/rust/issues/102777
                 Some(DocumentSymbol {
                     name: f.name.0.clone(),
                     detail: None,
                     kind: SymbolKind::FUNCTION,
                     tags: None,
-                    range: range_to_lsp(&rope, &f.complete_range)?,
-                    selection_range: range_to_lsp(&rope, &f.name.1)?,
+                    range: range_to_lsp(&doc.rope, &f.complete_range)?,
+                    selection_range: range_to_lsp(&doc.rope, &f.name.1)?,
                     deprecated: None,
                     children: None,
                     // We could add the labels as children of the functions.
@@ -254,13 +259,12 @@ impl LanguageServer for Backend {
         let folding_ranges = || -> Option<Vec<FoldingRange>> {
             let uri = &params.text_document.uri;
             let uri_str = uri.to_string();
-            let index = self.index_map.get(&uri_str)?;
-            let rope = self.document_map.get(&uri_str)?;
+            let doc = self.document_map.get(&uri_str)?;
             let mut folding_ranges = Vec::<FoldingRange>::new();
 
-            folding_ranges.extend(index.function_bodies.iter().filter_map(|f| {
+            folding_ranges.extend(doc.index.function_bodies.iter().filter_map(|f| {
                 let collapsed_text = format!("{} basic blocks", f.labels.len());
-                let range = range_to_lsp(&rope, &f.complete_range)?;
+                let range = range_to_lsp(&doc.rope, &f.complete_range)?;
                 Some(FoldingRange {
                     start_line: range.start.line,
                     start_character: None,
@@ -272,13 +276,13 @@ impl LanguageServer for Backend {
             }));
 
             folding_ranges.extend(
-                index
+                doc.index
                     .function_bodies
                     .iter()
                     .flat_map(|e| e.basic_blocks.iter())
                     .filter_map(|bb| {
                         let collapsed_text = format!("{} instructions", bb.instructions.len());
-                        let range = range_to_lsp(&rope, &bb.span)?;
+                        let range = range_to_lsp(&doc.rope, &bb.span)?;
                         Some(FoldingRange {
                             start_line: range.start.line,
                             start_character: None,
@@ -299,13 +303,12 @@ impl LanguageServer for Backend {
         let inlay_hints = || -> Option<Vec<InlayHint>> {
             let uri = &params.text_document.uri;
             let uri_str = uri.to_string();
-            let index = self.index_map.get(&uri_str)?;
-            let rope = self.document_map.get(&uri_str)?;
+            let doc = self.document_map.get(&uri_str)?;
             let mut inlay_hints: Vec<InlayHint> = Vec::<InlayHint>::new();
 
             // Insert back references for each basic block which point back to the incoming edges
             inlay_hints.extend(
-                index
+                doc.index
                     .function_bodies
                     .iter()
                     .flat_map(|f| {
@@ -328,7 +331,7 @@ impl LanguageServer for Backend {
                                         value: incoming.0.clone(),
                                         location: Some(Location {
                                             uri: uri.clone(),
-                                            range: range_to_lsp(&rope, &incoming.1)?,
+                                            range: range_to_lsp(&doc.rope, &incoming.1)?,
                                         }),
                                         ..Default::default()
                                     },
@@ -338,7 +341,7 @@ impl LanguageServer for Backend {
                             .collect::<Vec<_>>();
 
                         Some(InlayHint {
-                            position: offset_to_lsp_pos(&rope, bb.label.as_ref()?.1.end)?,
+                            position: offset_to_lsp_pos(&doc.rope, bb.label.as_ref()?.1.end)?,
                             label: InlayHintLabel::LabelParts(label_parts),
                             kind: None,
                             text_edits: None,
@@ -352,14 +355,14 @@ impl LanguageServer for Backend {
 
             // Insert hints at the end of a function body which point back to the beginning
             // of the function definition
-            inlay_hints.extend(index.function_bodies.iter().filter_map(|f| {
+            inlay_hints.extend(doc.index.function_bodies.iter().filter_map(|f| {
                 Some(InlayHint {
-                    position: offset_to_lsp_pos(&rope, f.complete_range.end)?,
+                    position: offset_to_lsp_pos(&doc.rope, f.complete_range.end)?,
                     label: InlayHintLabel::LabelParts(vec![InlayHintLabelPart {
                         value: f.name.0.clone(),
                         location: Some(Location {
                             uri: uri.clone(),
-                            range: range_to_lsp(&rope, &f.name.1)?,
+                            range: range_to_lsp(&doc.rope, &f.name.1)?,
                         }),
                         ..Default::default()
                     }]),
@@ -381,17 +384,17 @@ impl LanguageServer for Backend {
         let codelenses = || -> Option<Vec<CodeLens>> {
             let uri = &params.text_document.uri;
             let uri_str = uri.to_string();
-            let index = self.index_map.get(&uri_str)?;
-            let rope = self.document_map.get(&uri_str)?;
+            let doc = self.document_map.get(&uri_str)?;
 
-            let codelenses = index
+            let codelenses = doc
+                .index
                 .functions
                 .iter()
                 .filter_map(|f| {
                     // Only show the code lens for functions with exactly one definition
                     if let [def_range] = &f.1.defs[..] {
                         Some(CodeLens {
-                            range: range_to_lsp(&rope, def_range)?,
+                            range: range_to_lsp(&doc.rope, def_range)?,
                             command: Some(Command {
                                 // Potential icons: ⇆⭾⧬⌸✍✒✎🧐
                                 title: "⭾ Visualize Controlflow".to_string(),
@@ -417,11 +420,15 @@ impl LanguageServer for Backend {
     async fn execute_command(&self, params: ExecuteCommandParams) -> Result<Option<Value>> {
         match (params.command.as_str(), &params.arguments[..]) {
             ("visualize-cfg", [Value::String(doc_uri), Value::String(func_name)]) => {
-                let index = self.index_map.get(doc_uri).ok_or_else(|| Error {
-                    code: ErrorCode::InvalidParams,
-                    message: format!("document `{}` not found", doc_uri).into(),
-                    data: None,
-                })?;
+                let index = &self
+                    .document_map
+                    .get(doc_uri)
+                    .ok_or_else(|| Error {
+                        code: ErrorCode::InvalidParams,
+                        message: format!("document `{}` not found", doc_uri).into(),
+                        data: None,
+                    })?
+                    .index;
                 let func_body = index
                     .function_bodies
                     .iter()
@@ -486,15 +493,13 @@ struct TextDocumentItem {
 impl Backend {
     async fn on_change(&self, params: TextDocumentItem) {
         let rope = ropey::Rope::from_str(&params.text);
-        self.document_map
-            .insert(params.uri.to_string(), rope.clone());
 
         let ParserResult {
             tokens,
             stmts,
             errors,
         } = parse_from_str(&rope.to_string());
-
+        let semantic_tokens = semantic_tokens_from_tokens(&tokens);
         let index = create_index(&tokens, &stmts);
 
         let mut diagnostics = Vec::<Diagnostic>::new();
@@ -502,9 +507,14 @@ impl Backend {
         diagnostics.extend(diagnostics_from_statements(&rope, &stmts));
         diagnostics.extend(diagnostics_from_index(&rope, &params.uri, &index));
 
-        self.semantic_token_map
-            .insert(params.uri.to_string(), semantic_tokens_from_tokens(&tokens));
-        self.index_map.insert(params.uri.to_string(), index);
+        self.document_map.insert(
+            params.uri.to_string(),
+            AnalyzedDocument {
+                rope,
+                semantic_tokens,
+                index,
+            },
+        );
 
         self.client
             .publish_diagnostics(params.uri.clone(), diagnostics, Some(params.version))
@@ -517,18 +527,18 @@ impl Backend {
         ud: UseDefKind,
     ) -> Option<(Range, Vec<Location>)> {
         let uri_str = pos.text_document.uri.to_string();
-        let rope = self.document_map.get(&uri_str)?;
-        let offset = lsp_pos_to_offset(&rope, &pos.position)?;
+        let doc = self.document_map.get(&uri_str)?;
 
         // Lookup the symbol at the given location
-        let index = self.index_map.get(&uri_str)?;
-        let symbol = index.find_symbol_at_position(offset)?;
+        let offset = lsp_pos_to_offset(&doc.rope, &pos.position)?;
+        let symbol = doc.index.find_symbol_at_position(offset)?;
 
         // Find all use/defs from the index
-        let usedefs = index
+        let usedefs = doc
+            .index
             .get_by_symbol_kind(
                 symbol.symbol_kind,
-                symbol.func_body_id.map(|id| &index.function_bodies[id]),
+                symbol.func_body_id.map(|id| &doc.index.function_bodies[id]),
             )
             .get(&symbol.name)?;
         let mut ranges = usedefs
@@ -537,7 +547,7 @@ impl Backend {
             .filter_map(|span| {
                 Some(Location::new(
                     pos.text_document.uri.clone(),
-                    range_to_lsp(&rope, span)?,
+                    range_to_lsp(&doc.rope, span)?,
                 ))
             })
             .collect::<Vec<_>>();
@@ -548,15 +558,17 @@ impl Backend {
                 let root_paths = self.root_paths.lock().unwrap();
                 let uri = root_paths.iter().find_map(|baseuri| {
                     let mut uri = baseuri.clone();
-                    uri.path_segments_mut().unwrap().extend(d.filepath.split('/'));
+                    uri.path_segments_mut()
+                        .unwrap()
+                        .extend(d.filepath.split('/'));
                     if uri.to_file_path().ok()?.exists() {
                         Some(uri)
-                    } else { 
+                    } else {
                         None
                     }
                 })?;
 
-                Some(Location{
+                Some(Location {
                     uri,
                     range: Range {
                         start: Position::new(d.line - 1, 0),
@@ -566,7 +578,7 @@ impl Backend {
             }));
         }
 
-        let origin_selection_range = range_to_lsp(&rope, &symbol.span)?;
+        let origin_selection_range = range_to_lsp(&doc.rope, &symbol.span)?;
         Some((origin_selection_range, ranges))
     }
 }
@@ -582,8 +594,6 @@ async fn main() {
         client,
         root_paths: Default::default(),
         document_map: DashMap::new(),
-        semantic_token_map: DashMap::new(),
-        index_map: DashMap::new(),
     })
     .finish();
 

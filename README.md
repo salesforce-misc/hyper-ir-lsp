@@ -114,6 +114,7 @@ I am happy to give anyone access to the repository (either for contributing, or 
     * ✔ Include README
     * ✔ Write proper README
     * Proper logo
+    * Add screenshots / screen recordings to README
     * Use Webassembly instead of native binary
 * Configuration for neovim
 * Github CI
