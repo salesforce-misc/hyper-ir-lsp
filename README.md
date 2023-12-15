@@ -122,6 +122,8 @@ Contributions are welcome. Feel free to just open a pull request.
     * ✔ Lint JS
     * ✔ Package VS Code extension
     * ✔ Compile also for Windows and macos
+    * ✔ Publish release artifacts to Github Releases
+    * Publish to VS Code marketplace
 * ✔ Script to auto-generate the Hyper IR dumps using HyperAPI
 * Hyper:
     * ✔ Fix printing of references to unnamed globals
@@ -131,8 +133,8 @@ Contributions are welcome. Feel free to just open a pull request.
     * ✔ Conditional break: no ',' between condition and first basicblock
     * ✔ Teardown-functions: move `destructDone` to the end
     * ✔ Missing "pure" modifier
-    * Stop printing stack traces at `main`
-    * Missing allocas?
+    * ✔ Stop printing stack traces at `main`
+    * Improve performance of symbolizing the stack traces
     * Print threadstate and querystate types better
 * Code Style / Things I still need to learn about Rust
     * Deduplicate the `just` + `map_with_span` pattern when parsing instructions
