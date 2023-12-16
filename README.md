@@ -35,14 +35,13 @@ As such, most bugs can be found through close inspection of Hyper IR.
 
 ## Installation
 
-For Visual Studio Code, we offer a pre-packaged plugin:
+For Visual Studio Code, we offer a pre-packaged Visual Studio Code plugin:
 
-1. Download the correct `*.vsix` package for your operating system
+1. Download the correct `*.vsix` package for your operating system from the [latest release](https://github.com/vogelsgesang/hyper-ir-lsp/releases/)
 2. Inside Visual Studio, press `Cmd` + `Shift` + `P` to open the command picker
 3. Choose the "Extension: Install from VSIX..." command
-4. In the file picker which opens, choose the downloaded `.vsix` file
+4. In the file picker, choose the downloaded `.vsix` file
 5. (Optional) Install the "Graphviz Interactive Preview" extension. This extension will be required to display the control flow graphs of Hyper IR functions.
-6. You are all set. There is no need to restart Visual Studio Code.
 
 Usage in other editors (neovim, emacs, IntelliJ, ...) is also possible.
 All functionality is contained inside the Language Server. This Language
@@ -55,14 +54,14 @@ the `hyper-ir-lsp` binary from it.
 ## Usage
 
 Pass the `dump_ir=1` parameter to `hyperd` to instruct Hyper to dump all generated modules.
-Hyper will then create a folder by the name `codegen_<pid>` inside which it will write all generated Hyper IR modules.
-You can then simply open any of the `*.hir` files and this extension will help you navigate and understand .
+Hyper will then create a folder by the name `codegen_<pid>` inside which it dump write all generated Hyper IR modules.
+You can then simply open any of the `*.hir` files and this extension will help you navigate and understand it.
 
 ## Development
 
-The source code for this extension lives at https://github.com/vogelsgesang/hyper-ir-lsp, a non-public Github repository under my private account.
-Unfortunately, I was not able to use our usual `devtools` repository for this project because I needed access to Github Actions, so I could easily build the extension for all operating systems (Linux, Windows, OSX).
-I am happy to give anyone access to the repository (either for contributing, or also if you are just curious about the internal implementation) - just ping me on Slack!
+The source code for this extension lives at https://github.com/vogelsgesang/hyper-ir-lsp.
+Github Actions automatically build every single commit for all operating systems (Linux, Windows, OSX).
+Contributions are welcome. Feel free to just open a pull request.
 
 ### Building from source
 
