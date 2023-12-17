@@ -28,20 +28,20 @@ export async function activate (context: ExtensionContext) {
       }
     }
   };
+  // If the extension is launched in debug mode then the debug server options are used
+  // Otherwise the run options are used
   const serverOptions: ServerOptions = {
     run,
     debug: run
   };
-  // If the extension is launched in debug mode then the debug server options are used
-  // Otherwise the run options are used
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
-    // Register the server for plain text documents
-    documentSelector: [{ language: 'hir' }]
+    // Register the server for Hyper IR documents
+    documentSelector: [{ language: 'hir' }],
   };
 
   // Create the language client and start the client.
-  client = new LanguageClient('hyper-ir-lsp', 'Hyper IR language server', serverOptions, clientOptions);
+  client = new LanguageClient('hyper-ir-lsp', 'Hyper IR Language Server', serverOptions, clientOptions);
 
   client.onRequest('hyperir/showDot', async (params) => {
     const dotGraph = params.dotGraph;
