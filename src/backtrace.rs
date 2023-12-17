@@ -1,8 +1,8 @@
 use std::cmp::max;
 
 use tower_lsp::lsp_types::{
-    InlayHint, InlayHintLabel, InlayHintLabelPart, InlayHintLabelPartTooltip,
-    MarkupContent, MarkupKind, Position, Url,
+    InlayHint, InlayHintLabel, InlayHintLabelPart, InlayHintLabelPartTooltip, MarkupContent,
+    MarkupKind, Position, Url,
 };
 
 pub fn resolve_relative_path(root_paths: &[Url], path: &str) -> Option<Url> {
@@ -140,14 +140,28 @@ pub fn backtrace_json_to_md(frames: &[Frame]) -> String {
         .join("\n")
 }
 
+fn shorten_name(s: &str, len: usize) -> String {
+    if s.len() < len - 2 {
+        return s.to_string();
+    } else {
+        return s[..len - 2].to_string() + "…";
+    }
+}
+
 pub fn inlay_hint_for_backtrace(pos: Position, frames: &[Frame]) -> InlayHint {
     // Extract all interesting frames
     let mut inlay_hint_parts: Vec<InlayHintLabelPart> = Vec::new();
     if let Some(idx) = identify_relevant_frames(&frames) {
         let frame = &frames[idx];
+        let symbol = shorten_name(&frame.symbol,50);
+        let tooltip = if symbol == frame.symbol {
+            None
+        } else {
+            Some(InlayHintLabelPartTooltip::String(frame.symbol.clone()))
+        };
         inlay_hint_parts.push(InlayHintLabelPart {
-            value: frame.symbol.clone(),
-            tooltip: None,
+            value: symbol.to_string(),
+            tooltip,
             location: None,
             command: None,
         });
