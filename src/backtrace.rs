@@ -1,6 +1,9 @@
 use std::cmp::max;
 
-use tower_lsp::lsp_types::Url;
+use tower_lsp::lsp_types::{
+    InlayHint, InlayHintLabel, InlayHintLabelPart, InlayHintLabelPartTooltip,
+    MarkupContent, MarkupKind, Position, Url,
+};
 
 pub fn resolve_relative_path(root_paths: &[Url], path: &str) -> Option<Url> {
     root_paths.iter().find_map(|baseuri| {
@@ -16,10 +19,10 @@ pub fn resolve_relative_path(root_paths: &[Url], path: &str) -> Option<Url> {
 
 #[derive(Debug, Clone)]
 pub struct Frame {
-    symbol: String,
-    filepath: Option<String>,
-    line: u32,
-    resolved_filepath: Option<Url>,
+    pub symbol: String,
+    pub filepath: Option<String>,
+    pub line: u32,
+    pub resolved_filepath: Option<Url>,
 }
 
 pub fn parse_backtrace_from_json(
@@ -72,6 +75,31 @@ pub fn parse_backtrace_from_json(
     Some(bt)
 }
 
+pub fn identify_relevant_frames(frames: &[Frame]) -> Option<usize> {
+    // Finding a `Translator::consume` or `drivePipeline` would be the best case
+    let symbol_preferences = [
+        "Translator::consume",
+        "Translator::produceMaterializedResult",
+        "Translator::drivePipeline",
+        "Translator::deriveValue",
+        "Translator::",
+    ];
+    for pref in symbol_preferences {
+        let pref_frame = frames.iter().position(|f| f.symbol.contains(pref));
+        if pref_frame.is_some() {
+            return pref_frame;
+        }
+    }
+
+    // As a fallback, find the first, non-internal frame. We consider everything inside the
+    // `hyper/ir` and the `hyper/codegen` folder as internal. Those are our codegen
+    // utilities.
+    frames.iter().position(|f| match &f.filepath {
+        Some(fp) => !fp.contains("hyper/ir/") && !fp.contains("hyper/codegen"),
+        None => false,
+    })
+}
+
 // Removes all potentially dangerous characters form a string which we are
 // about to embed into Markdown
 fn sanitize_markdown(txt: &str) -> String {
@@ -104,15 +132,56 @@ fn sanitize_markdown(txt: &str) -> String {
     sanitized
 }
 
-pub fn backtrace_json_to_md(frames: &[Frame]) -> Option<String> {
-    let md = frames
+pub fn backtrace_json_to_md(frames: &[Frame]) -> String {
+    frames
         .iter()
-        .map(|frame| {
-            format!("* {}", sanitize_markdown(&frame.symbol))
-        })
+        .map(|frame| format!("* {}", sanitize_markdown(&frame.symbol)))
         .collect::<Vec<_>>()
-        .join("\n");
-    Some(md)
+        .join("\n")
+}
+
+pub fn inlay_hint_for_backtrace(pos: Position, frames: &[Frame]) -> InlayHint {
+    // Extract all interesting frames
+    let mut inlay_hint_parts: Vec<InlayHintLabelPart> = Vec::new();
+    if let Some(idx) = identify_relevant_frames(&frames) {
+        let frame = &frames[idx];
+        inlay_hint_parts.push(InlayHintLabelPart {
+            value: frame.symbol.clone(),
+            tooltip: None,
+            location: None,
+            command: None,
+        });
+        inlay_hint_parts.push(InlayHintLabelPart {
+            value: ", ".to_string(),
+            tooltip: None,
+            location: None,
+            command: None,
+        });
+    }
+
+    // Put the full backtrace into a tooltip
+    let tooltip_md = backtrace_json_to_md(&frames);
+    let tooltip = MarkupContent {
+        kind: MarkupKind::Markdown,
+        value: tooltip_md,
+    };
+    inlay_hint_parts.push(InlayHintLabelPart {
+        value: "Full backtrace".to_string(),
+        tooltip: Some(InlayHintLabelPartTooltip::MarkupContent(tooltip)),
+        location: None,
+        command: None,
+    });
+
+    InlayHint {
+        position: pos,
+        label: InlayHintLabel::LabelParts(inlay_hint_parts),
+        kind: None,
+        text_edits: None,
+        tooltip: None,
+        padding_left: Some(true),
+        padding_right: Some(true),
+        data: None,
+    }
 }
 
 #[cfg(test)]

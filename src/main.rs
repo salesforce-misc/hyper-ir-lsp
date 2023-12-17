@@ -3,7 +3,7 @@ use std::sync::Mutex;
 
 use dashmap::DashMap;
 use hyper_ir_lsp::backtrace::{
-    backtrace_json_to_md, parse_backtrace_from_json, resolve_relative_path,
+    inlay_hint_for_backtrace, parse_backtrace_from_json, resolve_relative_path,
 };
 use hyper_ir_lsp::control_flow_graph::create_cfg_dot_visualization;
 use hyper_ir_lsp::diagnostics::{
@@ -370,38 +370,16 @@ impl LanguageServer for Backend {
                     .flatten()
                     .flat_map(|bb| -> &Vec<Instruction> { bb.instructions.as_ref() })
                     .filter_map(|stmt| {
-                        // Parse the backtrace
                         let dbg_ref = stmt.dbg_ref.as_ref()?;
                         let json_txt = doc.index.dgb_annotation_values.get(&dbg_ref.0)?;
                         let json_val = serde_json::from_str::<serde_json::Value>(json_txt).ok()?;
                         let root_paths: std::sync::MutexGuard<'_, Vec<Url>> =
                             self.root_paths.lock().unwrap();
                         let frames = parse_backtrace_from_json(&root_paths, json_val)?;
-
-                        // Put the full backtrace into a tooltip
-                        let mut inlay_hint_parts: Vec<InlayHintLabelPart> = Vec::new();
-                        let tooltip_md = backtrace_json_to_md(&frames)?;
-                        let tooltip = MarkupContent {
-                            kind: MarkupKind::Markdown,
-                            value: tooltip_md,
-                        };
-                        inlay_hint_parts.push(InlayHintLabelPart {
-                            value: "Full backtrace".to_string(),
-                            tooltip: Some(InlayHintLabelPartTooltip::MarkupContent(tooltip)),
-                            location: None,
-                            command: None,
-                        });
-
-                        Some(InlayHint {
-                            position: offset_to_lsp_pos(&doc.rope, dbg_ref.1.end)?,
-                            label: InlayHintLabel::LabelParts(inlay_hint_parts),
-                            kind: None,
-                            text_edits: None,
-                            tooltip: None,
-                            padding_left: Some(true),
-                            padding_right: Some(true),
-                            data: None,
-                        })
+                        Some(inlay_hint_for_backtrace(
+                            offset_to_lsp_pos(&doc.rope, dbg_ref.1.end)?,
+                            &frames,
+                        ))
                     }),
             );
 
