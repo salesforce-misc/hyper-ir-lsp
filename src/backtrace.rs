@@ -25,6 +25,11 @@ pub struct Frame {
     pub resolved_filepath: Option<Url>,
 }
 
+fn shorten_filepath(path: &str) -> &str {
+    let separator_pos = max(path.rfind('/'), path.rfind('\\'));
+    path.split_at(separator_pos.map(|p| p + 1).unwrap_or(0)).1
+}
+
 pub fn parse_backtrace_from_json(
     root_paths: &[Url],
     json: serde_json::Value,
@@ -44,8 +49,7 @@ pub fn parse_backtrace_from_json(
                 // Use the name provided in the backtrace if present
                 name = json_name.unwrap();
             } else if let Some(link) = json_link {
-                let separator_pos = max(link.rfind('/'), link.rfind('\\'));
-                name = link.split_at(separator_pos.map(|p| p + 1).unwrap_or(0)).1;
+                name = shorten_filepath(link);
             }
 
             // Parse `file:linenr`
@@ -102,7 +106,7 @@ pub fn identify_relevant_frames(frames: &[Frame]) -> Option<usize> {
 
 // Removes all potentially dangerous characters form a string which we are
 // about to embed into Markdown
-fn sanitize_markdown(txt: &str) -> String {
+fn sanitize_markdown_code(txt: &str) -> String {
     let mut sanitized = String::with_capacity(txt.bytes().len());
     for c in txt.chars() {
         if c.is_alphanumeric() || c.is_whitespace() {
@@ -111,7 +115,8 @@ fn sanitize_markdown(txt: &str) -> String {
             sanitized.push(c);
         } else {
             match c {
-                // Forward characters which are safe in Markdown
+                // Forward characters which are safe in Markdown code blocks.
+                // Note that even `<` and `>` have no special meaning in this context.
                 '.' => sanitized.push(c),
                 ',' => sanitized.push(c),
                 ':' => sanitized.push(c),
@@ -119,11 +124,10 @@ fn sanitize_markdown(txt: &str) -> String {
                 '-' => sanitized.push(c),
                 '=' => sanitized.push(c),
                 '/' => sanitized.push(c),
-                // Characters which need to be escaped
-                '*' => sanitized.push_str("\\*"),
-                '<' => sanitized.push_str("&lt;"),
-                '>' => sanitized.push_str("&gt;"),
-                '_' => sanitized.push_str("\\_"),
+                '*' => sanitized.push(c),
+                '<' => sanitized.push(c),
+                '>' => sanitized.push(c),
+                '_' => sanitized.push(c),
                 // Unsupported characters are replaced
                 _ => sanitized.push('�'),
             }
@@ -132,10 +136,37 @@ fn sanitize_markdown(txt: &str) -> String {
     sanitized
 }
 
-pub fn backtrace_json_to_md(frames: &[Frame]) -> String {
+fn format_frame_as_md(frame: &Frame) -> String {
+    if let Some(fp) = &frame.filepath {
+        let shortened_path: &str = shorten_filepath(fp);
+        if let Some(resolved_fp) = &frame.resolved_filepath {
+            // Also see https://github.com/microsoft/language-server-protocol/issues/473 and
+            // https://github.com/microsoft/language-server-protocol/issues/379 regarding `file:` links
+            format!(
+                "`{}` @ [{}:{}]({}#{})",
+                sanitize_markdown_code(&frame.symbol),
+                shortened_path,
+                frame.line,
+                resolved_fp,
+                frame.line
+            )
+        } else {
+            format!(
+                "`{}` @ {}:{}",
+                sanitize_markdown_code(&frame.symbol),
+                shortened_path,
+                frame.line
+            )
+        }
+    } else {
+        format!("`{}`", sanitize_markdown_code(&frame.symbol))
+    }
+}
+
+fn backtrace_json_to_md(frames: &[Frame]) -> String {
     frames
         .iter()
-        .map(|frame| format!("* {}", sanitize_markdown(&frame.symbol)))
+        .map(|frame| format!("* {}", format_frame_as_md(frame)))
         .collect::<Vec<_>>()
         .join("\n")
 }
@@ -154,22 +185,18 @@ pub fn inlay_hint_for_backtrace(pos: Position, frames: &[Frame]) -> InlayHint {
     if let Some(idx) = identify_relevant_frames(frames) {
         let frame = &frames[idx];
         let symbol = shorten_name(&frame.symbol, 50);
-        let tooltip = if symbol == frame.symbol {
-            None
-        } else {
-            Some(InlayHintLabelPartTooltip::String(frame.symbol.clone()))
-        };
+        let tooltip = Some(InlayHintLabelPartTooltip::MarkupContent(MarkupContent {
+            kind: MarkupKind::Markdown,
+            value: format_frame_as_md(frame),
+        }));
         inlay_hint_parts.push(InlayHintLabelPart {
             value: symbol.to_string(),
             tooltip,
-            location: None,
-            command: None,
+            ..Default::default()
         });
         inlay_hint_parts.push(InlayHintLabelPart {
             value: ", ".to_string(),
-            tooltip: None,
-            location: None,
-            command: None,
+            ..Default::default()
         });
     }
 
@@ -182,8 +209,7 @@ pub fn inlay_hint_for_backtrace(pos: Position, frames: &[Frame]) -> InlayHint {
     inlay_hint_parts.push(InlayHintLabelPart {
         value: "Full backtrace".to_string(),
         tooltip: Some(InlayHintLabelPartTooltip::MarkupContent(tooltip)),
-        location: None,
-        command: None,
+        ..Default::default()
     });
 
     InlayHint {
