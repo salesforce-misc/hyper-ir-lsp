@@ -461,7 +461,7 @@ fn test_index() {
                         "body_0".to_string(),
                         UseDefList {
                             decls: Vec::new(),
-                            defs: vec![235..242],
+                            defs: vec![235..241],
                             external_defs: Vec::new(),
                             uses: Vec::new(),
                         }
@@ -470,7 +470,7 @@ fn test_index() {
                         "switch_1".to_string(),
                         UseDefList {
                             decls: vec![],
-                            defs: vec![339..348],
+                            defs: vec![339..347],
                             external_defs: Vec::new(),
                             uses: vec![320..328]
                         }
@@ -479,7 +479,7 @@ fn test_index() {
                         "done_1".to_string(),
                         UseDefList {
                             decls: Vec::new(),
-                            defs: vec![429..436],
+                            defs: vec![429..435],
                             external_defs: Vec::new(),
                             uses: vec![390..396, 412..418]
                         }
@@ -524,13 +524,13 @@ fn test_index() {
                 HashMap::from([
                     (
                         "switch_1".to_string(),
-                        vec![("body_0".to_string(), 235..242)]
+                        vec![("body_0".to_string(), 235..241)]
                     ),
                     (
                         "done_1".to_string(),
                         // Note that `switch_1` is listed only once, although it mentions `done1`
                         // as its target twice.
-                        vec![("switch_1".to_string(), 339..348)]
+                        vec![("switch_1".to_string(), 339..347)]
                     ),
                 ])
             );

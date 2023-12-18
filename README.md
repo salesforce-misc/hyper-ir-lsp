@@ -98,13 +98,18 @@ Contributions are welcome. Feel free to just open a pull request.
     * ✔ Report warnings when we failed to extract the basic blocks from a branching instruction
     * ✔ Control flow graph visualization
     * ✔ Add "Go to definition" for proxied functions
-    * Hyperlink the stack trace, pointing to the place where a function is defined
+    * ✔ Hyperlink the stack trace, pointing to the place where a function is defined
+    * Link the stack frame through "go to definition", so it uses VSCode's "peek" functionality
+    * ✔ Support renames (functions, global vars, labels, local vars)
+    * Code action to increment/decrement value number (and also increment value number of all following values)
+    * Code action to strip all debug annotations
+    * Action to set breakpoint at generation time and run until breakpoint
+    * Provide folding range for all debug annotations; collapse by default
     * Hover provider for function-local variables; Show "SSA chain"
     * "Inline variables" debugger support?
     * Incremental sync
     * More robust error recovery in the tokenizer & parser
     * Figure out what those "*.hir.git" files are about which show up in the problems list
-    * Support renames (functions, global vars, labels, local vars)
     * Highlight provider for function-local variables (not sure it's worth it? How is this used by VSCode?)
     * Code folding: Use "folded text" as soon as VS Code supports it (https://github.com/microsoft/vscode/pull/170447)
 * VS Code extension

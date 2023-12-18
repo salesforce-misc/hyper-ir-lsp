@@ -52,6 +52,7 @@ pub struct FuncBody {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct BasicBlock {
     pub label: Option<Spanned<String>>,
+    pub label_comma_span: Option<Span>,
     pub instructions: Vec<Instruction>,
     pub span: Span,
 }
@@ -322,8 +323,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
 
     // A basic block
     let basic_block = ident
-        .then_ignore(just(Token::Punctuation(':')))
-        .map_with_span(|i, span| (i.0, span))
+        .then(just(Token::Punctuation(':')).map_with_span(|_, span| span))
         .then_ignore(just(Token::Newline).repeated().at_least(1))
         .then(
             instruction
@@ -332,13 +332,14 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
                 .repeated()
                 .collect::<Vec<_>>(),
         )
-        .map(|(label, instructions)| {
+        .map(|((label, comma), instructions)| {
             let span = Span {
                 start: label.1.start,
                 end: instructions.last().map_or(label.1.end, |i| i.span.end),
             };
             BasicBlock {
                 label: Some(label),
+                label_comma_span: Some(comma),
                 instructions,
                 span,
             }
@@ -361,6 +362,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
                     };
                     BasicBlock {
                         label: None,
+                        label_comma_span: None,
                         instructions,
                         span,
                     }

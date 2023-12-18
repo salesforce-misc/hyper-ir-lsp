@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
@@ -9,7 +10,7 @@ use hyper_ir_lsp::control_flow_graph::create_cfg_dot_visualization;
 use hyper_ir_lsp::diagnostics::{
     diagnostics_from_index, diagnostics_from_parser, diagnostics_from_statements,
 };
-use hyper_ir_lsp::hir_index::{create_index, HIRIndex, UseDefKind, UseDefList};
+use hyper_ir_lsp::hir_index::{create_index, HIRIndex, SymbolOccurrence, UseDefKind, UseDefList};
 use hyper_ir_lsp::hir_parser::{parse_from_str, BasicBlock, Instruction, ParserResult, Statement};
 use hyper_ir_lsp::lsp_utils::{lsp_pos_to_offset, offset_to_lsp_pos, range_to_lsp};
 use hyper_ir_lsp::semantic_token::{
@@ -94,6 +95,12 @@ impl LanguageServer for Backend {
                 code_lens_provider: Some(CodeLensOptions {
                     resolve_provider: None,
                 }),
+                rename_provider: Some(OneOf::Right(RenameOptions {
+                    prepare_provider: Some(true),
+                    work_done_progress_options: WorkDoneProgressOptions {
+                        work_done_progress: None,
+                    },
+                })),
                 execute_command_provider: Some(ExecuteCommandOptions {
                     commands: vec!["visualize-cfg".to_string()],
                     ..Default::default()
@@ -259,6 +266,95 @@ impl LanguageServer for Backend {
         Ok(symbols)
     }
 
+    async fn prepare_rename(
+        &self,
+        pos: TextDocumentPositionParams,
+    ) -> Result<Option<PrepareRenameResponse>> {
+        Ok(|| -> Option<PrepareRenameResponse> {
+            let uri_str = pos.text_document.uri.to_string();
+            let doc = self.document_map.get(&uri_str)?;
+            let offset = lsp_pos_to_offset(&doc.rope, &pos.position)?;
+            let symbol = doc.index.find_symbol_at_position(offset)?;
+            let range = range_to_lsp(&doc.rope, &symbol.span);
+            Some(PrepareRenameResponse::Range(range?))
+        }())
+    }
+
+    async fn rename(&self, params: RenameParams) -> Result<Option<WorkspaceEdit>> {
+        let pos = params.text_document_position;
+        let uri_str = pos.text_document.uri.to_string();
+        let create_error = |msg: &'static str| Error {
+            code: ErrorCode::InvalidParams,
+            message: Cow::Borrowed(msg),
+            data: None,
+        };
+
+        // Find the document
+        let doc = self
+            .document_map
+            .get(&uri_str)
+            .ok_or_else(|| create_error("Document not found"))?;
+
+        // Find the symbol under the cursor
+        let symbol = (|| -> Option<&SymbolOccurrence> {
+            let offset = lsp_pos_to_offset(&doc.rope, &pos.position)?;
+            doc.index.find_symbol_at_position(offset)
+        })()
+        .ok_or_else(|| create_error("No symbol at the given position"))?;
+
+        // Check the new name and make sure it contains the expected prefix
+        let prefix = match symbol.symbol_kind {
+            hyper_ir_lsp::hir_index::SymbolKind::GlobalVar => "@",
+            hyper_ir_lsp::hir_index::SymbolKind::Function => "@",
+            hyper_ir_lsp::hir_index::SymbolKind::DbgAnnotation => "!",
+            hyper_ir_lsp::hir_index::SymbolKind::Label => "",
+            hyper_ir_lsp::hir_index::SymbolKind::LocalVar => "%",
+        };
+        let mut new_name = params.new_name;
+        if let Some(stripped) = new_name.strip_prefix(prefix) {
+            new_name = stripped.to_string();
+        }
+        if new_name
+            .chars()
+            .any(|c| !c.is_alphanumeric() && c != '_' && c != ':')
+        {
+            return Result::Err(create_error("Name contains invalid character"));
+        }
+        if new_name.chars().next().unwrap().is_numeric()
+            && symbol.symbol_kind != hyper_ir_lsp::hir_index::SymbolKind::DbgAnnotation
+        {
+            return Result::Err(create_error("Name must not start with a digit"));
+        }
+        new_name = format!("{}{}", prefix, new_name);
+
+        // Rename all occurrences
+        let usedefs = doc
+            .index
+            .get_by_symbol_kind(
+                symbol.symbol_kind,
+                symbol.func_body_id.map(|id| &doc.index.function_bodies[id]),
+            )
+            .get(&symbol.name)
+            .unwrap();
+        let edits = usedefs
+            .decls
+            .iter()
+            .chain(usedefs.defs.iter())
+            .chain(usedefs.uses.iter())
+            .filter_map(|range| {
+                Some(TextEdit {
+                    range: range_to_lsp(&doc.rope, range)?,
+                    new_text: new_name.clone(),
+                })
+            })
+            .collect::<Vec<_>>();
+        let edit = WorkspaceEdit {
+            changes: Some(HashMap::from([(pos.text_document.uri, edits)])),
+            ..Default::default()
+        };
+        Ok(Some(edit))
+    }
+
     async fn folding_range(&self, params: FoldingRangeParams) -> Result<Option<Vec<FoldingRange>>> {
         let folding_ranges = || -> Option<Vec<FoldingRange>> {
             let uri = &params.text_document.uri;
@@ -345,7 +441,10 @@ impl LanguageServer for Backend {
                             .collect::<Vec<_>>();
 
                         Some(InlayHint {
-                            position: offset_to_lsp_pos(&doc.rope, bb.label.as_ref()?.1.end)?,
+                            position: offset_to_lsp_pos(
+                                &doc.rope,
+                                bb.label_comma_span.as_ref()?.end,
+                            )?,
                             label: InlayHintLabel::LabelParts(label_parts),
                             kind: None,
                             text_edits: None,
