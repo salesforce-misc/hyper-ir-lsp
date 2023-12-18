@@ -6,13 +6,13 @@ use crate::{
     lsp_utils::range_to_lsp,
 };
 
-pub fn extract_number_from_identifier(id: &str) -> Option<(&str, u32)> {
+pub fn extract_number_from_identifier(id: &str) -> Option<(&str, i64)> {
     let offset = id
         .rfind(|c: char| !c.is_numeric())
         .map(|i| i + 1)
         .unwrap_or(0);
     let (name, nr) = id.split_at(offset);
-    Some((name, nr.parse::<u32>().ok()?))
+    Some((name, nr.parse::<i64>().ok()?))
 }
 
 pub fn get_rename_edits(rope: &Rope, usedefs: &UseDefList, new_name: &str) -> Vec<TextEdit> {
@@ -35,7 +35,8 @@ pub fn get_shift_edits(
     index: &HIRIndex,
     symbol_kind: SymbolKind,
     func_body_id: Option<usize>,
-    renamed_nr: u32,
+    renamed_nr: i64,
+    shift: i64,
 ) -> Vec<TextEdit> {
     index
         .get_by_symbol_kind(
@@ -48,7 +49,7 @@ pub fn get_shift_edits(
             if nr < renamed_nr {
                 return None;
             }
-            let new_name = format!("{}{}", prefix, nr + 1);
+            let new_name = format!("{}{}", prefix, (nr + shift).wrapping_abs());
             Some(get_rename_edits(rope, usedefs, &new_name))
         })
         .flatten()

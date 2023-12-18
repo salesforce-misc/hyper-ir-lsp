@@ -48,7 +48,7 @@ enum CodeActionData {
         uri: Url,
         symbol_kind: hyper_ir_lsp::hir_index::SymbolKind,
         func_body_id: Option<usize>,
-        renamed_nr: u32,
+        renamed_nr: i64,
     },
 }
 
@@ -336,41 +336,64 @@ impl LanguageServer for Backend {
         })()
         .ok_or_else(|| Error::invalid_params("No symbol at the given position"))?;
 
-        // Check the new name and make sure it contains the expected prefix
-        let prefix = match symbol.symbol_kind {
-            hyper_ir_lsp::hir_index::SymbolKind::GlobalVar => "@",
-            hyper_ir_lsp::hir_index::SymbolKind::Function => "@",
-            hyper_ir_lsp::hir_index::SymbolKind::DbgAnnotation => "!",
-            hyper_ir_lsp::hir_index::SymbolKind::Label => "",
-            hyper_ir_lsp::hir_index::SymbolKind::LocalVar => "%",
-        };
+        // Detect relative renames
         let mut new_name = params.new_name;
-        if let Some(stripped) = new_name.strip_prefix(prefix) {
-            new_name = stripped.to_string();
-        }
-        if new_name
-            .chars()
-            .any(|c| !c.is_alphanumeric() && c != '_' && c != ':')
-        {
-            return Result::Err(Error::invalid_params("Name contains invalid character"));
-        }
-        if new_name.chars().next().unwrap().is_numeric()
-            && symbol.symbol_kind != hyper_ir_lsp::hir_index::SymbolKind::DbgAnnotation
-        {
-            return Result::Err(Error::invalid_params("Name must not start with a digit"));
-        }
-        new_name = format!("{}{}", prefix, new_name);
-
-        // Rename all occurrences
-        let usedefs = doc
-            .index
-            .get_by_symbol_kind(
+        let edits = if new_name.starts_with('+') || new_name.starts_with('-') {
+            let sign = if new_name.starts_with('-') { -1 } else { 1 };
+            let rename_nr = new_name[1..].parse::<i64>().map_err(|_e| {
+                Error::invalid_params(format!("Invalid relative rename `{}`", new_name))
+            })?;
+            let rename_shift = sign * rename_nr;
+            let (_, rename_start) =
+                extract_number_from_identifier(&symbol.name).ok_or_else(|| {
+                    Error::invalid_params(
+                        "Relative rename can only be applied to a numbered identifier",
+                    )
+                })?;
+            get_shift_edits(
+                &doc.rope,
+                &doc.index,
                 symbol.symbol_kind,
-                symbol.func_body_id.map(|id| &doc.index.function_bodies[id]),
+                symbol.func_body_id,
+                rename_start,
+                rename_shift,
             )
-            .get(&symbol.name)
-            .unwrap();
-        let edits = get_rename_edits(&doc.rope, usedefs, &new_name);
+        } else {
+            // Check the new name and make sure it contains the expected prefix
+            let prefix = match symbol.symbol_kind {
+                hyper_ir_lsp::hir_index::SymbolKind::GlobalVar => "@",
+                hyper_ir_lsp::hir_index::SymbolKind::Function => "@",
+                hyper_ir_lsp::hir_index::SymbolKind::DbgAnnotation => "!",
+                hyper_ir_lsp::hir_index::SymbolKind::Label => "",
+                hyper_ir_lsp::hir_index::SymbolKind::LocalVar => "%",
+            };
+            if let Some(stripped) = new_name.strip_prefix(prefix) {
+                new_name = stripped.to_string();
+            }
+            if new_name
+                .chars()
+                .any(|c| !c.is_alphanumeric() && c != '_' && c != ':')
+            {
+                return Result::Err(Error::invalid_params("Name contains invalid character"));
+            }
+            if new_name.chars().next().unwrap().is_numeric()
+                && symbol.symbol_kind != hyper_ir_lsp::hir_index::SymbolKind::DbgAnnotation
+            {
+                return Result::Err(Error::invalid_params("Name must not start with a digit"));
+            }
+            new_name = format!("{}{}", prefix, new_name);
+
+            // Rename all occurrences
+            let usedefs = doc
+                .index
+                .get_by_symbol_kind(
+                    symbol.symbol_kind,
+                    symbol.func_body_id.map(|id| &doc.index.function_bodies[id]),
+                )
+                .get(&symbol.name)
+                .unwrap();
+            get_rename_edits(&doc.rope, usedefs, &new_name)
+        };
         let edit = WorkspaceEdit {
             changes: Some(HashMap::from([(pos.text_document.uri, edits)])),
             ..Default::default()
@@ -812,8 +835,14 @@ impl Backend {
                     .document_map
                     .get(&uri.to_string())
                     .ok_or_else(|| Error::invalid_params("Document not found"))?;
-                let edits =
-                    get_shift_edits(&doc.rope, &doc.index, symbol_kind, func_body_id, renamed_nr);
+                let edits = get_shift_edits(
+                    &doc.rope,
+                    &doc.index,
+                    symbol_kind,
+                    func_body_id,
+                    renamed_nr,
+                    1,
+                );
                 updated_action.edit = Some(WorkspaceEdit {
                     changes: Some(HashMap::from([(uri, edits)])),
                     ..Default::default()
