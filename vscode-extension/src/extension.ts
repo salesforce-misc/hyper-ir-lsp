@@ -37,7 +37,7 @@ export async function activate (context: ExtensionContext) {
   // Options to control the language client
   const clientOptions: LanguageClientOptions = {
     // Register the server for Hyper IR documents
-    documentSelector: [{ language: 'hir' }],
+    documentSelector: [{ language: 'hir' }]
   };
 
   // Create the language client and start the client.

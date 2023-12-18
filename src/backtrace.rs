@@ -142,18 +142,18 @@ pub fn backtrace_json_to_md(frames: &[Frame]) -> String {
 
 fn shorten_name(s: &str, len: usize) -> String {
     if s.len() < len - 2 {
-        return s.to_string();
+        s.to_string()
     } else {
-        return s[..len - 2].to_string() + "…";
+        s[..len - 2].to_string() + "…"
     }
 }
 
 pub fn inlay_hint_for_backtrace(pos: Position, frames: &[Frame]) -> InlayHint {
     // Extract all interesting frames
     let mut inlay_hint_parts: Vec<InlayHintLabelPart> = Vec::new();
-    if let Some(idx) = identify_relevant_frames(&frames) {
+    if let Some(idx) = identify_relevant_frames(frames) {
         let frame = &frames[idx];
-        let symbol = shorten_name(&frame.symbol,50);
+        let symbol = shorten_name(&frame.symbol, 50);
         let tooltip = if symbol == frame.symbol {
             None
         } else {
@@ -174,7 +174,7 @@ pub fn inlay_hint_for_backtrace(pos: Position, frames: &[Frame]) -> InlayHint {
     }
 
     // Put the full backtrace into a tooltip
-    let tooltip_md = backtrace_json_to_md(&frames);
+    let tooltip_md = backtrace_json_to_md(frames);
     let tooltip = MarkupContent {
         kind: MarkupKind::Markdown,
         value: tooltip_md,
