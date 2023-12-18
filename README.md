@@ -101,8 +101,9 @@ Contributions are welcome. Feel free to just open a pull request.
     * ✔ Hyperlink the stack trace, pointing to the place where a function is defined
     * Link the stack frame through "go to definition", so it uses VSCode's "peek" functionality
     * ✔ Support renames (functions, global vars, labels, local vars)
-    * Code action to increment/decrement value number (and also increment value number of all following values)
+    * ✔ Code action to increment value number (and also increment value number of all following values)
     * Code action to strip all debug annotations
+    * Code action to mask out all pointer values
     * Action to set breakpoint at generation time and run until breakpoint
     * Provide folding range for all debug annotations; collapse by default
     * Hover provider for function-local variables; Show "SSA chain"

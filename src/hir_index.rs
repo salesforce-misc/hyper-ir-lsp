@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::{
     hir_parser::{BasicBlock, Statement},
     hir_tokenizer::{Span, Spanned, Token},
@@ -53,7 +55,8 @@ pub struct FunctionBody {
     pub incoming_bb_branches: HashMap<String, Vec<Spanned<String>>>,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde()]
 pub enum SymbolKind {
     GlobalVar,
     Function,

@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::cell::Cell;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
@@ -13,6 +13,7 @@ use hyper_ir_lsp::diagnostics::{
 use hyper_ir_lsp::hir_index::{create_index, HIRIndex, SymbolOccurrence, UseDefKind, UseDefList};
 use hyper_ir_lsp::hir_parser::{parse_from_str, BasicBlock, Instruction, ParserResult, Statement};
 use hyper_ir_lsp::lsp_utils::{lsp_pos_to_offset, offset_to_lsp_pos, range_to_lsp};
+use hyper_ir_lsp::rename::{extract_number_from_identifier, get_rename_edits, get_shift_edits};
 use hyper_ir_lsp::semantic_token::{
     convert_to_lsp_tokens, semantic_tokens_from_tokens, HIRSemanticToken, LEGEND_TYPE,
 };
@@ -36,7 +37,19 @@ struct AnalyzedDocument {
 struct Backend {
     client: Client,
     root_paths: Mutex<Vec<Url>>,
+    code_actions_lazy_resolve: Mutex<Cell<bool>>,
     document_map: DashMap<String, AnalyzedDocument>,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+enum CodeActionData {
+    ShiftNumbering {
+        uri: Url,
+        symbol_kind: hyper_ir_lsp::hir_index::SymbolKind,
+        func_body_id: Option<usize>,
+        renamed_nr: u32,
+    },
 }
 
 #[tower_lsp::async_trait]
@@ -50,6 +63,23 @@ impl LanguageServer for Backend {
         } else if let Some(root_uri) = params.root_uri {
             self.root_paths.lock().unwrap().push(root_uri);
         }
+        let code_actions_lazy_resolve = params
+            .capabilities
+            .text_document
+            .and_then(|c| c.code_action)
+            .map(|c| {
+                let supports_resolve = c
+                    .resolve_support
+                    .map(|c| c.properties.contains(&"edit".to_string()))
+                    .unwrap_or(false);
+                let supports_data = c.data_support.unwrap_or(false);
+                supports_resolve && supports_data
+            })
+            .unwrap_or(false);
+        self.code_actions_lazy_resolve
+            .lock()
+            .unwrap()
+            .set(code_actions_lazy_resolve);
 
         Ok(InitializeResult {
             server_info: Some(ServerInfo {
@@ -101,6 +131,15 @@ impl LanguageServer for Backend {
                         work_done_progress: None,
                     },
                 })),
+                code_action_provider: Some(CodeActionProviderCapability::Options(
+                    CodeActionOptions {
+                        code_action_kinds: None,
+                        work_done_progress_options: WorkDoneProgressOptions {
+                            work_done_progress: None,
+                        },
+                        resolve_provider: Some(code_actions_lazy_resolve),
+                    },
+                )),
                 execute_command_provider: Some(ExecuteCommandOptions {
                     commands: vec!["visualize-cfg".to_string()],
                     ..Default::default()
@@ -111,8 +150,9 @@ impl LanguageServer for Backend {
     }
 
     async fn initialized(&self, _: InitializedParams) {
+        let lazy = self.code_actions_lazy_resolve.lock().unwrap().get();
         self.client
-            .log_message(MessageType::INFO, "initialized!")
+            .log_message(MessageType::INFO, format!("initialized (lazy: {})", lazy))
             .await;
     }
 
@@ -281,26 +321,20 @@ impl LanguageServer for Backend {
     }
 
     async fn rename(&self, params: RenameParams) -> Result<Option<WorkspaceEdit>> {
+        // Find the document
         let pos = params.text_document_position;
         let uri_str = pos.text_document.uri.to_string();
-        let create_error = |msg: &'static str| Error {
-            code: ErrorCode::InvalidParams,
-            message: Cow::Borrowed(msg),
-            data: None,
-        };
-
-        // Find the document
         let doc = self
             .document_map
             .get(&uri_str)
-            .ok_or_else(|| create_error("Document not found"))?;
+            .ok_or_else(|| Error::invalid_params("Document not found"))?;
 
         // Find the symbol under the cursor
         let symbol = (|| -> Option<&SymbolOccurrence> {
             let offset = lsp_pos_to_offset(&doc.rope, &pos.position)?;
             doc.index.find_symbol_at_position(offset)
         })()
-        .ok_or_else(|| create_error("No symbol at the given position"))?;
+        .ok_or_else(|| Error::invalid_params("No symbol at the given position"))?;
 
         // Check the new name and make sure it contains the expected prefix
         let prefix = match symbol.symbol_kind {
@@ -318,12 +352,12 @@ impl LanguageServer for Backend {
             .chars()
             .any(|c| !c.is_alphanumeric() && c != '_' && c != ':')
         {
-            return Result::Err(create_error("Name contains invalid character"));
+            return Result::Err(Error::invalid_params("Name contains invalid character"));
         }
         if new_name.chars().next().unwrap().is_numeric()
             && symbol.symbol_kind != hyper_ir_lsp::hir_index::SymbolKind::DbgAnnotation
         {
-            return Result::Err(create_error("Name must not start with a digit"));
+            return Result::Err(Error::invalid_params("Name must not start with a digit"));
         }
         new_name = format!("{}{}", prefix, new_name);
 
@@ -336,23 +370,78 @@ impl LanguageServer for Backend {
             )
             .get(&symbol.name)
             .unwrap();
-        let edits = usedefs
-            .decls
-            .iter()
-            .chain(usedefs.defs.iter())
-            .chain(usedefs.uses.iter())
-            .filter_map(|range| {
-                Some(TextEdit {
-                    range: range_to_lsp(&doc.rope, range)?,
-                    new_text: new_name.clone(),
-                })
-            })
-            .collect::<Vec<_>>();
+        let edits = get_rename_edits(&doc.rope, usedefs, &new_name);
         let edit = WorkspaceEdit {
             changes: Some(HashMap::from([(pos.text_document.uri, edits)])),
             ..Default::default()
         };
         Ok(Some(edit))
+    }
+
+    async fn code_action(&self, params: CodeActionParams) -> Result<Option<CodeActionResponse>> {
+        // Find the document
+        let uri_str = params.text_document.uri.to_string();
+        let doc = self
+            .document_map
+            .get(&uri_str)
+            .ok_or_else(|| Error::invalid_params("Document not found"))?;
+
+        // We don't support ranges, yet
+        let range = params.range;
+        if range.start != range.end {
+            return Ok(None);
+        }
+
+        let mut actions = vec![];
+        // The "Increment identifier" action, if available
+        (|| -> Option<()> {
+            let offset = lsp_pos_to_offset(&doc.rope, &range.start)?;
+            let symbol = doc.index.find_symbol_at_position(offset)?;
+            let (_, renamed_nr) = extract_number_from_identifier(&symbol.name)?;
+
+            let title = match symbol.symbol_kind {
+                hyper_ir_lsp::hir_index::SymbolKind::GlobalVar => "Shift global variable numbering",
+                hyper_ir_lsp::hir_index::SymbolKind::Function => "Shift function numbering",
+                hyper_ir_lsp::hir_index::SymbolKind::DbgAnnotation => "Shift debug numbering",
+                hyper_ir_lsp::hir_index::SymbolKind::Label => "Shift basic block numbering",
+                hyper_ir_lsp::hir_index::SymbolKind::LocalVar => "Shift variable numbering",
+            }
+            .to_string();
+
+            actions.push(CodeAction {
+                title,
+                data: Some(
+                    serde_json::to_value(CodeActionData::ShiftNumbering {
+                        uri: params.text_document.uri.clone(),
+                        symbol_kind: symbol.symbol_kind,
+                        func_body_id: symbol.func_body_id,
+                        renamed_nr,
+                    })
+                    .ok()?,
+                ),
+                ..Default::default()
+            });
+            None
+        })();
+
+        // Eagerly resolve all edits, if the client doesn't support lazy resolving
+        if !self.code_actions_lazy_resolve.lock().unwrap().get() {
+            actions = actions
+                .drain(..)
+                .map(|a| self.do_code_action_resolve(a).ok().unwrap())
+                .collect();
+        }
+
+        Ok(Some(
+            actions
+                .drain(..)
+                .map(CodeActionOrCommand::CodeAction)
+                .collect(),
+        ))
+    }
+
+    async fn code_action_resolve(&self, action: CodeAction) -> Result<CodeAction> {
+        self.do_code_action_resolve(action)
     }
 
     async fn folding_range(&self, params: FoldingRangeParams) -> Result<Option<Vec<FoldingRange>>> {
@@ -702,6 +791,37 @@ impl Backend {
         let origin_selection_range = range_to_lsp(&doc.rope, &symbol.span)?;
         Some((origin_selection_range, ranges))
     }
+
+    fn do_code_action_resolve(&self, action: CodeAction) -> Result<CodeAction> {
+        let raw_data = action
+            .data
+            .as_ref()
+            .ok_or_else(|| Error::invalid_params("Missing `data` in code action"))?;
+        let data = serde_json::from_value::<CodeActionData>(raw_data.clone()).map_err(|err| {
+            Error::invalid_params(format!("Invalid `data` for code action: {}", err))
+        })?;
+        let mut updated_action = action.clone();
+        match data {
+            CodeActionData::ShiftNumbering {
+                uri,
+                symbol_kind,
+                func_body_id,
+                renamed_nr,
+            } => {
+                let doc = self
+                    .document_map
+                    .get(&uri.to_string())
+                    .ok_or_else(|| Error::invalid_params("Document not found"))?;
+                let edits =
+                    get_shift_edits(&doc.rope, &doc.index, symbol_kind, func_body_id, renamed_nr);
+                updated_action.edit = Some(WorkspaceEdit {
+                    changes: Some(HashMap::from([(uri, edits)])),
+                    ..Default::default()
+                });
+            }
+        };
+        Ok(updated_action)
+    }
 }
 
 #[tokio::main]
@@ -714,6 +834,7 @@ async fn main() {
     let (service, socket) = LspService::build(|client| Backend {
         client,
         root_paths: Default::default(),
+        code_actions_lazy_resolve: Default::default(),
         document_map: DashMap::new(),
     })
     .finish();
