@@ -142,7 +142,7 @@ jobs:
 
       - name: Package VS Code extension
         working-directory: vscode-extension
-        run: pnpm package
+        run: pnpm package:release
 
       - name: Upload Workflow Artifact
         uses: actions/upload-artifact@v4
