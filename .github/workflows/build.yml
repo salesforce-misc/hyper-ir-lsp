@@ -61,7 +61,6 @@ jobs:
         with:
             name: hyper-ir-lsp-${{ matrix.os }}${{ runner.os == 'Windows' && '.exe' || '' }}
             path: ./target/release/hyper-ir-lsp${{ runner.os == 'Windows' && '.exe' || '' }}
-            retention-days: 1
             if-no-files-found: error
 
       - name: Upload Release Artifact
@@ -81,6 +80,7 @@ jobs:
   build_vscode_ext:
     name: Build VS Code extension
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu, windows, macos]
     runs-on: ${{ matrix.os }}-latest
@@ -149,7 +149,6 @@ jobs:
         with:
             name: hyper-ir-lsp-0.0.1.${{ matrix.os }}.vsix
             path: ./vscode-extension/hyper-ir-lsp-0.0.1.vsix
-            retention-days: 1
             if-no-files-found: error
 
       - name: Upload Release Artifact
