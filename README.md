@@ -35,7 +35,11 @@ As such, most bugs can be found through close inspection of Hyper IR.
 
 ## Installation
 
-For Visual Studio Code, we offer a pre-packaged Visual Studio Code plugin:
+All functionality is contained inside the Language Server. This Language
+Server can be reused between editors. As such, this extension can be
+used in a wide range editors (neovim, emacs, IntelliJ, ...).
+
+For **Visual Studio Code**, we offer a pre-packaged Visual Studio Code plugin:
 
 1. Download the correct `*.vsix` package for your operating system from the [latest release](https://github.com/vogelsgesang/hyper-ir-lsp/releases/)
 2. Inside Visual Studio, press `Cmd` + `Shift` + `P` to open the command picker
@@ -43,13 +47,43 @@ For Visual Studio Code, we offer a pre-packaged Visual Studio Code plugin:
 4. In the file picker, choose the downloaded `.vsix` file
 5. (Optional) Install the "Graphviz Interactive Preview" extension. This extension will be required to display the control flow graphs of Hyper IR functions.
 
-Usage in other editors (neovim, emacs, IntelliJ, ...) is also possible.
-All functionality is contained inside the Language Server. This Language
-Server can be reused between editors. The exact way to configure a
-language server is different for each editor, read the manual of your
-editor to figure out how to configure a language server. You can get
-the language server binary by unzipping the `*.vsix` file and extracting
-the `hyper-ir-lsp` binary from it.
+For **Neovim**, use the standalone LSP executables and a configuration similar to
+
+```lua
+vim.filetype.add({
+  extension = {
+    hir = 'hyper_ir',
+  }
+})
+
+local nvim_lsp = require('lspconfig.configs')
+require('lspconfig.configs').hyper_ir_lsp = {
+  default_config = {
+    cmd = { '/home/avogelsgesang/Documents/hyper-ir-lsp/target/release/hyper-ir-lsp' },
+    name = 'Hyper IR LSP',
+    filetypes = {'hyper_ir'},
+    root_dir = function(fname)
+      return nvim_lsp.util.find_git_ancestor(fname)
+    end,
+  }
+}
+nvim_lsp["hyper_ir_lsp"].setup({})
+
+local hyper_ir_links = {
+  ['@lsp.type.keyword.hyper_ir'] = '@keyword',
+  ['@lsp.type.modifier.hyper_ir'] = '@keyword',
+  ['@lsp.type.type.hyper_ir'] = '@type',
+  ['@lsp.type.variable.hyper_ir'] = 'Identifier',
+  ['@lsp.type.number.hyper_ir'] = '@number',
+  ['@lsp.type.string.hyper_ir'] = '@string',
+}
+for newgroup, oldgroup in pairs(hyper_ir_links) do
+  vim.api.nvim_set_hl(0, newgroup, { link = oldgroup, default = true })
+end
+```
+
+I will leave it as an exercise to the reader to figure out how exactly
+to configure the language server for other editors.
 
 ## Usage
 
@@ -121,7 +155,7 @@ Contributions are welcome. Feel free to just open a pull request.
     * Proper logo
     * Add screenshots / screen recordings to README
     * Use Webassembly instead of native binary
-* Configuration for neovim
+* ✔ Configuration for neovim
 * Github CI
     * ✔ Compile rust
     * ✔ Run rust test cases
