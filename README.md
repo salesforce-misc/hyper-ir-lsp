@@ -174,7 +174,8 @@ Contributions are welcome. Feel free to just open a pull request.
     * ✔ Teardown-functions: move `destructDone` to the end
     * ✔ Missing "pure" modifier
     * ✔ Stop printing stack traces at `main`
-    * Improve performance of symbolizing the stack traces
+    * ✔ Improve performance of symbolizing the stack traces
+    * Print definitions for proxied types
     * Print threadstate and querystate types better
 * Code Style / Things I still need to learn about Rust
     * Deduplicate the `just` + `map_with_span` pattern when parsing instructions
