@@ -100,6 +100,7 @@ pub fn tokenizer() -> impl Parser<char, Vec<Spanned<Token>>, Error = Simple<char
             "int16" => Token::Type(ident),
             "int32" => Token::Type(ident),
             "int64" => Token::Type(ident),
+            "float32" => Token::Type(ident),
             "float64" => Token::Type(ident),
             "data128" => Token::Type(ident),
             "ptr" => Token::Type(ident),
