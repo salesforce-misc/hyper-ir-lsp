@@ -2,22 +2,22 @@
 
 Code intelligence for Hyper IR.
 
+![Screenshot](media/screenshot.png)
+
 ## Features
 
 The plugin focuses on features which make it easier to understand a Hyper IR module:
-Syntax highlighting, code navigation, code visualization, code folding, etc.
-Below you can find small screen recordings of all those features.
 
 * **Syntax Highlighting**:  As soon as you open a Hyper IR module, you get proper syntax highlighting.
-* **Code Folding**: You can fold individual basic blocks or complete functions.
 * **Control Flow Visualization**: Use the "Visualize Controlflow" action directly above a function definition to get a rendering of the functions's control flow graph.
+* **Code Folding**: You can fold individual basic blocks or complete functions.
 * **Code Navigation**:
   * The **Document Outline** shows you a list of all global variables and functions. Double-click on any function to directly jump to it.
   * Use "**go to definition / references**" on function names, variable names and metadata references.
   * **Inlay hints** show the incoming control flow edges for each basic block
 * **(Self)-Diagnostics**: The plugin shows syntax errors or other semantic issues. Given that the IR is usually dumped by Hyper, any errors indicate a bug in either Hyper or this extension.
 
-### Non-features
+### Non-Features
 
 Editing-focused features (e.g., code-completion) are not provided by this plugin.
 Those features would provide little value for Hyper IR because no developer ever writes Hyper IR by hand.
@@ -153,7 +153,7 @@ Contributions are welcome. Feel free to just open a pull request.
     * ✔ Include README
     * ✔ Write proper README
     * Proper logo
-    * Add screenshots / screen recordings to README
+    * ✔ Add screenshots / screen recordings to README
     * Use Webassembly instead of native binary
 * ✔ Configuration for neovim
 * Github CI

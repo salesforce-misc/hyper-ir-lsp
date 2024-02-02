@@ -638,7 +638,7 @@ impl LanguageServer for Backend {
                             range: range_to_lsp(&doc.rope, def_range)?,
                             command: Some(Command {
                                 // Potential icons: ⇆⭾⧬⌸✍✒✎🧐
-                                title: "⭾ Visualize Controlflow".to_string(),
+                                title: "✨ Visualize Controlflow".to_string(),
                                 command: "visualize-cfg".to_string(),
                                 arguments: Some(vec![
                                     Value::String(uri_str.clone()),
