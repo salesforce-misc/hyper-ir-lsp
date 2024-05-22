@@ -41,7 +41,7 @@ used in a wide range editors (neovim, emacs, IntelliJ, ...).
 
 For **Visual Studio Code**, we offer a pre-packaged Visual Studio Code plugin:
 
-1. Download the correct `*.vsix` package for your operating system from the [latest release](https://github.com/vogelsgesang/hyper-ir-lsp/releases/)
+1. Download the correct `*.vsix` package for your operating system from the [latest release](https://github.com/salesforce-misc/hyper-ir-lsp/releases/)
 2. Inside Visual Studio, press `Cmd` + `Shift` + `P` to open the command picker
 3. Choose the "Extension: Install from VSIX..." command
 4. In the file picker, choose the downloaded `.vsix` file
@@ -93,7 +93,7 @@ You can then simply open any of the `*.hir` files and this extension will help y
 
 ## Development
 
-The source code for this extension lives at https://github.com/vogelsgesang/hyper-ir-lsp.
+The source code for this extension lives at https://github.com/salesforce-misc/hyper-ir-lsp.
 Github Actions automatically build every single commit for all operating systems (Linux, Windows, OSX).
 Contributions are welcome. Feel free to just open a pull request.
 

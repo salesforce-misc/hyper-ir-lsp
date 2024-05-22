@@ -12,7 +12,7 @@
 		"language-server"
 	],
 	"repository": {
-		"url": "https://github.com/vogelsgesang/hyper-ir-lsp"
+		"url": "https://github.com/salesforce-misc/hyper-ir-lsp"
 	},
 	"engines": {
 		"vscode": "^1.83.0"
