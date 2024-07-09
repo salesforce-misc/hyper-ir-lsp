@@ -632,21 +632,30 @@ impl LanguageServer for Backend {
                 .functions
                 .iter()
                 .filter_map(|f| {
-                    // Only show the code lens for functions with exactly one definition
+                    // Only show the code lens for functions with exactly one definition and with more than one basic block
                     if let [def_range] = &f.1.defs[..] {
-                        Some(CodeLens {
-                            range: range_to_lsp(&doc.rope, def_range)?,
-                            command: Some(Command {
-                                // Potential icons: ⇆⭾⧬⌸✍✒✎🧐
-                                title: "✨ Visualize Controlflow".to_string(),
-                                command: "visualize-cfg".to_string(),
-                                arguments: Some(vec![
-                                    Value::String(uri_str.clone()),
-                                    Value::String(f.0.clone()),
-                                ]),
-                            }),
-                            data: None,
-                        })
+                        let function_body = doc
+                            .index
+                            .function_bodies
+                            .iter()
+                            .find(|b| b.name.0 == *f.0)?;
+                        if function_body.basic_blocks.len() > 1 {
+                            Some(CodeLens {
+                                range: range_to_lsp(&doc.rope, def_range)?,
+                                command: Some(Command {
+                                    // Potential icons: ⇆⭾⧬⌸✍✒✎🧐
+                                    title: "✨ Visualize Controlflow".to_string(),
+                                    command: "visualize-cfg".to_string(),
+                                    arguments: Some(vec![
+                                        Value::String(uri_str.clone()),
+                                        Value::String(f.0.clone()),
+                                    ]),
+                                }),
+                                data: None,
+                            })
+                        } else {
+                            None
+                        }
                     } else {
                         None
                     }
