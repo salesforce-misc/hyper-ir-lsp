@@ -167,8 +167,15 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         });
 
     // A conditional branch
+    let likelihood = one_of([
+        Token::Ident("likely".to_string()),
+        Token::Ident("unlikely".to_string()),
+        Token::Ident("highly_likely".to_string()),
+        Token::Ident("highly_unlikely".to_string()),
+    ]);
     let condbr_instruction = just(Token::Ident("br".to_string()))
         .map_with_span(|_, span| ("br".to_string(), span))
+        .then_ignore(likelihood.or_not())
         .then_ignore(just(Token::Type("int1".to_string())))
         .then_ignore(any())
         .then_ignore(just(Token::Punctuation(',')))
@@ -601,6 +608,7 @@ fn test_parse_basicblock_refs() {
         br next_1
         br next_1                         !1
         br int1 %v33, loop_2, loopDone_3  !2
+        br likely int1 %v33, loop_2, loopDone_3  !2
         int64 %v10 = phi [body_0, int64 0], [loop_3, int64 %v15]
         int32 %v17 = saddbr int32 %v9, int32 %v11, cont=add_cont_3, overflow=overflow_4    !30
         switch int32 %v10, default=unreachable_5, int32 0 label=bb_0, int32 1 label=bb_1, int32 2 label=bb_2
@@ -620,7 +628,7 @@ fn test_parse_basicblock_refs() {
         }] => {
             assert_eq!(basic_blocks.len(), 1);
             let instructions = &basic_blocks[0].instructions;
-            assert_eq!(instructions.len(), 6);
+            assert_eq!(instructions.len(), 7);
 
             assert_eq!(instructions[0].instruction.0, "br");
             assert_eq!(
@@ -643,32 +651,41 @@ fn test_parse_basicblock_refs() {
                 ]
             );
 
-            assert_eq!(instructions[3].instruction.0, "phi");
+            assert_eq!(instructions[3].instruction.0, "br");
             assert_eq!(
                 instructions[3].basic_block_refs,
                 vec![
-                    ("body_0".to_string(), 202..208),
-                    ("loop_3".to_string(), 221..227)
+                    ("loop_2".to_string(), 205..211),
+                    ("loopDone_3".to_string(), 213..223)
                 ]
             );
 
-            assert_eq!(instructions[4].instruction.0, "saddbr");
+            assert_eq!(instructions[4].instruction.0, "phi");
             assert_eq!(
                 instructions[4].basic_block_refs,
                 vec![
-                    ("add_cont_3".to_string(), 297..307),
-                    ("overflow_4".to_string(), 318..328)
+                    ("body_0".to_string(), 254..260),
+                    ("loop_3".to_string(), 273..279)
                 ]
             );
 
-            assert_eq!(instructions[5].instruction.0, "switch");
+            assert_eq!(instructions[5].instruction.0, "saddbr");
             assert_eq!(
                 instructions[5].basic_block_refs,
                 vec![
-                    ("unreachable_5".to_string(), 371..384),
-                    ("bb_0".to_string(), 400..404),
-                    ("bb_1".to_string(), 420..424),
-                    ("bb_2".to_string(), 440..444)
+                    ("add_cont_3".to_string(), 349..359),
+                    ("overflow_4".to_string(), 370..380)
+                ]
+            );
+
+            assert_eq!(instructions[6].instruction.0, "switch");
+            assert_eq!(
+                instructions[6].basic_block_refs,
+                vec![
+                    ("unreachable_5".to_string(), 423..436),
+                    ("bb_0".to_string(), 452..456),
+                    ("bb_1".to_string(), 472..476),
+                    ("bb_2".to_string(), 492..496)
                 ]
             );
         }
