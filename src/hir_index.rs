@@ -211,6 +211,7 @@ pub fn create_index(src: &str, tokens: &[Spanned<Token>], stmts: &[Statement]) -
                 }
             }
             Statement::FuncDependencies { .. } => {}
+            Statement::TypeDef { .. } => {}
             Statement::DbgAnnotation { name, def } => {
                 index.add_global_spanned(SymbolKind::DbgAnnotation, UseDefKind::Def, name);
                 if !def.is_empty() {

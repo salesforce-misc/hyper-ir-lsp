@@ -36,6 +36,9 @@ pub enum Statement {
         dependent: Spanned<String>,
         dependencies: Vec<Spanned<String>>,
     },
+    TypeDef {
+        name: Spanned<String>,
+    },
     DbgAnnotation {
         name: Spanned<String>,
         def: Vec<Spanned<Token>>,
@@ -57,7 +60,7 @@ pub struct BasicBlock {
     pub span: Span,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct Instruction {
     pub assignment_target: Option<Spanned<String>>,
     pub instruction: Spanned<String>,
@@ -159,11 +162,11 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .then(dbg_ref.or_not())
         .then_ignore(just(Token::Newline).rewind())
         .map_with_span(|((instruction, target), dbg_ref), span| Instruction {
-            assignment_target: None,
             instruction,
             basic_block_refs: vec![target],
             dbg_ref,
             span,
+            ..Default::default()
         });
 
     // A conditional branch
@@ -186,11 +189,11 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .then_ignore(just(Token::Newline).rewind())
         .map_with_span(
             |(((instruction, then_target), else_target), dbg_ref), span| Instruction {
-                assignment_target: None,
                 instruction,
                 basic_block_refs: vec![then_target, else_target],
                 dbg_ref,
                 span,
+                ..Default::default()
             },
         );
 
@@ -224,11 +227,11 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .then_ignore(just(Token::Newline).rewind())
         .map_with_span(
             |(((instruction, target1), target2), dbg_ref), span| Instruction {
-                assignment_target: None,
                 instruction,
                 basic_block_refs: vec![target1, target2],
                 dbg_ref,
                 span,
+                ..Default::default()
             },
         );
 
@@ -261,11 +264,11 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
             |(((instruction, default_target), mut targets), dbg_ref), span| {
                 targets.insert(0, default_target);
                 Instruction {
-                    assignment_target: None,
                     instruction,
                     basic_block_refs: targets,
                     dbg_ref,
                     span,
+                    ..Default::default()
                 }
             },
         );
@@ -283,11 +286,11 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .then(dbg_ref.or_not())
         .then_ignore(just(Token::Newline).rewind())
         .map_with_span(|((instruction, targets), dbg_ref), span| Instruction {
-            assignment_target: None,
             instruction,
             basic_block_refs: targets,
             dbg_ref,
             span,
+            ..Default::default()
         });
 
     // Any (unknown) instruction
@@ -302,11 +305,10 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .then(dbg_ref.or_not())
         .then_ignore(just(Token::Newline).rewind())
         .map_with_span(|(instruction, dbg_ref), span| Instruction {
-            assignment_target: None,
             instruction,
-            basic_block_refs: vec![],
             dbg_ref,
             span,
+            ..Default::default()
         });
 
     // A single instruction with a potential assignment target
@@ -415,6 +417,13 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
             dependencies,
         });
 
+    // Type definition
+    let type_def = just(Token::Ident("type".to_string()))
+        .ignore_then(ident)
+        .then_ignore(just(Token::Punctuation('=')))
+        .then_ignore(token_soup.clone())
+        .map(|name| Statement::TypeDef { name });
+
     // Debug annotation
     let dbg_annotation = dbg_ref
         .then_ignore(just(Token::Punctuation('=')))
@@ -427,6 +436,7 @@ pub fn parser() -> impl Parser<Token, Vec<Statement>, Error = Simple<Token>> + C
         .or(func_def)
         .or(func_dependencies)
         .or(dbg_annotation)
+        .or(type_def)
         .padded_by(just(Token::Newline).repeated())
         .recover_with(skip_then_retry_until([]))
         .repeated()
@@ -476,6 +486,20 @@ fn test_parse_globals() {
     match res.stmts[..] {
         [Statement::GlobalVar { ref name, def: _ }] => {
             assert_eq!(name.0, "@var1");
+        }
+        _ => panic!("Unexpected parse {:?}", res.stmts),
+    }
+}
+
+#[test]
+fn test_parse_typedef() {
+    let res = parse_from_str(
+        "type threadState_5 = {hyper::StringAllocator, hyper::DebugStringStream, int64}",
+    );
+    assert_eq!(res.errors, []);
+    match res.stmts[..] {
+        [Statement::TypeDef { ref name }] => {
+            assert_eq!(name.0, "threadState_5");
         }
         _ => panic!("Unexpected parse {:?}", res.stmts),
     }
